@@ -1307,7 +1307,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
              *  be considered for completion.  try_to_commit flattens
              *  the `if' tree a bit and allows other tests for inst
              *  commit to be inserted here. */
-            bool try_to_commit = false;º
+            bool try_to_commit = false;
 
             /* Try and issue memory ops early if they:
              *  - Can push a request into the LSQ
@@ -1710,6 +1710,9 @@ Execute::evaluate()
 
             if (head_inst.inst->isNoCostInst()) {
                 head_inst_might_commit = true;
+            } else if (head_inst.inst->staticInst->isVector()) {
+                head_inst_might_commit = true;
+                break;
             } else {
                 FUPipeline *fu = funcUnits[head_inst.inst->fuIndex];
                 if ((fu->stalled &&

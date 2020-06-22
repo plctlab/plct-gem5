@@ -138,13 +138,13 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
     {
         Reads++;
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
-        DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx\n"
-            ,pkt->getSize(), pkt->getAddr());
+        //DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx\n"
+        //    ,pkt->getSize(), pkt->getAddr());
     } else {
         Writes++;
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
-        DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx\n"
-            ,pkt->getSize(), pkt->getAddr());
+        //DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx\n"
+        //    ,pkt->getSize(), pkt->getAddr());
     }
 
     pkt->makeTimingResponse();
