@@ -126,6 +126,13 @@ const std::vector<std::string> FloatRegNames = {
     "ft8", "ft9", "ft10", "ft11"
 };
 
+const std::vector<std::string> VectorRegNames ={
+    "v0",   "v1",   "v2",   "v3",   "v4",   "v5",   "v6",   "v7",
+    "v8",   "v9",   "v10",  "v11",  "v12",  "v13",  "v14",  "v15",
+    "v16",  "v17",  "v18",  "v19",  "v20",  "v21",  "v22",  "v23",
+    "v24",  "v25",  "v26",  "v27",  "v28",  "v29",  "v30",  "v31"
+};
+
 enum MiscRegIndex {
     MISCREG_PRV = 0,
     MISCREG_ISA,
@@ -251,6 +258,9 @@ enum MiscRegIndex {
     MISCREG_UTVAL,
     MISCREG_FFLAGS,
     MISCREG_FRM,
+
+    MISCREG_VL,
+    MISCREG_VTYPE,
 
     NUM_MISCREGS
 };
@@ -419,7 +429,10 @@ enum CSRIndex {
     CSR_TDATA3 = 0x7A3,
     CSR_DCSR = 0x7B0,
     CSR_DPC = 0x7B1,
-    CSR_DSCRATCH = 0x7B2
+    CSR_DSCRATCH = 0x7B2,
+
+    CSR_VL           = 0xC20,
+    CSR_VTYPE        = 0xC21
 };
 
 struct CSRMetadata
@@ -589,7 +602,10 @@ const std::map<int, CSRMetadata> CSRData = {
     {CSR_TDATA3, {"tdata3", MISCREG_TDATA3}},
     {CSR_DCSR, {"dcsr", MISCREG_DCSR}},
     {CSR_DPC, {"dpc", MISCREG_DPC}},
-    {CSR_DSCRATCH, {"dscratch", MISCREG_DSCRATCH}}
+    {CSR_DSCRATCH, {"dscratch", MISCREG_DSCRATCH}},
+
+    {CSR_VL,           {"vl"    , MISCREG_VL}},
+    {CSR_VTYPE,        {"vtype" , MISCREG_VTYPE}}
 };
 
 /**

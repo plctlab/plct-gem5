@@ -1,3 +1,4 @@
 TARGET_ISA = 'riscv'
 CPU_MODELS = 'AtomicSimpleCPU,TimingSimpleCPU,MinorCPU,O3CPU'
+BUILD_VECTOR_ENGINE = True
 PROTOCOL = 'MI_example'

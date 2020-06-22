@@ -348,6 +348,12 @@ class Execute : public Named
     /** Like the drain interface on SimObject */
     unsigned int drain();
     void drainResume();
+
+#if THE_ISA == RISCV_ISA
+  public:
+    bool waiting_vector_engine_resp = false;
+    bool completed_vec_inst = false;
+#endif // THE_ISA == RISCV_ISA
 };
 
 }

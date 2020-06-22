@@ -1,0 +1,13 @@
+
+Import('*')
+
+if not env['BUILD_VECTOR_ENGINE']:
+    Return()
+
+SimObject('VectorEngine.py')
+
+Source('vector_engine.cc')
+
+DebugFlag('VectorEngine')
+DebugFlag('VectorEngineInfo')
+DebugFlag('VectorInst')

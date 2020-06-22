@@ -1,0 +1,22 @@
+
+Import('*')
+
+if not env['BUILD_VECTOR_ENGINE']:
+    Return()
+
+SimObject('MemUnitReadTiming.py')
+SimObject('MemUnitWriteTiming.py')
+SimObject('VectorMemUnit.py')
+
+Source('write_timing_unit.cc')
+Source('read_timing_unit.cc')
+Source('vector_mem_unit.cc')
+
+
+DebugFlag('MemUnitWriteTiming')
+DebugFlag('MemUnitReadTiming')
+DebugFlag('VectorMemUnit')
+
+CompoundFlag('VectorMem',
+    [ 'VectorMemUnit','MemUnitWriteTiming', 'MemUnitReadTiming' ])
+

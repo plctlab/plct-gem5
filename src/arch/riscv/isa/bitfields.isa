@@ -123,3 +123,16 @@ def bitfield CIMM1 <12>;
 
 // Pseudo instructions
 def bitfield M5FUNC <31:25>;
+
+// Vector instructions
+def bitfield VFUNC_6       <31:26>;
+def bitfield VFUNC_5       <31:27>;
+def bitfield VFUNC_3       <27:25>;
+def bitfield VFUNC_2       <26:25>;
+
+def bitfield VS3           <31:27>;
+def bitfield VS2           <24:20>;
+def bitfield VS1           <19:15>;
+def bitfield VD            <11:7>;
+
+def bitfield MOP           <28:26>;

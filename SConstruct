@@ -1009,6 +1009,7 @@ sticky_vars.AddVariables(
                  'Enable using a tap device to bridge to the host network',
                  have_tuntap),
     BoolVariable('BUILD_GPU', 'Build the compute-GPU model', False),
+    BoolVariable('BUILD_VECTOR_ENGINE', 'Build the Vector Engine model',False),
     EnumVariable('PROTOCOL', 'Coherence protocol for Ruby', 'None',
                   all_protocols),
     EnumVariable('BACKTRACE_IMPL', 'Post-mortem dump implementation',

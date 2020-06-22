@@ -174,6 +174,9 @@ const std::array<const char *, NumMiscRegs> M5_VAR_USED MiscRegNames = {{
     [MISCREG_UTVAL]         = "UTVAL",
     [MISCREG_FFLAGS]        = "FFLAGS",
     [MISCREG_FRM]           = "FRM",
+
+    [MISCREG_VL]            = "VL",
+    [MISCREG_VTYPE]         = "VTYPE",
 }};
 
 ISA::ISA(Params *p) : BaseISA(p)

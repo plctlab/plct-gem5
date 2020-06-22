@@ -1,0 +1,12 @@
+
+Import('*')
+
+if not env['BUILD_VECTOR_ENGINE']:
+    Return()
+
+SimObject('ReorderBuffer.py')
+
+Source('reorder_buffer.cc')
+
+DebugFlag('ReorderBuffer')
+

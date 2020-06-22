@@ -1,0 +1,14 @@
+
+Import('*')
+
+if not env['BUILD_VECTOR_ENGINE']:
+    Return()
+
+SimObject('VectorLane.py')
+SimObject('Datapath.py')
+
+Source('vector_lane.cc')
+Source('datapath.cc')
+
+DebugFlag('VectorLane')
+DebugFlag('Datapath')

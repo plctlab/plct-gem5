@@ -1,0 +1,14 @@
+
+Import('*')
+
+if not env['BUILD_VECTOR_ENGINE']:
+    Return()
+
+SimObject('VectorRegister.py')
+SimObject('VectorValidBit.py')
+
+Source('vector_reg.cc')
+Source('vector_reg_valid_bit.cc')
+
+DebugFlag('VectorRegister')
+DebugFlag('VectorValidBit')

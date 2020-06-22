@@ -286,3 +286,6 @@ class MinorCPU(BaseCPU):
     def addCheckerCpu(self):
         print("Checker not yet supported by MinorCPU")
         exit(1)
+
+    if buildEnv['TARGET_ISA'] == 'riscv':
+    vector_engine = Param.VectorEngine("RISC-V Vector Engine")
