@@ -47,6 +47,7 @@
 #include "cpu/vector_engine/packet.hh"
 #include "cpu/vector_engine/req_state.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
+//#include "cpu/vector_engine/vector_engine_interface.hh"
 #include "cpu/vector_engine/vmu/vector_mem_unit.hh"
 #include "cpu/vector_engine/vpu/csr_local/vector_csr.hh"
 #include "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
@@ -188,8 +189,7 @@ public:
     bool cluster_available();
 
     void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContext *xc ,
-        uint64_t src1, uint64_t src2,
-        std::function<void()> dependencie_callback);
+        uint64_t src1, uint64_t src2, std::function<void()> dependencie_callback);
     void issue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
         ExecContext *xc,
     uint64_t src1 , uint64_t src2,uint64_t vtype,uint64_t vl,

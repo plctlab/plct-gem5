@@ -49,7 +49,7 @@ MinorCPU::MinorCPU(MinorCPUParams *params) :
     BaseCPU(params),
     threadPolicy(params->threadPolicy)
 #if THE_ISA == RISCV_ISA
-    ,vector_engine(params->vector_engine)
+    ,ve_interface(params->ve_interface)
 #endif
 {
     /* This is only written for one thread at the moment */

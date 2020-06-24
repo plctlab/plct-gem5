@@ -28,63 +28,62 @@
  * Author: Cristóbal Ramírez
  */
 
-#ifndef __ARCH_RISCV_VECTOR_DYN_INSTS_HH__
-#define __ARCH_RISCV_VECTOR_DYN_INSTS_HH__
+#include "cpu/vector_engine/vector_engine_interface.hh"
 
+#include <cassert>
 #include <string>
+#include <vector>
 
-#include "arch/riscv/insts/vector_static_inst.hh"
+#include "base/logging.hh"
+#include "base/types.hh"
+#include "debug/VectorEngineInterface.hh"
+#include "sim/faults.hh"
+#include "sim/sim_object.hh"
 
-class VectorStaticInst;
-
-class VectorDynInst
+VectorEngineInterface::VectorEngineInterface(VectorEngineInterfaceParams *p) :
+SimObject(p),vector_engine(p->vector_engine)
 {
-public:
-VectorDynInst() : vinst(NULL),PSrc1(1024),PSrc2(1024),PSrc3(1024),
-  PDst(1024),POldDst(1024),PMask(1024),rob_entry(1024){
-  }
-~VectorDynInst() {}
+}
 
-  uint16_t get_PSrc1()  { return PSrc1; }
-  void set_PSrc1(uint16_t val)  { PSrc1 = val; }
+VectorEngineInterface::~VectorEngineInterface()
+{
+}
 
-  uint16_t get_PSrc2() { return PSrc2; }
-  void set_PSrc2(uint16_t val) { PSrc2  = val; }
+bool 
+VectorEngineInterface::request_grant(RiscvISA::VectorStaticInst* vinst)
+{
+    bool grant = vector_engine->request_grant(vinst);
+    return grant;
+}
 
-  uint16_t get_PSrc3() { return PSrc3; }
-  void set_PSrc3(uint16_t val) { PSrc3  = val; }
+void
+VectorEngineInterface::send_command(RiscvISA::VectorStaticInst* vinst ,ExecContext *xc ,
+        uint64_t src1, uint64_t src2,
+        std::function<void()> done_callback)
+{
+    DPRINTF(VectorEngineInterface,"Sending a new command to the vector engine\n");
+    vector_engine->dispatch(*vinst,xc,src1,src2,done_callback);
+}
 
-  uint16_t get_PDst() { return PDst; }
-  void set_PDst(uint16_t val) { PDst  = val; }
+uint64_t
+VectorEngineInterface::req_new_vector_length(uint64_t rvl, uint64_t vtype, bool r_mvl)
+{
+    DPRINTF(VectorEngineInterface,"resquesting a vector length\n");
+     uint64_t gvl = vector_engine->vector_csr->
+        req_new_vector_length(rvl,vtype,r_mvl);
+    return gvl;
+}
 
-  uint16_t get_POldDst() { return POldDst; }
-  void set_POldDst(uint16_t val) { POldDst  = val; }
+bool
+VectorEngineInterface::bussy()
+{
 
-  uint16_t get_PMask() { return PMask; }
-  void set_PMask(uint16_t val) { PMask  = val; }
+    bool bussy = vector_engine->isOccupied();
+    return bussy;
+}
 
-  uint16_t get_rob_entry() { return rob_entry; }
-  void set_rob_entry(uint16_t val) { rob_entry  = val; }
-
-  RiscvISA::VectorStaticInst*
-  get_VectorStaticInst() {
-    return vinst;
-  }
-
-  void
-  set_VectorStaticInst(RiscvISA::VectorStaticInst* instruction){
-    vinst  = instruction;
-    }
-
-private:
-  RiscvISA::VectorStaticInst *vinst;
-  uint16_t  PSrc1;
-  uint16_t  PSrc2;
-  uint16_t  PSrc3;
-  uint16_t  PDst;
-  uint16_t  POldDst;
-  uint16_t  PMask;
-  uint16_t  rob_entry;
-};
-
-#endif // __ARCH_RISCV_VECTOR_DYN_INSTS_HH__
+VectorEngineInterface *
+VectorEngineInterfaceParams::create()
+{
+    return new VectorEngineInterface(this);
+}

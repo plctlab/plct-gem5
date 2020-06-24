@@ -258,7 +258,6 @@ InstQueue::evaluate()
                 DPRINTF(InstQueue,"Mem Queue Size %d\n",
                     Instruction_Queue.size());
                 if (Instruction->insn.write_to_scalar_reg()) {
-                    //this->dependencie_callback(scalar_reg,scalar_data,fp);
                     Instruction->dependencie_callback();
                 }
 

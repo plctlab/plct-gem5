@@ -188,7 +188,8 @@ class MinorCPU : public BaseCPU
     void wakeupOnEvent(unsigned int stage_id);
 
 #if THE_ISA == RISCV_ISA
-    VectorEngine *vector_engine;
+    /** The vector engine interface */
+    VectorEngineInterface *ve_interface;
 #endif
 };
 

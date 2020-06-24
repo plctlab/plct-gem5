@@ -198,7 +198,8 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
 
     bool has_dst = !insn.write_to_scalar_reg();
 
-    VectorDynInst *vector_dyn_insn = new VectorDynInst();
+    VectorDynInst *vector_dyn_insn = new VectorDynInst(); //inicializar ...
+
 
     if (insn.isSetVL()) {
         VectorSetIns++;

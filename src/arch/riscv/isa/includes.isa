@@ -85,13 +85,11 @@ output exec {{
 
 #include "arch/generic/memhelpers.hh"
 #include "arch/riscv/faults.hh"
-#include "arch/riscv/insts/vector_static_inst.hh"
 #include "arch/riscv/registers.hh"
 #include "arch/riscv/utility.hh"
 #include "base/condcodes.hh"
 #include "cpu/base.hh"
 #include "cpu/exetrace.hh"
-#include "cpu/vector_engine/vector_engine.hh"
 #include "debug/RiscvMisc.hh"
 #include "mem/packet.hh"
 #include "mem/packet_access.hh"

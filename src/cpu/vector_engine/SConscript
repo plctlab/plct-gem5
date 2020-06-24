@@ -4,10 +4,14 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
+SimObject('VectorEngineInterface.py')
 SimObject('VectorEngine.py')
 
+Source('vector_engine_interface.cc')
 Source('vector_engine.cc')
 
+DebugFlag('VectorEngineInterface')
 DebugFlag('VectorEngine')
 DebugFlag('VectorEngineInfo')
 DebugFlag('VectorInst')
+

@@ -288,4 +288,4 @@ class MinorCPU(BaseCPU):
         exit(1)
 
     if buildEnv['TARGET_ISA'] == 'riscv':
-        vector_engine = Param.VectorEngine("RISC-V Vector Engine")
+        ve_interface = Param.VectorEngineInterface("Vector Engine Interface")

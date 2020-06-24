@@ -55,7 +55,8 @@ class Inst_Queue {
     Inst_Queue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
         ExecContext *xc, std::function<void()> dependencie_callback,
         uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
-        dependencie_callback(dependencie_callback),insn(insn),
+        dependencie_callback(dependencie_callback),
+        insn(insn),
         dyn_insn(dyn_insn),xc(xc),src1(src1),src2(src2),
         rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
         {}

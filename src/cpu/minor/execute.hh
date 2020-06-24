@@ -349,11 +349,13 @@ class Execute : public Named
     unsigned int drain();
     void drainResume();
 
-#if THE_ISA == RISCV_ISA
-  public:
+    /** Signal used to know if the scalar core is waiting for an answer
+     *  from the vector engine*/
     bool waiting_vector_engine_resp = false;
+
+    /** Signal used to know if a vector instruction has been completed
+     *  and proceed with commit */
     bool completed_vec_inst = false;
-#endif // THE_ISA == RISCV_ISA
 };
 
 }
