@@ -1182,16 +1182,15 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 #if THE_ISA == RISCV_ISA
         /*
          * The interface with the Vector Engine, only for RISC-V systems
-         * The Vector Engine corresponds to a decoupled engine. The core send
-         * a command with the vector instruction, and commit the instruction.
-         * When the core send a request to the vector engine
-         * "cpu.vector_engine->request_grant(vector_insn)" , the vector engine
-         * responds with a grant if the instruction was accepted, otherwise,
-         * the core must send again the vector instruction.
-         * For those instruction that writes to the scalar register, the core
-         * stalls until the operation finish, these operations are usually fast
-         * operations that takes few cycles to be executed in the vector
-         * engine.
+         * The Vector Engine corresponds to a decoupled engine.
+         * request_grant function is used by the scalar to ask for permision
+         * to send a new vector instruction to the vector engine.
+         * send_command function is used to send a command the vector engine.
+         * Previous to use this function, a granted signal from the vector
+         * engine must be received, otherwise, the command must not be send.
+         * req_new_vector_length function is used by the vector configuration
+         * instructions. This instructions ask to the vector engine for some
+         * vector length, and the vector engine answer with the available one.
          */
         } else if (can_commit_insts && waiting_vector_engine_resp &&
             !completed_vec_inst && inst->staticInst->isVector() ) {

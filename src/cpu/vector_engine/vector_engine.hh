@@ -47,7 +47,6 @@
 #include "cpu/vector_engine/packet.hh"
 #include "cpu/vector_engine/req_state.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
-//#include "cpu/vector_engine/vector_engine_interface.hh"
 #include "cpu/vector_engine/vmu/vector_mem_unit.hh"
 #include "cpu/vector_engine/vpu/csr_local/vector_csr.hh"
 #include "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
