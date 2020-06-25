@@ -297,7 +297,7 @@ system.membus = SystemXBar()
 ###############################################################################
 # Connect CPU Ports and Vector Port
 ###############################################################################
-def connectCPUPorts1(cpu,l1bus,l2bus,membus):
+def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
     cpu.icache.mem_side = l2bus.slave
     cpu.dcache.mem_side = l2bus.slave
 
@@ -309,38 +309,35 @@ def connectCPUPorts1(cpu,l1bus,l2bus,membus):
 
     #connect vector_reg ports for each mem_unit
     for channel in range(0, vector_rf_ports):
-        system.cpu.ve_interface.vector_engine.vector_reg_port =
-            system.cpu.ve_interface.vector_engine.vector_reg.port
+        vector_engine.vector_reg_port = vector_engine.vector_reg.port
 
-def connectCPUPorts2(cpu,l2bus,membus):
+def connectCPUPorts2(cpu,vector_engine,l2bus,membus):
     cpu.icache.mem_side = l2bus.slave
     cpu.dcache.mem_side = l2bus.slave
     cpu.icache_port = cpu.icache.cpu_side
     cpu.dcache_port = cpu.dcache.cpu_side
 
     if(connect_to_l1V):
-        system.cpu.ve_interface.vector_engine.vector_mem_port =
-            system.VectorCache.cpu_side
+        vector_engine.vector_mem_port = system.VectorCache.cpu_side
         system.VectorCache.mem_side = l2bus.slave
     else:
         if(connect_to_l2):
-            system.cpu.ve_interface.vector_engine.vector_mem_port =
-                system.VectorCache.cpu_side
+            vector_engine.vector_mem_port = system.VectorCache.cpu_side
             system.VectorCache.mem_side = l2bus.slave
         else:
             if(connect_to_dram):
-                system.cpu.ve_interface.vector_engine.vector_mem_port =
-                    system.VectorCache.cpu_side
+                vector_engine.vector_mem_port = system.VectorCache.cpu_side
                 system.VectorCache.mem_side = membus.slave
 
     for channel in range(0, vector_rf_ports):
-        system.cpu.ve_interface.vector_engine.vector_reg_port =
-            system.cpu.ve_interface.vector_engine.vector_reg.port
+        vector_engine.vector_reg_port = vector_engine.vector_reg.port
 
 if(connect_to_l1d):
-    connectCPUPorts1(system.cpu,system.l1bus,system.l2bus, system.membus)
+    connectCPUPorts1(system.cpu, system.cpu.ve_interface.vector_engine,
+        system.l1bus,system.l2bus, system.membus)
 else:
-    connectCPUPorts2(system.cpu,system.l2bus, system.membus)
+    connectCPUPorts2(system.cpu, system.cpu.ve_interface.vector_engine,
+        system.l2bus, system.membus)
 
 ###############################################################################
 # Everything from the l2Xbar down
