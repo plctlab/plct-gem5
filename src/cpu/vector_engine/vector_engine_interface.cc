@@ -50,14 +50,14 @@ VectorEngineInterface::~VectorEngineInterface()
 }
 
 bool 
-VectorEngineInterface::request_grant(RiscvISA::VectorStaticInst* vinst)
+VectorEngineInterface::requestGrant(RiscvISA::VectorStaticInst* vinst)
 {
-    bool grant = vector_engine->request_grant(vinst);
+    bool grant = vector_engine->requestGrant(vinst);
     return grant;
 }
 
 void
-VectorEngineInterface::send_command(RiscvISA::VectorStaticInst* vinst ,ExecContext *xc ,
+VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContext *xc ,
         uint64_t src1, uint64_t src2,
         std::function<void()> done_callback)
 {
@@ -66,11 +66,11 @@ VectorEngineInterface::send_command(RiscvISA::VectorStaticInst* vinst ,ExecConte
 }
 
 uint64_t
-VectorEngineInterface::req_new_vector_length(uint64_t rvl, uint64_t vtype, bool r_mvl)
+VectorEngineInterface::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl)
 {
     DPRINTF(VectorEngineInterface,"resquesting a vector length\n");
      uint64_t gvl = vector_engine->vector_csr->
-        req_new_vector_length(rvl,vtype,r_mvl);
+        reqAppVectorLength(rvl,vtype,r_mvl);
     return gvl;
 }
 

@@ -56,7 +56,7 @@ VectorCsrReg::~VectorCsrReg()
 }
 
 uint64_t
-VectorCsrReg::req_new_vector_length(uint64_t rvl, uint64_t vtype, bool r_mvl){
+VectorCsrReg::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl){
 uint32_t gvl=0;
 uint32_t vsew = vt(vtype,2,3);
 
@@ -75,6 +75,28 @@ default:
 }
 
 return (r_mvl) ? gvl:(rvl>gvl) ? gvl:rvl;
+}
+
+uint64_t
+VectorCsrReg::vector_length_in_bits(uint64_t vl, uint64_t vtype){
+uint64_t vl_bits=0;
+uint32_t vsew = vt(vtype,2,3);
+
+switch (vsew)
+{
+case 0:
+    vl_bits=vl*1*8; break;
+case 1:
+    vl_bits=vl*2*8; break;
+case 2:
+    vl_bits=vl*4*8; break;
+case 3:
+    vl_bits=vl*8*8; break;
+default:
+    panic("vsew not implemented\n"); vl_bits=0;
+}
+
+return  vl_bits;
 }
 
 uint64_t

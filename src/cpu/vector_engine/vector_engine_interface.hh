@@ -57,26 +57,26 @@ public:
     ~VectorEngineInterface();
 
     /**
-    * request_grant function is used by the scalar to ask for permision to send
+    * requestGrant function is used by the scalar to ask for permision to send
     * a new vector instruction to the vector engine.
     */
-    bool request_grant(RiscvISA::VectorStaticInst* insn);
+    bool requestGrant(RiscvISA::VectorStaticInst* insn);
 
     /**
-    * send_command function receives the command from the scalar core
+    * sendCommand function receives the command from the scalar core
     * and sent it to the vector engine. Previous to use this function,
     * a granted signal  from the vector engine must be received, otherwise,
     * the command must not be send.
     */
-    void send_command(RiscvISA::VectorStaticInst *vinst ,ExecContext *xc ,
+    void sendCommand(RiscvISA::VectorStaticInst *vinst ,ExecContext *xc ,
         uint64_t src1, uint64_t src2, std::function<void()> done_callback);
 
     /**
-    * req_new_vector_length function is used by the vector configuration
+    * reqAppVectorLength function is used by the vector configuration
     * instructions. This instructions ask to the vector engine for some
     * vector length, and the vector engine answer with the available one.
     */
-    uint64_t req_new_vector_length(uint64_t rvl, uint64_t vtype, bool r_mvl);
+    uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
 
     /**
     * bussy function is used by the scalar core to know the state of the vector

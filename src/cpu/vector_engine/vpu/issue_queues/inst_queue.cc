@@ -236,7 +236,8 @@ InstQueue::evaluate()
 
             //Instruction_Queue.pop_front();
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
-                Instruction->xc,Instruction->src1,Instruction->src2,0,0,
+                Instruction->xc,Instruction->src1,Instruction->src2,
+                 Instruction->rename_vtype,Instruction->rename_vl,
                 [Instruction,masked_op/*,queue_slot*/,pc,this](Fault f) {
 
                 // Setting the Valid Bit

@@ -111,17 +111,23 @@ VectorEngine::regStats()
     VectorMemIns
         .name(name() + ".VectorMemIns")
         .desc("Number vector arithmetic instructions");
-    VectorSetIns
-        .name(name() + ".VectorSetIns")
+    VectorConfigIns
+        .name(name() + ".VectorConfigIns")
         .desc("Number vector configuration instructions");
-    VectorSetExecutedIns
-        .name(name() + ".VectorSetExecutedIns")
-        .desc("Number vector configuration instructions executed");
+    SumVL
+        .name(name() + ".SumVL")
+        .desc("Sum of all instruction's vector length to obtain the average ");
+    AverageVL
+        .name(name() + ".AverageVL")
+        .desc("SumVL divided by the number of instructions")
+        .precision(1);
+    AverageVL = SumVL/(VectorMemIns+VectorArithmeticIns);
+
 }
 
 
 bool
-VectorEngine::request_grant(RiscvISA::VectorStaticInst *insn)
+VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
 {
     bool rob_entry_available = !vector_rob->rob_full();
     bool queue_slots_available = ((insn->isVectorInstArith()
@@ -202,8 +208,6 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
 
 
     if (insn.isSetVL()) {
-        VectorSetIns++;
-
         rename_vtype = src2;
         rename_vl = src1;
     }
@@ -420,13 +424,13 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
                 new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
-                NULL,src1,src2,0,0));
+                NULL,src1,src2,rename_vtype,rename_vl));
         } else {
             uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
                 new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
-                dependencie_callback,src1,src2,0,0));
+                dependencie_callback,src1,src2,rename_vtype,rename_vl));
         }
 
         DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
@@ -444,7 +448,7 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
     uint64_t pc = insn.getPC();
     if (insn.isSetVL())
     {
-        VectorSetExecutedIns++;
+        VectorConfigIns++;
         vector_csr->set_vector_length(src1);
         vector_csr->set_vtype(src2);
         done_callback(NoFault);
@@ -456,8 +460,12 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
             ,insn.getName() , *(uint64_t*)&pc );
         vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,ren_vtype,
             ren_vl, done_callback);
+
+        SumVL = SumVL.value() + vector_csr->vector_length_in_bits(ren_vl,ren_vtype);
     }
     else if (insn.isVectorInstArith()) {
+
+        SumVL = SumVL.value() + vector_csr->vector_length_in_bits(ren_vl,ren_vtype);
         VectorArithmeticIns++;
         uint8_t lane_id_available = 0;
         for (int i=0 ; i< num_clusters ; i++) {
@@ -473,7 +481,6 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
         panic("Invalid Vector Instruction, insn=%#h\n", insn.machInst);
     }
 }
-
 
 Port &
 VectorEngine::getPort(const std::string &if_name, PortID idx)

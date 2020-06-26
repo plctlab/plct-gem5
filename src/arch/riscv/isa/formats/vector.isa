@@ -43,9 +43,9 @@ def template VectorMemoryConstructor {{
     }
 }};
 
-def template VectorSetConstructor {{
+def template VectorConfigConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorSet)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorConfig)
     {
         flags[IsVector] = true;
     }
@@ -84,7 +84,7 @@ def format VectorDataOp() {{
 def format VectorConfigOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorCfgOp')
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorSetConstructor.subst(iop)
+    decoder_output = VectorConfigConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

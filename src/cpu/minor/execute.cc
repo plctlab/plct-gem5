@@ -1183,12 +1183,12 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         /*
          * The interface with the Vector Engine, only for RISC-V systems
          * The Vector Engine corresponds to a decoupled engine.
-         * request_grant function is used by the scalar to ask for permision
+         * requestGrant function is used by the scalar to ask for permision
          * to send a new vector instruction to the vector engine.
-         * send_command function is used to send a command the vector engine.
+         * sendCommand function is used to send a command the vector engine.
          * Previous to use this function, a granted signal from the vector
          * engine must be received, otherwise, the command must not be send.
-         * req_new_vector_length function is used by the vector configuration
+         * reqAppVectorLength function is used by the vector configuration
          * instructions. This instructions ask to the vector engine for some
          * vector length, and the vector engine answer with the available one.
          */
@@ -1224,7 +1224,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     dynamic_cast<RiscvISA::VectorStaticInst*>
                     (inst->staticInst.get());
 
-                if (!cpu.ve_interface->request_grant(vector_insn))
+                if (!cpu.ve_interface->requestGrant(vector_insn))
                 {
                     DPRINTF(CpuVectorIssue,"The Vector Engine could not accept"
                     "the instruction : %s \n",*inst);
@@ -1244,7 +1244,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                         uint64_t vtype = (vsetvl) ?
                             xc->readIntRegOperand(vector_insn,1) :
                             (uint64_t)vector_insn->vtype();
-                        uint64_t gvl = cpu.ve_interface->req_new_vector_length(
+                        uint64_t gvl = cpu.ve_interface->reqAppVectorLength(
                             rvl,vtype,(vector_insn->vs1()==0));
 
                         DPRINTF(CpuVectorIssue,"vsetvl: %d \n",vsetvl );
@@ -1278,7 +1278,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     completed_vec_inst = false;
                     waiting_vector_engine_resp = true;
 
-                    cpu.ve_interface->send_command(vector_insn,xc,src1,src2,
+                    cpu.ve_interface->sendCommand(vector_insn,xc,src1,src2,
                         [this,inst]() mutable {
                         DPRINTF(CpuVectorIssue,"The instruction has been "
                         "hosted by the Vector Engine %s \n",*inst );

@@ -183,7 +183,7 @@ public:
     std::deque<Vector_ReqState *> vector_PendingReqQ;
 
 
-    bool request_grant(RiscvISA::VectorStaticInst* insn);
+    bool requestGrant(RiscvISA::VectorStaticInst* insn);
     bool isOccupied();
     bool cluster_available();
 
@@ -222,12 +222,16 @@ public:
     // Stat for number of Vector Memory Instructions
     Stats::Scalar VectorMemIns;
     // Stat for number of Vector Set Instructions
-    Stats::Scalar VectorSetIns;
-    // Stat for number of Vector Set Removed
-    Stats::Scalar VectorSetRemovedIns;
-    // Stat for number of Vector Set Executed
-    Stats::Scalar VectorSetExecutedIns;
+    Stats::Scalar VectorConfigIns;
+    // Stat for number of Vector Operations (1 vector inst = VL operations)
+    Stats::Scalar VectorOp;
 
+    // Stat for Average VL)
+    Stats::Scalar TotalVL;
+    // Stat for Average VL)
+    Stats::Scalar SumVL;
+    // Stat for Average VL)
+    Stats::Formula AverageVL;
 private:
     uint64_t last_vtype;
     uint64_t last_vl;
