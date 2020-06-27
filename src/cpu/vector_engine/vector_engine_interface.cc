@@ -49,7 +49,7 @@ VectorEngineInterface::~VectorEngineInterface()
 {
 }
 
-bool 
+bool
 VectorEngineInterface::requestGrant(RiscvISA::VectorStaticInst* vinst)
 {
     bool grant = vector_engine->requestGrant(vinst);

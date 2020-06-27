@@ -1233,6 +1233,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     doInstCommitAccounting(inst);
                     ExecContext * xc = new ExecContext(cpu,
                         *cpu.threads[thread_id],*this, inst);
+
                     uint64_t  pc = xc->inst->pc.instAddr();
                     vector_insn->setPC(pc);
                     uint64_t src1,src2;
@@ -1279,7 +1280,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     waiting_vector_engine_resp = true;
 
                     cpu.ve_interface->sendCommand(vector_insn,xc,src1,src2,
-                        [this,inst]() mutable {
+                        [this,inst,vector_insn]() mutable {
                         DPRINTF(CpuVectorIssue,"The instruction has been "
                         "hosted by the Vector Engine %s \n",*inst );
                         completed_vec_inst = true;

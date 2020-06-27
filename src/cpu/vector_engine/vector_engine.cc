@@ -400,7 +400,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
         uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
         vector_dyn_insn->set_rob_entry(rob_entry);
         vector_inst_queue->Instruction_Queue.push_back(
-            new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
+            new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
             NULL,src1,src2,0,0));
         DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
             insn.getName(), *(uint64_t*)&pc );
@@ -411,7 +411,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
         vector_dyn_insn->get_POldDst(), insn.isLoad());
     vector_dyn_insn->set_rob_entry(rob_entry);
     vector_inst_queue->Memory_Queue.push_back(
-        new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
+        new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
             NULL,src1,src2,rename_vtype,rename_vl));
     DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
         insn.getName(), *(uint64_t*)&pc );
@@ -423,13 +423,13 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
                 vector_dyn_insn->get_POldDst() , 1);
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
-                new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
+                new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 NULL,src1,src2,rename_vtype,rename_vl));
         } else {
             uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
-                new InstQueue::Inst_Queue(insn,vector_dyn_insn,xc,
+                new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 dependencie_callback,src1,src2,rename_vtype,rename_vl));
         }
 

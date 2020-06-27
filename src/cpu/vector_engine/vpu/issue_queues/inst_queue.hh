@@ -50,9 +50,9 @@ class InstQueue : public TickedObject
 {
 
 public:
-class Inst_Queue {
+class QueueEntry {
     public:
-    Inst_Queue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
+    QueueEntry(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
         ExecContext *xc, std::function<void()> dependencie_callback,
         uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
         dependencie_callback(dependencie_callback),
@@ -60,7 +60,7 @@ class Inst_Queue {
         dyn_insn(dyn_insn),xc(xc),src1(src1),src2(src2),
         rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
         {}
-    ~Inst_Queue() {}
+    ~QueueEntry() {}
 
     std::function<void()> dependencie_callback;
     RiscvISA::VectorStaticInst& insn;
@@ -91,8 +91,8 @@ protected:
     bool occupied;
 
 public:
-    std::deque<Inst_Queue *> Instruction_Queue;
-    std::deque<Inst_Queue *> Memory_Queue;
+    std::deque<QueueEntry *> Instruction_Queue;
+    std::deque<QueueEntry *> Memory_Queue;
     bool OoO_queues;
     uint64_t vector_mem_queue_size;
     uint64_t vector_arith_queue_size;

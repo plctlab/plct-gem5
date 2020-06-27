@@ -145,7 +145,7 @@ InstQueue::evaluate()
         bool src2_ready=0;
         bool src3_ready=0;
         bool srcs_ready=0;
-        Inst_Queue * Instruction = Instruction_Queue.front();
+        QueueEntry * Instruction = Instruction_Queue.front();
         uint64_t queue_slot = 0;
 
         int queue_size = (OoO_queues) ? Instruction_Queue.size() : 1;
@@ -296,7 +296,7 @@ InstQueue::evaluate()
         uint64_t src_ready=0;
         bool ambiguous_dependency = 0;
 
-        Inst_Queue * Mem_Instruction = Memory_Queue.front();
+        QueueEntry * Mem_Instruction = Memory_Queue.front();
         uint64_t queue_slot = 0;
         int queue_size = (OoO_queues) ? Memory_Queue.size() : 1;
         //int min = std::min(queue_size ,32);
@@ -323,7 +323,7 @@ InstQueue::evaluate()
             {
             for (int j=i ; j>0 ; j--)
                 {
-                Inst_Queue *  Mem_Instruction_dep = Memory_Queue[j-1];
+                QueueEntry *  Mem_Instruction_dep = Memory_Queue[j-1];
                 ambiguous_dependency = ambiguous_dependency |
                     (Mem_Instruction_dep->src1 == Mem_Instruction->src1);
                 delete Mem_Instruction_dep;
