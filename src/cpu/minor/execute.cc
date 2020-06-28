@@ -608,7 +608,9 @@ Execute::issue(ThreadID thread_id)
                     "for thread %d\n",*inst, thread.streamSeqNum);
                 issued = false;
             }
-            else { //if (thread.inFlightInsts->empty()) {
+            //else if (!cpu.ve_interface->bussy()
+            //    && thread.inFlightInsts->empty()) {
+            else {
                 DPRINTF(CpuVectorIssue,"Vector Instruction Issue to exec:"
                     "%s \n",*inst);
                 scoreboard[thread_id].markupInstDests(inst, cpu.curCycle() +
@@ -620,6 +622,7 @@ Execute::issue(ThreadID thread_id)
             }
             //else {
             //    issued = false;
+            //}
 #endif // THE_ISA == RISCV_ISA
         } else {
             /* Try and issue an instruction into an FU, assume we didn't and
@@ -1231,10 +1234,15 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     completed_inst = false;
                 } else {
                     doInstCommitAccounting(inst);
-                    ExecContext * xc = new ExecContext(cpu,
+                    //ExecContext * xc = new ExecContext(cpu,
+                    //    *cpu.threads[thread_id],*this, inst);
+
+                    ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
                         *cpu.threads[thread_id],*this, inst);
 
-                    uint64_t  pc = xc->inst->pc.instAddr();
+                     DPRINTF(CpuVectorIssue,"ExecContextPtr %p %d \n",xc.get(),xc.get());
+
+                    uint64_t  pc = inst->pc.instAddr();
                     vector_insn->setPC(pc);
                     uint64_t src1,src2;
 

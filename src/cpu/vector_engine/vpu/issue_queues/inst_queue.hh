@@ -44,7 +44,8 @@
 #include "sim/ticked_object.hh"
 
 class VectorEngine;
-class ExecContext;
+//class ExecContextPtr;
+//class ExecContext;
 
 class InstQueue : public TickedObject
 {
@@ -53,19 +54,21 @@ public:
 class QueueEntry {
     public:
     QueueEntry(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-        ExecContext *xc, std::function<void()> dependencie_callback,
+        ExecContextPtr& _xc, std::function<void()> dependencie_callback,
         uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
         dependencie_callback(dependencie_callback),
         insn(insn),
-        dyn_insn(dyn_insn),xc(xc),src1(src1),src2(src2),
+        dyn_insn(dyn_insn)/*,xc(_xc)*/,src1(src1),src2(src2),
         rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
-        {}
+        {
+            xc=_xc;
+        }
     ~QueueEntry() {}
 
     std::function<void()> dependencie_callback;
     RiscvISA::VectorStaticInst& insn;
     VectorDynInst     *dyn_insn;
-    ExecContext *xc;
+    ExecContextPtr xc;
     uint64_t src1;
     uint64_t src2;
     uint64_t rename_vtype;

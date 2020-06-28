@@ -55,7 +55,7 @@ class VectorLane : public SimObject
 
     bool isOccupied();
     void issue(VectorEngine& vector_wrapper,RiscvISA::VectorStaticInst& insn,
-        VectorDynInst *dyn_insn, ExecContext *xc,uint64_t src1,
+        VectorDynInst *dyn_insn, ExecContextPtr& xc,uint64_t src1,
         std::function<void(Fault fault)> done_callback);
 
     //internal state for current instruction

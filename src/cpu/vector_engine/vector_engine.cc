@@ -173,7 +173,7 @@ VectorEngine::cluster_available()
 }
 
 void
-VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
+VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
     uint64_t src1,uint64_t src2,std::function<void()> dependencie_callback)
 {
     //Be sure that the instruction was added to some group in base.isa
@@ -442,7 +442,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContext *xc,
 
 void
 VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
-    ExecContext *xc ,uint64_t src1 ,uint64_t src2,uint64_t ren_vtype,
+    ExecContextPtr& xc ,uint64_t src1 ,uint64_t src2,uint64_t ren_vtype,
     uint64_t ren_vl, std::function<void(Fault fault)> done_callback) {
 
     uint64_t pc = insn.getPC();
@@ -750,6 +750,7 @@ bool
 VectorEngine::writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
     ThreadContext *tc, uint8_t channel, std::function<void(void)> callback)
 {
+    DPRINTF(VectorEngine, "inside writeVectorMem\n");
     uint64_t id = (uniqueReqId++);
     Vector_ReqState *pending = new Vector_W_ReqState(id, callback);
     vector_PendingReqQ.push_back(pending);

@@ -57,7 +57,7 @@ VectorEngineInterface::requestGrant(RiscvISA::VectorStaticInst* vinst)
 }
 
 void
-VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContext *xc ,
+VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContextPtr& xc ,
         uint64_t src1, uint64_t src2,
         std::function<void()> done_callback)
 {

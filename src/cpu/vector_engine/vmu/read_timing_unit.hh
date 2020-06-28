@@ -42,7 +42,6 @@
 #include "sim/ticked_object.hh"
 
 class VectorEngine;
-class ExecContext;
 
 class MemUnitReadTiming : public TickedObject
 {
@@ -57,7 +56,7 @@ public:
     void queueData(uint8_t *data);
     void initialize(VectorEngine& vector_wrapper,uint64_t count,
         uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop, bool location,
-        ExecContext * xc,
+        ExecContextPtr& xc,
         std::function<void(uint8_t*,uint8_t,bool)> on_item_load);
 
 private:

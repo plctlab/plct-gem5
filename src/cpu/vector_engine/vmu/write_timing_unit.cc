@@ -86,7 +86,7 @@ MemUnitWriteTiming::queueData(uint8_t *data)
 void
 MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     uint64_t DST_SIZE,uint64_t mem_addr, bool location,
-    ExecContext * xc, std::function<void(bool)> on_item_store)
+    ExecContextPtr& xc, std::function<void(bool)> on_item_store)
 {
     assert(!running && !done);
     assert(count > 0);

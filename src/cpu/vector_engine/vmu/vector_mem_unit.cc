@@ -57,7 +57,7 @@ bool VectorMemUnit::isOccupied()
 
 void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
-    ExecContext *xc, uint64_t src1,uint64_t vtype,uint64_t vl,
+    ExecContextPtr& xc, uint64_t src1,uint64_t vtype,uint64_t vl,
     std::function<void(Fault fault)> done_callback)
 {
     assert(!occupied);

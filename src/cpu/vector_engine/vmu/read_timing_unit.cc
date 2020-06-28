@@ -82,7 +82,7 @@ MemUnitReadTiming::queueData(uint8_t *data)
 void
 MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     uint64_t DST_SIZE,uint64_t mem_addr, uint8_t mop, bool location,
-    ExecContext *xc, std::function<void(uint8_t*,
+    ExecContextPtr& xc, std::function<void(uint8_t*,
     uint8_t,bool)> on_item_load) {
 
     assert(!running && !done);

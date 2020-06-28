@@ -68,7 +68,7 @@ public:
     * a granted signal  from the vector engine must be received, otherwise,
     * the command must not be send.
     */
-    void sendCommand(RiscvISA::VectorStaticInst *vinst ,ExecContext *xc ,
+    void sendCommand(RiscvISA::VectorStaticInst *vinst ,ExecContextPtr& xc ,
         uint64_t src1, uint64_t src2, std::function<void()> done_callback);
 
     /**

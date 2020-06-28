@@ -187,10 +187,10 @@ public:
     bool isOccupied();
     bool cluster_available();
 
-    void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContext *xc ,
+    void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContextPtr& xc ,
         uint64_t src1, uint64_t src2, std::function<void()> dependencie_callback);
     void issue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-        ExecContext *xc,
+        ExecContextPtr& xc,
     uint64_t src1 , uint64_t src2,uint64_t vtype,uint64_t vl,
         std::function<void(Fault fault)> done_callback);
 
