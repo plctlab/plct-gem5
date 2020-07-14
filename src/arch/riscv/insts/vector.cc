@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2015 RISC-V Foundation
  * Copyright (c) 2020 Barcelona Supercomputing Center
  * All rights reserved.
  *
@@ -25,6 +24,8 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Author: Cristóbal Ramírez
  */
 
 #include "arch/riscv/insts/vector.hh"
