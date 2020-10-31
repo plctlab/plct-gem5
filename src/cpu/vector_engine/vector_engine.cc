@@ -173,6 +173,63 @@ VectorEngine::cluster_available()
 }
 
 void
+VectorEngine::printConfigInst(RiscvISA::VectorStaticInst& insn, uint64_t src1,uint64_t src2)
+{
+    uint64_t pc = insn.getPC();
+    DPRINTF(VectorInst,"%s vl:%d, vtype:%d       PC 0x%X\n",insn.getName(),src1,src2,*(uint64_t*)&pc );
+}
+
+void
+VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn)
+{
+    uint64_t pc = insn.getPC();
+    bool gather_op = (insn.mop() ==3);
+
+    if (insn.isLoad())
+    {
+        if (gather_op){
+            DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc );
+        } else {
+            DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
+        }
+    }
+    else if (insn.isStore())
+    {
+        DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
+    } else {
+        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
+void
+VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
+{
+    uint64_t pc = insn.getPC();
+    std::string masked;
+    if(insn.vm()==0) {masked = "v0.m";} else {masked = "   ";}
+    std::string reg_type;
+    if(insn.write_to_scalar_reg()==1) {reg_type = "x";} else {reg_type = "v";}
+
+    if (insn.arith_src1()) {
+        DPRINTF(VectorInst,"%s %s%d v%d %s           PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs1(),masked,*(uint64_t*)&pc );
+    }
+    else if (insn.arith_src2()) {
+        DPRINTF(VectorInst,"%s %s%d v%d %s           PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),masked,*(uint64_t*)&pc );
+    }
+    else if (insn.arith_src1_src2()) {
+        DPRINTF(VectorInst,"%s %s%d v%d v%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs1(),insn.vs2(),masked,*(uint64_t*)&pc );
+    }
+    else if (insn.arith_src1_src2_src3()) {
+        DPRINTF(VectorInst,"%s %s%d v%d v%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs1(),insn.vs2(),masked,*(uint64_t*)&pc );
+    }
+    else if (insn.arith_no_src()) {
+         DPRINTF(VectorInst,"%s v%d val:0x%X %s      PC 0x%X\n",insn.getName(),insn.vd(),src1,masked,*(uint64_t*)&pc );
+    } else {
+        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
+void
 VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
     uint64_t src1,uint64_t src2,std::function<void()> dependencie_callback)
 {
@@ -241,20 +298,20 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
 
             DPRINTF(VectorValidBit,"Set Valid-bit %d : %d\n",PDst,0);
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
+        }
+        else if (insn.isStore())
+        {
+            //Physical source
+            PDst = vector_rename->get_preg_rat(vd);
+            vector_dyn_insn->set_PDst(PDst);
+            // MASKED NOT IMPLEMENTED FOR STORES
+            if (masked_op) {
+                DPRINTF(VectorRename,"%s v%lu ,  , mask %lu\n"
+                    ,insn.getName(), PDst, PMask);
+            } else {
+                DPRINTF(VectorRename,"%s v%lu \n",insn.getName(), PDst);
             }
-            else if (insn.isStore())
-            {
-                //Physical source
-                PDst = vector_rename->get_preg_rat(vd);
-                vector_dyn_insn->set_PDst(PDst);
-                // MASKED NOT IMPLEMENTED FOR STORES
-                if (masked_op) {
-                    DPRINTF(VectorRename,"%s v%lu ,  , mask %lu\n"
-                        ,insn.getName(), PDst, PMask);
-                } else {
-                    DPRINTF(VectorRename,"%s v%lu \n",insn.getName(), PDst);
-                }
-            }
+        }
     }
     else if (insn.isVectorInstArith()) {
         if (insn.arith_src1()) {
@@ -393,8 +450,6 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_rob->startTicking(*this);
     }
 
-    uint64_t pc = insn.getPC();
-
     if (insn.isSetVL()) {
         dependencie_callback();
         uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
@@ -402,19 +457,17 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->Instruction_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
             NULL,src1,src2,0,0));
-        DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
-            insn.getName(), *(uint64_t*)&pc );
+        printConfigInst(insn,src1,src2);
     }
     else if (insn.isVectorInstMem()) {
-    dependencie_callback();
-    uint32_t rob_entry = vector_rob->set_rob_entry(
-        vector_dyn_insn->get_POldDst(), insn.isLoad());
-    vector_dyn_insn->set_rob_entry(rob_entry);
-    vector_inst_queue->Memory_Queue.push_back(
-        new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
-            NULL,src1,src2,rename_vtype,rename_vl));
-    DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
-        insn.getName(), *(uint64_t*)&pc );
+        dependencie_callback();
+        uint32_t rob_entry = vector_rob->set_rob_entry(
+            vector_dyn_insn->get_POldDst(), insn.isLoad());
+        vector_dyn_insn->set_rob_entry(rob_entry);
+        vector_inst_queue->Memory_Queue.push_back(
+            new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
+                NULL,src1,src2,rename_vtype,rename_vl));
+        printMemInst(insn);
     }
     else if (insn.isVectorInstArith()) {
         if (has_dst) {
@@ -432,9 +485,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 dependencie_callback,src1,src2,rename_vtype,rename_vl));
         }
-
-        DPRINTF(VectorInst,"New instruction %s pc 0x%lx\n",
-            insn.getName(), *(uint64_t*)&pc);
+        printArithInst(insn,src1);
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }

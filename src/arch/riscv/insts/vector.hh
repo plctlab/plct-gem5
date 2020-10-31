@@ -87,7 +87,7 @@ class RiscvVectorCfgOp : public RiscvVectorInsn
            * destination registers for those vector
            * instructions that make us of it.
            */
-            if (isSetVLi()) {
+            if (getName() == "vsetvli") {
              _numSrcRegs =  1;
              _numDestRegs = 1;
              _srcRegIdx[0] = RegId(IntRegClass, vs1());

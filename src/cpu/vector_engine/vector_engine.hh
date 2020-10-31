@@ -202,6 +202,24 @@ public:
     */
     void regStats() override;
 
+//    RegisterMAP(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
+//        ExecContextPtr& _xc, std::function<void()> dependencie_callback,
+//        uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
+//        dependencie_callback(dependencie_callback),
+//        insn(insn),
+//        dyn_insn(dyn_insn)/*,xc(_xc)*/,src1(src1),src2(src2),
+//        rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
+//        {
+//            xc=_xc;
+//        }
+//    ~RegisterMAP() {}
+//
+//    RegisterMAP * register_mapping;
+
+    void printConfigInst(RiscvISA::VectorStaticInst& insn,uint64_t src1,uint64_t src2);
+    void printMemInst(RiscvISA::VectorStaticInst& insn);
+    void printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1);
+
 public:
     uint64_t rename_vtype;
     uint64_t rename_vl;

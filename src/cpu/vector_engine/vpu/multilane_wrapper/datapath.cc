@@ -101,7 +101,8 @@ Datapath::startTicking(
     arith_src1_src2         = this->insn->arith_src1_src2();
     arith_src1_src2_src3    = this->insn->arith_src1_src2_src3();
 
-    op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
+    //op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
+    op_imm = (this->insn->func3()==3);
 
     vfredsum = (operation == "vfredsum_vs");
 

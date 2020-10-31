@@ -54,7 +54,6 @@ public:
       virtual bool isVectorInst() const = 0;
       /* riscv vector configuration instruction */
       virtual bool isSetVL() const = 0;
-      virtual bool isSetVLi() const = 0;
       /* general riscv vector memory instruction */
       virtual bool isVectorInstMem() const = 0;
       /* vector load */
@@ -153,9 +152,6 @@ RegIndex vd() const override { return (RegIndex)x(7, 5); }
 bool isSetVL() const override {
   return (getName() == "vsetvli") | (getName() == "vsetvl") ; }
 
-bool isSetVLi() const override {
-  return (getName() == "vsetvli"); }
-
 bool write_to_scalar_reg() const override {
   return ((getName() == "vfmv_fs") | (getName() == "vmpopc_m")
     | (getName() == "vmfirst_m"));  }
@@ -168,6 +164,7 @@ bool arith_src1() const override { return 0; }
 
 bool arith_src2() const override {
   return ((getName() == "vadd_vi")      | (getName() == "vsub_vi")
+    | (getName() == "vsll_vi")      | (getName() == "vsrl_vi")
     | (getName() == "vfsqrt_v")
     | (getName() == "vfcvt_x_f_v")  | (getName() == "vfcvt_f_x_v")
     | (getName() == "vfmv_fs")

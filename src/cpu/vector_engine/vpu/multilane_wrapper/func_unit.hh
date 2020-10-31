@@ -300,13 +300,13 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vsll_vv")) {
+    if ((operation == "vsll_vv") || (operation == "vsll_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem << Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %x << %x  = %x  \n",
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vsrl_vv")) {
+    if ((operation == "vsrl_vv") || (operation == "vsrl_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
             Bitem,Aitem, Ditem);

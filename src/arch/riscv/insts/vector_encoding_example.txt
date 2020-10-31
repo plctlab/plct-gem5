@@ -1,0 +1,192 @@
+//=============================================================================
+// BSC - Barcelona Supercomputing Center
+// Author: Cristobal Ramirez Lazo
+// RISCV - VECTOR EXTENSION
+//=============================================================================
+// 
+//=============================================================================
+//Vector Load/Store Instruction Encoding   - version 0.7
+//=============================================================================
+// Format for Vector Load Instructions under LOAD-FP major opcode
+// 31 29 28 26  25  24      20 19       15 14   12 11      7 6     0
+//  nf  | mop | vm |  lumop   |    rs1    | width |    vd   |0000111| VL*  unit-stride
+//  nf  | mop | vm |   rs2    |    rs1    | width |    vd   |0000111| VLS* strided
+//  nf  | mop | vm |   vs2    |    rs1    | width |    vd   |0000111| VLX* indexed
+//   3     3     1      5           5         3         5       7
+//
+// Format for Vector Store Instructions under STORE-FP major opcode
+// 31 29 28 26  25  24      20 19       15 14   12 11      7 6     0
+//  nf  | mop | vm |  sumop   |    rs1    | width |   vs3   |0100111| VS*  unit-stride
+//  nf  | mop | vm |   rs2    |    rs1    | width |   vs3   |0100111| VSS* strided
+//  nf  | mop | vm |   vs2    |    rs1    | width |   vs3   |0100111| VSX* indexed
+//   3     3     1      5           5         3         5        7
+//
+// rs1[4:0] specifies x register holding base address
+// rs2[4:0] specifies x register holding stride
+// vs2[4:0] specifies v register holding address offsets
+// vs3[4:0] specifies v register holding store data
+// vd[4:0]  specifies v register destination of load
+// vm specifies vector mask
+// width[2:0] specifies size of memory elements, and distinguishes from FP scalar
+// mop[2:0] specifies memory addressing mode
+// nf[2:0] specifies the number of fields in each segment, for segment load/stores
+// lumop[4:0]/sumop[4:0] are additional fields encoding variants of unit-stride instructions
+//=============================================================================
+// Mask Encoding   - version 0.7
+//=============================================================================
+// vm
+//  0    vector result, only where v0[i].LSB = 1
+//  1    unmasked
+//=============================================================================  
+// Vector Load/Store Addressing Modes   - version 0.7
+//=============================================================================
+// mop [2:0] encoding for loads
+//    0 0 0  zero-extended unit-stride         VLxU,VLE
+//    0 0 1  reserved
+//    0 1 0  zero-extended strided             VLSxU, VLSE
+//    0 1 1  zero-extended indexed             VLXxU, VLXE
+//    1 0 0  sign-extended unit-stride         VLx  (x!=E)
+//    1 0 1  reserved
+//    1 1 0  sign-extended strided             VLSx (x!=E)
+//    1 1 1  sign-extended indexed             VLXx (x!=E)
+
+// mop [2:0] encoding for stores
+//    0 0 0  unit-stride                       VSx
+//    0 0 1  reserved
+//    0 1 0  strided                           VSSx
+//    0 1 1  indexed-ordered                   VSXx
+//    1 0 0  reserved
+//    1 0 1  reserved
+//    1 1 0  reserved
+//    1 1 1  indexed-unordered                 VSUXx
+
+//  nf[2:0] field encodes the number of fields in each segment. 
+// For regular vector loads and stores, nf=0.
+
+// Additional unit-stride vector addressing modes are encoded using the 5-bit lumop and sumop fields in the unit-stride load and store instruction encodings respectively.
+// lumop[4:0]
+//    00000  unit-stride
+//    0xxxx  reserved, x!=0
+//    10000  unit-stride fault-only-first
+//    1xxxx  reserved, x!=0
+// sumop[4:0]
+//    00000  unit-stride
+//    0xxxx  reserved, x!=0
+//    1xxxx  reserved
+
+// Width Encoding
+// Standard scalar FP    001     16     FLEN      FLH/FSH
+// Standard scalar FP    010     32     FLEN      FLW/FSW
+// Standard scalar FP    011     64     FLEN      FLD/FSD
+// Standard scalar FP    100    128     FLEN      FLQ/FSQ
+// Vector byte           000   vl*8     vl*SEW    VxB
+// Vector halfword       101   vl*16    vl*SEW    VxH
+// Vector word           110   vl*32    vl*SEW    VxW
+// Vector element        111   vl*SEW   vl*SEW    VxE
+
+//=============================================================================  
+// Formats for Vector Arithmetic Instructions under OP-V major opcode
+//=============================================================================  
+// 31       26  25   24      20 19      15 14   12 11      7 6     0
+//   funct6   | vm  |   vs2    |    vs1   | 0 0 0 |    vd   |1010111| OP-V (OPIVV)
+//   funct6   | vm  |   vs2    |    vs1   | 0 0 1 |    vd   |1010111| OP-V (OPFVV)
+//   funct6   | vm  |   vs2    |    vs1   | 0 1 0 |  vd/rd  |1010111| OP-V (OPMVV)
+//   funct6   | vm  |   vs2    |   simm5  | 0 1 1 |    vd   |1010111| OP-V (OPIVI)
+//   funct6   | vm  |   vs2    |    rs1   | 1 0 0 |    vd   |1010111| OP-V (OPIVX)
+//   funct6   | vm  |   vs2    |    rs1   | 1 0 1 |    vd   |1010111| OP-V (OPFVF)
+//   funct6   | vm  |   vs2    |    rs1   | 1 1 0 |  vd/rd  |1010111| OP-V (OPMVX)
+
+// funct3[2:0]    Operands          Source of scalar(s)
+// 0 0 0   OPIVV   vector-vector           -
+// 0 0 1   OPFVV   vector-vector           -
+// 0 1 0   OPMVV   vector-vector           -
+// 0 1 1   OPIVI   vector-immediate  imm[4:0]
+// 1 0 0   OPIVX   vector-scalar     GPR x register rs1
+// 1 0 1   OPFVF   vector-scalar     FP f register rs1
+// 1 1 0   OPMVX   vector-scalar     GPR x register rs1
+// 1 1 1   OPCFG   scalars-imms      GPR x register rs1 & rs2/imm
+
+// VFUNARY1 encoding space
+// vs1
+// 00000 vfsqrt.v
+// 10000 vfclass.v
+
+//=============================================================================
+// Formats for Vector Configuration Instructions under OP-V major opcode
+//=============================================================================
+// 31 30         25 24      20 19      15 14   12 11      7 6     0
+// 0 |        zimm[10:0]      |    rs1   | 1 1 1 |    rd   |1010111| vsetvli
+// 1 |   000000    |   rs2    |    rs1   | 1 1 1 |    rd   |1010111| vsetvl
+// 1        6            5          5        3        5        7
+
+// Examples
+// 020b7087 vle.v   v1, (s6)            000000 1 00000 10110 111 00001 0000111
+// 02057027 vse.v   v0, (a0)            000000 1 00000 01010 111 00000 0100111
+//          vse.v   v8, (t1)            000000 1 00000 00110 111 01000 0100111
+// 5e005057 vfmerge.vf  v0, v0, ft0     010111 1 00000 00000 101 00000 1010111
+       
+// 1a101057 vfmax.vv    v0, v1, v0      000110 1 00001 00000 001 00000 1010111
+// 120090d7 vfmin.vv    v1, v0, v1      000100 1 00000 00001 001 00001 1010111
+        
+
+// 6e941057 vflt.vv v0, v9, v8          011011 1 01001 01000 001 00000 1010111
+// 66531057 vfle.vv v0, v5, v6          011001 1 00101 01110 001 00000 1010111
+                                        
+// 22941057 vfsgnj.vv   v0, v9, v8      001000 1 01001 01000 001 00000 1010111
+// 261090d7 vfsgnjn.vv  v1, v1, v1      001001 1 00001 00001 001 00001 1010111
+
+// 2a849057 vfsgnjx.vv  v0, v8, v9      001010 1 01000 01001 001 00000 1010111
+
+// 92009057 vfmul.vv    v0, v0, v1      100100 1 00000 00001 001 00000 1010111
+// 02009057 vfadd.vv    v0, v0, v1      000000 1 00000 00001 001 00000 1010111
+
+
+// 0a101057 vfsub.vv    v0, v1, v0      000010 1 00001 00000 001 00000 1010111
+// 08111057 vfsub.vv   v0, v1, v2, v0.t 000010 0 00001 00010 001 00000 1010111
+
+
+// 82009057 vfdiv.vv    v0, v0, v1      100000 1 00000 00001 001 00000 1010111
+// 8e8010d7 vfsqrt.v    v1, v8          100011 1 01000 00000 001 00001 1010111
+
+// 06239057 vfredsum.vs v0, v2, v7      000001 1 00010 00111 001 00000 1010111
+
+// 00c57557 vsetvli a0, a0, e64, m1     0 00000001100 01010 111 01010 1010111
+// 8055f057 vsetvl  zero, a1, t0        1 000000 00101 01011 111 00000 1010111
+
+// CONVERSION OP
+// 8a009057 vfcvt.x.f.v v0, v0          100010 1 00000 00001 001 00000 1010111
+// 8a219157 vfcvt.f.x.v v2, v2          100010 1 00010 00011 001 00010 1010111
+
+// INTEGER OP
+// 024032d7 vadd.vi v5, v4, 0           000000 1 00100 00000 011 00101 1010111
+// 02018057 vadd.vv v0, v0, v3          000000 1 00000 00011 000 00000 1010111
+// 0a208157 vsub.vv v2, v2, v1          000010 1 00010 00001 000 00010 1010111
+// 0a208157 vsub.vi v2, v2, 0           000010 1 00010 00000 011 00010 1010111
+
+// 96020057 vsll.vv v0, v0, v4          100101 1 00000 00100 000 00000 1010111
+// a2020057 vsrl.vv v0, v0, v4          101000 1 00000 00100 000 00000 1010111
+// a26bb457 vsrl.vi v8 v6 23            101000 1 00110 10111 011 01000 1010111
+
+// 62100057 vseq.vv v0, v1, v0          011000 1 00001 00000 000 00000 1010111
+
+
+// 5c1202d7 vmerge.vv v5, v1, v4, v0.t  010111 0 00001 00100 000 00101 1010111
+// 5e05c257 vmerge.vx   v4, v0, a1      010111 1 00000 01011 100 00100 1010111
+// 5e04b257 vmerge.vi   v4, v0, 9       010111 1 00000 01001 011 00100 1010111
+
+
+// 26010057 vand.vv v0, v0, v2          001001 1 00000 00010 000 00000 1010111
+// 2a0081d7  vor.vv  v3, v0, v1          001010 1 00000 00001 000 00011 1010111
+                                                     
+
+// vsetvli rd, rs1, vtypei    # rd = new vl, rs1 = AVL(application Vector Length), vtypei = new vtype setting
+// if rs1 = x0, then use maximum vector length
+
+// vtype register layout
+//     Bits  Name        Description
+//   XLEN-1  vill        Illegal value if set
+// XLEN-2:7              Reserved (write 0)
+//      6:5  vediv[1:0]  Used by EDIV extension
+//      4:2  vsew[2:0]   Standard element width (SEW) setting
+//      1:0  vlmul[1:0]  Vector register group multiplier (LMUL) setting
+//=============================================================================

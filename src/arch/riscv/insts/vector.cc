@@ -62,7 +62,7 @@ RiscvVectorCfgOp::generateDisassembly(Addr pc,
     ss << csprintf("0x%08x", machInst) << " " << mnemonic << " ";
     ss << IntRegNames[vd()] << ", ";
     ss << IntRegNames[vs1()] << ", ";
-    if (!isSetVLi()) {
+    if (getName() == "vsetvl") {
         ss << IntRegNames[vs2()] ;
     } else {
         ss << vtype() ;

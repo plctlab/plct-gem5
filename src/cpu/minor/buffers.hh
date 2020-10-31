@@ -429,10 +429,10 @@ class Queue : public Named, public Reservable
             freeReservation();
             queue.push_back(data);
 
-            if (queue.size() > capacity) {
-                warn("%s: No space to push data into queue of capacity"
-                    " %u, pushing anyway\n", name(), capacity);
-            }
+            //if (queue.size() > capacity) {
+            //    warn("%s: No space to push data into queue of capacity"
+            //        " %u, pushing anyway\n", name(), capacity);
+            //}
 
         }
     }

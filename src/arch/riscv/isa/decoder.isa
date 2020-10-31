@@ -1837,10 +1837,12 @@ decode QUADRANT default Unknown::unknown() {
             0x25: decode FUNCT3 {
                 0x0: VectorDataOp::vsll_vv();
                 0x2: VectorDataOp::vmul_vv();
+                0x3: VectorDataOp::vsll_vi();
                 }
             0x28: decode FUNCT3 {
                 0x0: VectorDataOp::vsrl_vv();
                 0x1: VectorDataOp::vfmadd_vv();
+                0x3: VectorDataOp::vsrl_vi(); // Aqui falta inmediato .. por eso falla ...
                 }
             0x2C: decode FUNCT3 {
                 0x1: VectorDataOp::vfmacc_vv();

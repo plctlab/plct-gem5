@@ -168,12 +168,12 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if (operation == "vsll_vv") {
+    if ((operation == "vsll_vv") || (operation == "vsll_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if (operation == "vsrl_vv") {
+    if ((operation == "vsrl_vv") || (operation == "vsrl_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
