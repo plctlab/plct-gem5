@@ -96,6 +96,8 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     uint64_t    vaddr       = mem_addr;
     int32_t     vstride     = 1;
 
+    assert(mop != 2); //no stride operation .. comment this line to evaluate strided operation
+
     //reset vecIndex
     vecIndex = 0;
 
@@ -213,7 +215,7 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                 DPRINTF(MemUnitReadTiming,"items_in_line %d\n",items_in_line);
             }
         delete buf;
-        }
+        } //end indexed operation
 
         //try to read the line
         DPRINTF(MemUnitReadTiming, "reading line_addr %#x with %d items for "

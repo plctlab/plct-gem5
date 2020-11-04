@@ -416,12 +416,24 @@ decode QUADRANT default Unknown::unknown() {
                     Fd_bits = Mem;
                 }}, inst_flags=FloatMemReadOp);
             }
+            0x0: decode MOP {
+                0x0:VectorMemOp::vlb_v();
+                0x2:VectorMemOp::vlsb_v();
+                0x3:VectorMemOp::vlxb_v();
+            }
+            0x5: decode MOP {
+                0x0:VectorMemOp::vlh_v();
+                0x2:VectorMemOp::vlsh_v();
+                0x3:VectorMemOp::vlxh_v();
+            }
             0x6: decode MOP {
                 0x0:VectorMemOp::vlw_v();
-                0x2:VectorMemOp::vlxw_v();
+                0x2:VectorMemOp::vlsw_v();
+                0x3:VectorMemOp::vlxw_v();
             }
             0x7: decode MOP {
                 0x0:VectorMemOp::vle_v();
+                0x2:VectorMemOp::vlse_v();
                 0x3:VectorMemOp::vlxe_v();
             }
         }
@@ -528,10 +540,26 @@ decode QUADRANT default Unknown::unknown() {
                     Mem_ud = Fs2_bits;
                 }}, inst_flags=FloatMemWriteOp);
             }
-            0x0: VectorMemOp::vsb_v();
-            0x5: VectorMemOp::vsh_v();
-            0x6: VectorMemOp::vsw_v();
-            0x7: VectorMemOp::vse_v();
+            0x0: decode MOP {
+                0x0:VectorMemOp::vsb_v();
+                0x2:VectorMemOp::vssb_v();
+                0x3:VectorMemOp::vsxb_v();
+            }
+            0x5: decode MOP {
+                0x0:VectorMemOp::vsh_v();
+                0x2:VectorMemOp::vssh_v();
+                0x3:VectorMemOp::vsxh_v();
+            }
+            0x6: decode MOP {
+                0x0:VectorMemOp::vsw_v();
+                0x2:VectorMemOp::vssw_v();
+                0x3:VectorMemOp::vsxw_v();
+            }
+            0x7: decode MOP {
+                0x0:VectorMemOp::vse_v();
+                0x2:VectorMemOp::vsse_v();
+                0x3:VectorMemOp::vsxe_v();
+            }
         }
 
         0x0b: decode FUNCT3 {

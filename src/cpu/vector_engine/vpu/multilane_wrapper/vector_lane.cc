@@ -98,7 +98,8 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     bool vm;
 
     bool op_imm;
-    op_imm = (insn.getName() =="vfadd_vi") | (insn.getName() =="vadd_vi");
+    //op_imm = (insn.getName() =="vfadd_vi") | (insn.getName() =="vadd_vi");
+    op_imm = (insn.func3()==3);
 
     bool move_to_core;
     move_to_core = (insn.getName() =="vfmv_fs");

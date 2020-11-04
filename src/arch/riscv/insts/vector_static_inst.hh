@@ -39,6 +39,22 @@
 
 namespace RiscvISA
 {
+/*
+struct VecStaticInstFlags {
+  enum VecFlags {
+      IsConfigOp = 0,
+      IsMemOp = 1,
+      IsArithmOp = 2,
+      IsFP = 3,
+      IsInt = 4,
+      IsOneSrc = 5,
+      IsTwoSrc = 6,
+      IsThreeSrc = 7,
+      Num_Flags = 8
+  };
+  static const char *FlagsStrings[Num_Flags];
+};
+*/
 /* VectorStaticInst holds the info of all vector instructions */
 class VectorStaticInst : public StaticInst
 {
@@ -135,7 +151,6 @@ uint32_t opcode() const { return x(0, 7); }
 
 uint32_t vtype() const  override   { return x(20, 11); }
 
-
 uint32_t func3() const override { return x(12, 3); }
 uint32_t func5() const override { return x(27, 5); }
 uint32_t func6() const override { return x(26, 6); }
@@ -165,12 +180,14 @@ bool arith_src1() const override { return 0; }
 bool arith_src2() const override {
   return ((getName() == "vadd_vi")      | (getName() == "vsub_vi")
     | (getName() == "vsll_vi")      | (getName() == "vsrl_vi")
-    | (getName() == "vfsqrt_v")
-    | (getName() == "vfcvt_x_f_v")  | (getName() == "vfcvt_f_x_v")
-    | (getName() == "vfmv_fs")
     | (getName() == "vslideup_vi") | (getName() == "vslidedown_vi")
     | (getName() == "vslideup_vx") | (getName() == "vslidedown_vx")
     | (getName() == "vslide1up_vx") | (getName() == "vslide1down_vx")
+
+    | (getName() == "vfsqrt_v")
+    | (getName() == "vfcvt_x_f_v")  | (getName() == "vfcvt_f_x_v")
+    | (getName() == "vfmv_fs")
+
     | (getName() == "vmpopc_m") | (getName() == "vmfirst_m")
     );  }
 
