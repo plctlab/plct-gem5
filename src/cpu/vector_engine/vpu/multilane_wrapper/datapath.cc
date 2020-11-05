@@ -193,7 +193,7 @@ Datapath::evaluate()
             return;
         }
     }
-    else if (arith_src1_src2 | op_imm)  // 2 sources operation
+    else if (arith_src1_src2 )  // 2 sources operation
     {
         //DPRINTF(VectorEngine," arith_src1_src2 \n" );
         if ( (vector_lane->AdataQ.size() < simd_size) |
@@ -248,7 +248,7 @@ Datapath::evaluate()
                 }
             }
         }
-        else if (!arith_src2 | op_imm)
+        else if (!arith_src2)
         {
             uint8_t *Aitem = vector_lane->AdataQ.front();
             memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);

@@ -221,6 +221,11 @@ public:
     void printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1);
 
 public:
+    bool masked_op;
+    bool vx_op;
+    bool vf_op;
+    bool vi_op;
+
     uint64_t rename_vtype;
     uint64_t rename_vl;
 

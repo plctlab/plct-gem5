@@ -1273,10 +1273,13 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     }
                     else
                     {
-                    bool vfmerge_vf =(vector_insn->getName() == "vfmerge_vf");
-                    src1 = (vfmerge_vf) ?
-                        xc->readFloatRegOperandBits(vector_insn,0) :
-                        xc->readIntRegOperand(vector_insn,0);
+
+                    //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
+                    bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
+                    //bool vi_src = (vector_insn->func3()==3);
+
+                    src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
+                            xc->readIntRegOperand(vector_insn,0);
                     src2 = xc->readIntRegOperand(vector_insn,1);
                     }
 

@@ -140,6 +140,9 @@ InstQueue::evaluate()
         uint64_t mask=0;
 
         bool masked_op=0;
+        bool vx_op=0;
+        bool vf_op=0;
+        bool vi_op=0;
         bool mask_ready=0;
         bool src1_ready=0;
         bool src2_ready=0;
@@ -178,6 +181,10 @@ InstQueue::evaluate()
             masked_op = (Instruction->insn.vm()==0) &&
                 !Instruction->insn.isSetVL();
 
+            vx_op = (Instruction->insn.func3()==4) || (Instruction->insn.func3()==6);
+            vf_op = (Instruction->insn.func3()==5);
+            vi_op = (Instruction->insn.func3()==3);
+
             if (masked_op) {
                 mask_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(mask);
@@ -185,9 +192,8 @@ InstQueue::evaluate()
                 mask_ready = 1;
             }
 
-            if (Instruction->insn.arith_src1() ||
-                Instruction->insn.arith_src1_src2() ||
-                Instruction->insn.arith_src1_src2_src3()) {
+            if ((Instruction->insn.arith_src1_src2() ||
+                Instruction->insn.arith_src1_src2_src3()) && !( vx_op || vf_op || vi_op)) {
                 src1_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(src1);
             }

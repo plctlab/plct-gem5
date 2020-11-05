@@ -37,19 +37,19 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
     float Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vfadd_vv") | (operation == "vfadd_vi")) {
+    if ((operation == "vfadd_vv") | (operation == "vfadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f + %f  = %f  \n",Aitem,
             Bitem, Ditem);
     }
 
-    if ((operation == "vfsub_vv")){
+    if ((operation == "vfsub_vv") | (operation == "vfsub_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f - %f  = %f  \n",Bitem,
             Aitem, Ditem);
     }
 
-    if ((operation == "vfmul_vv")){
+    if ((operation == "vfmul_vv") | (operation == "vfmul_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f * %f  = %f  \n",Aitem,
             Bitem, Ditem);
@@ -67,12 +67,12 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
             Bitem,Ditem);
     }
 
-    if ((operation == "vfmin_vv")) {
+    if ((operation == "vfmin_vv") || (operation == "vfmin_vf")) {
         Ditem = (Aitem < Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %f , %f  = min :%f\n",
             Aitem,Bitem, Ditem);
     }
-    if ((operation == "vfmax_vv")) {
+    if ((operation == "vfmax_vv") || (operation == "vfmax_vf")) {
         Ditem = (Aitem > Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %f , %f  = max :%f\n",
             Aitem,Bitem, Ditem);
@@ -98,10 +98,10 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")) {
+    if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = 0x%x : 0x%x  = 0x%x\n",
-            *(uint32_t*)&Aitem,*(uint32_t*)&Bitem, *(uint32_t*)&Ditem);
+        DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
+            Aitem,Bitem,Ditem);
     }
 
     if ((operation == "vfmacc_vv")) {
@@ -133,17 +133,17 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
     double Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vfadd_vv") | (operation == "vfadd_vi")){
+    if ((operation == "vfadd_vv") | (operation == "vfadd_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lf + %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
-    if ((operation == "vfsub_vv")){
+    if ((operation == "vfsub_vv") | (operation == "vfsub_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lf - %lf  = %lf\n",
             Bitem, Aitem, Ditem);
     }
-    if ((operation == "vfmul_vv")){
+    if ((operation == "vfmul_vv") | (operation == "vfmul_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lf * %lf  = %lf\n",
             Aitem,Bitem, Ditem);
@@ -162,12 +162,12 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
             Bitem,Ditem);
     }
 
-    if ((operation == "vfmin_vv"))  {
+    if ((operation == "vfmin_vv") || (operation == "vfmin_vf"))  {
         Ditem = (Aitem < Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %lf , %lf  = min :%lf\n",
             Aitem,Bitem, Ditem);
     }
-    if ((operation == "vfmax_vv")) {
+    if ((operation == "vfmax_vv") || (operation == "vfmax_vf")) {
         Ditem = (Aitem > Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %lf , %lf  = max :%lf\n",
             Aitem,Bitem, Ditem);
@@ -193,10 +193,10 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")) {
+    if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = 0x%lx : 0x%lx  = 0x%lx\n",
-            *(uint64_t*)&Aitem,*(uint64_t*)&Bitem, *(uint64_t*)&Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf : %lf  = %lf\n",
+            Aitem,Bitem,Ditem);
     }
 
     if ((operation == "vfmacc_vv")) {
@@ -271,7 +271,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     long int Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vadd_vv") | (operation == "vadd_vi")) {
+    if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d  \n",
             Aitem,Bitem, Ditem);
@@ -324,7 +324,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vand_vv")) {
+    if ((operation == "vand_vv") || (operation == "vand_vx") || (operation == "vand_vi")) {
         Ditem = (Bitem & Aitem);
         DPRINTF(Datapath,"WB Instruction = 0x%x & 0x%x  = 0x%x  \n",
             Bitem,Aitem, Ditem);
@@ -348,6 +348,12 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Aitem,Bitem, Ditem);
     }
 
+    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
+        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
+            Aitem,Bitem,Ditem);
+    }
+
     if (vm==0) {
         DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d)"
             "\n",Mitem,Dstitem);
@@ -364,7 +370,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
     std::string operation = insn->getName();
 
 
-    if ((operation == "vadd_vv") | (operation == "vadd_vi")) {
+    if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Aitem,Bitem, Ditem);
@@ -394,7 +400,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vsll_vv")) {
+    if ((operation == "vsll_vv") || (operation == "vsll_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem << Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lx << %lx  = %lx\n",
             Bitem,Aitem, Ditem);
@@ -440,6 +446,12 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
         Ditem = (Aitem < Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %d , %d  = min :%d  \n",
             Aitem,Bitem, Ditem);
+    }
+
+    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
+        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
+            *(uint32_t*)&Aitem,*(uint32_t*)&Bitem, *(uint32_t*)&Ditem);
     }
 
     if (vm==0) {
@@ -514,4 +526,3 @@ Datapath::compute_cvt_x_f_32_op( float Bitem, int Mitem,
 
     return Ditem;
 }
-

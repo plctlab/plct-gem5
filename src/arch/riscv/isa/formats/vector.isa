@@ -29,7 +29,7 @@
 // Basic instruction class constructor template.
 def template VectorArithConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorArith)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorArithOp)
     {
         flags[IsVector] = true;
     }
@@ -37,7 +37,7 @@ def template VectorArithConstructor {{
 
 def template VectorMemoryConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorMemory)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryOp)
     {
         flags[IsVector] = true;
     }
@@ -45,16 +45,17 @@ def template VectorMemoryConstructor {{
 
 def template VectorConfigConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorConfig)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorConfigOp)
     {
+        %(constructor)s;
         flags[IsVector] = true;
+        //vecflags[IsVecConfigOp] = true;
     }
 }};
 
-
 def template VectorToScalarConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorToScalar)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorToScalarOp)
     {
         flags[IsVector] = true;
     }
@@ -81,8 +82,8 @@ def format VectorDataOp() {{
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorConfigOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorCfgOp')
+def format VectorConfigOp( *vecflags) {{
+    iop = InstObjParams(name, Name, 'RiscvVectorCfgOp', vecflags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorConfigConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)

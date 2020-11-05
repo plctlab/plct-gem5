@@ -38,17 +38,17 @@ Datapath::get_instruction_info()
     /**************************************************************************
      * Floating point Operations
      *************************************************************************/
-    if ((operation == "vfadd_vv") | (operation == "vfadd_vi")) {
+    if ((operation == "vfadd_vv") | (operation == "vfadd_vf")) {
         Oplatency           = 4;
         is_FP               = 1;
     }
 
-    if (operation == "vfsub_vv") {
+    if ((operation == "vfsub_vv") | (operation == "vfsub_vf")) {
         Oplatency           = 4;
         is_FP               = 1;
     }
 
-    if (operation == "vfmul_vv") {
+    if ((operation == "vfmul_vv") | (operation == "vfmul_vf")) {
         Oplatency           = 3;
         is_FP               = 1;
     }
@@ -62,12 +62,12 @@ Datapath::get_instruction_info()
         is_FP               = 1;
     }
 
-    if (operation == "vfmin_vv") {
+    if ((operation == "vfmin_vv") | (operation == "vfmin_vf")) {
         Oplatency           = 4;
         is_FP               = 1;
     }
 
-    if (operation == "vfmax_vv") {
+    if ((operation == "vfmax_vv") | (operation == "vfmax_vf")) {
         Oplatency           = 4;
         is_FP               = 1;
     }
@@ -87,11 +87,6 @@ Datapath::get_instruction_info()
         is_FP               = 1;
     }
 
-     if (operation == "vmerge_vv") {
-        Oplatency           = 1;
-        is_FP               = 1;
-    }
-
     if (operation == "vfmacc_vv") {
         Oplatency           = 6;
         is_FP               =1;
@@ -99,6 +94,11 @@ Datapath::get_instruction_info()
 
     if (operation == "vfmadd_vv")   {
         Oplatency           = 6;
+        is_FP               = 1;
+    }
+
+    if (operation == "vfmerge_vf")   {
+        Oplatency           = 1;
         is_FP               = 1;
     }
 
@@ -143,12 +143,12 @@ Datapath::get_instruction_info()
      * Intefer Operations
      *************************************************************************/
 
-    if ((operation == "vadd_vv") | (operation == "vadd_vi")) {
+    if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if ((operation == "vsub_vv") | (operation == "vsub_vi")) {
+    if ((operation == "vsub_vv") || (operation == "vsub_vx") || (operation == "vsub_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
@@ -188,7 +188,7 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if (operation == "vand_vv") {
+    if ((operation == "vand_vv") || (operation == "vand_vx") || (operation == "vand_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
@@ -208,6 +208,10 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
+    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
+        Oplatency           = 1;
+        is_INT              = 1;
+    }
     /**************************************************************************
      * Slide Operations
      *************************************************************************/

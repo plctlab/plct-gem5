@@ -81,9 +81,13 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     // 0 = 8-bit , 1 = 16-bit , 2 = 32-bit , 3 = 64-bit , 4 = 128-bit
     uint64_t vsew;
     vsew = vectorwrapper->vector_csr->get_vtype_vsew();
-    uint8_t SIZE = (vsew == 3) ? sizeof(double) :
-        (vsew == 2) ? sizeof(float) : 0;
+    uint8_t SIZE =  (vsew == 3) ? sizeof(double) :
+                    (vsew == 2) ? sizeof(float) :
+                    (vsew == 1) ? sizeof(uint16_t) :
+                    (vsew == 0) ? sizeof(uint8_t) : 0;
     assert(SIZE != 0);
+    assert((vsew == 3) || (vsew == 2)); // Only 64-bit and 32-bit Operations are supported
+
     //In this moment there are not implemented widening and narrowing,
     //then dst and src are similar sizes
     uint64_t DATA_SIZE = SIZE;
@@ -95,18 +99,18 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t addr_Mask;
     uint64_t addr_OldDst;
     bool location;
-    bool vm;
-
-    bool op_imm;
-    //op_imm = (insn.getName() =="vfadd_vi") | (insn.getName() =="vadd_vi");
-    op_imm = (insn.func3()==3);
 
     bool move_to_core;
     move_to_core = (insn.getName() =="vfmv_fs");
 
     uint64_t i;
-    // Masked operation: 1-disable , 0-Enable
-    vm = insn.vm();
+    // Masked operation
+    masked_op = (insn.vm()==0);
+    // OPIVI, OPIVX , OPFVF and OPMVX formats
+    vx_op = (insn.func3()==4) || (insn.func3()==6);
+    vf_op = (insn.func3()==5);
+    vi_op = (insn.func3()==3);
+
     //address in bytes
     uint64_t mvl_bits =vectorwrapper->vector_csr->get_max_vector_length_bits();
     addr_src0 = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
@@ -144,8 +148,6 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     }
 
     //Source operands used by the instruction
-    arith_no_src            = insn.arith_no_src();
-    arith_src1              = insn.arith_src1();
     arith_src2              = insn.arith_src2();
     arith_src1_src2         = insn.arith_src1_src2();
     arith_src1_src2_src3    = insn.arith_src1_src2_src3();
@@ -166,79 +168,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     dyn_insn->set_VectorStaticInst(&insn);
 
-    if (arith_no_src)
-    {
-        DPRINTF(VectorLane,"VMerge to Register Addrs: 0x%lx\n",addr_src0);
-
-        dstWriter->initialize(vector_wrapper,dst_count, DATA_SIZE, addr_src0,
-            location, xc,[done_callback,dst_count,this](bool done)
-        {
-            ++Dread;
-            if (done) {
-                assert(this->Dread == dst_count);
-                this->occupied = false;
-                done_callback(NoFault);
-            }
-        });
-
-        /*
-        bool vfmerge_vf =(insn.getName() == "vfmerge_vf");
-        bool vmerge_vx =(insn.getName() == "vmerge_vx");
-        */
-        bool vmerge_vi =(insn.getName() == "vmerge_vi");
-
-        uint8_t * Ddata = (uint8_t *)malloc(dst_count*DST_SIZE);
-
-        if (vsew == 3)
-        {
-            uint64_t merge_data;
-            merge_data = vmerge_vi ? ((insn.vs1()>=16) ? (0xfffffffffffffff0 |
-                (uint64_t)insn.vs1()) : insn.vs1() ): src1;
-            DPRINTF(VectorLane,"Merge Data  0x%lx \n" ,merge_data);
-            for (i=0; i<vl_count;i++){
-            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&merge_data, DST_SIZE);
-            }
-        }
-        else
-        {
-            uint32_t merge_data;
-            merge_data = vmerge_vi ? ((insn.vs1()>=16) ? (0xfffffff0 |
-                (uint32_t)insn.vs1()) : insn.vs1() ): src1;
-            DPRINTF(VectorLane,"Merge Data  0x%x \n" ,merge_data);
-            for (i=0; i<vl_count;i++){
-            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&merge_data, DST_SIZE);
-            }
-        }
-
-        for (i=0; i<vl_count; i++) {
-            uint8_t *ndata = new uint8_t[DST_SIZE];
-            memcpy(ndata, Ddata+(i*DST_SIZE), DST_SIZE);
-            dstWriter->queueData(ndata);
-            if (DST_SIZE==8){ DPRINTF(VectorLane,"queue Data 0x%x \n",
-                *(uint64_t *) ndata );}
-            if (DST_SIZE==4){ DPRINTF(VectorLane,"queue Data 0x%x \n",
-                *(uint32_t *) ndata );}
-            }
-        delete [] Ddata;
-
-        int zero_count = mvl_element-vl_count;
-        uint8_t * ZeroData = (uint8_t *)malloc(zero_count*DST_SIZE);
-        uint64_t zero_data = 0;
-        for (i=0; i<zero_count;i++){
-            memcpy(ZeroData+(i*DST_SIZE), (uint8_t*)&zero_data, DST_SIZE);
-            }
-        for (i=0; i<zero_count; i++) {
-            uint8_t *ndata = new uint8_t[DST_SIZE];
-            memcpy(ndata, ZeroData+(i*DST_SIZE), DST_SIZE);
-            dstWriter->queueData(ndata);
-            if (DST_SIZE==8){ DPRINTF(VectorLane,"queue Data Zero 0x%x  %d\n",
-                *(uint64_t *) ndata ,i+vl_count);}
-            if (DST_SIZE==4){ DPRINTF(VectorLane,"queue Data Zero 0x%x %d\n",
-                *(uint32_t *) ndata ,i+vl_count);}
-            }
-        delete [] ZeroData;
-    }
-    else if (move_to_core)
+    if (move_to_core)
     {
         /*
          * move_to_core refers to the instructions only read the first
@@ -361,17 +291,20 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             });
         }
 
-        if (op_imm==1)
+        if (vi_op | vx_op | vf_op)
         {
-            uint64_t imm_data;
-            imm_data = insn.vs1();
-            DPRINTF(VectorLane,"Imm Data  %lu \n" ,imm_data);
+            uint64_t scalar_data;
+            scalar_data = //(vi_op) ? ((insn.vs1()>=16) ? (0xfffffffffffffff0 | (uint64_t)insn.vs1()) : insn.vs1()) :
+                          (vi_op) ? (uint64_t)insn.vs1():
+                          (vx_op | vf_op) ? src1 : 0;
+
+            DPRINTF(VectorLane,"scalar data  0x%x vl_count %d\n" ,scalar_data, vl_count);
 
             //create data result buffer
             uint8_t * Ddata = (uint8_t *)malloc(vl_count*DST_SIZE);
 
             for (i=0; i<vl_count;i++){
-                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&imm_data, DST_SIZE);
+                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&scalar_data, DST_SIZE);
                 }
 
             for (i=0; i<vl_count; ++i) {
@@ -433,7 +366,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             assert(!done || (this->Bread == vl_count));
         });
 
-        if (vm==0)
+        if (masked_op)
         {
             //DPRINTF(VectorLane,"Reading Source M \n" );
             srcMReader->initialize(vector_wrapper,vl_count,DATA_SIZE,addr_Mask,
@@ -456,7 +389,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             });
         }
 
-        if ((!reduction & (vm==0))| arith_src1_src2_src3 | is_slide)
+        if ((!reduction & (masked_op))| arith_src1_src2_src3 | is_slide)
             {
             //DPRINTF(VectorLane,"Reading Source DstOld \n" );
             //Leemos el old detination para el caso de mask Op

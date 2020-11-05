@@ -72,6 +72,41 @@ class RiscvVectorDataOp : public RiscvVectorInsn
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
     };
+
+/*
+ * Vector Arithmetic Instructions
+ */
+    /*
+class RiscvVectorData2SrcsOp : public RiscvVectorInsn
+    {
+      public:
+        RiscvVectorDataOp(const char *mnem, ExtMachInst _machInst,
+            OpClass __opClass) :
+            RiscvVectorInsn(mnem, _machInst, __opClass)
+        {
+          
+           // Here is defined the scalar source registers and
+           // destination registers for those vector
+           // instructions that make us of it.
+           
+            if ((func3()==4) || (func3()==6)) {
+                _numSrcRegs = 1;
+                _numDestRegs = 0;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            } else if ((func3()==5)) {
+                _numSrcRegs = 1;
+                _numDestRegs = 0;
+                _srcRegIdx[0] = RegId(FloatRegClass, vs1());
+            } else {
+                _numSrcRegs = 0;
+                _numDestRegs = 0;
+            }
+        }
+
+        std::string generateDisassembly(Addr pc,
+            const Loader::SymbolTable *symtab) const;
+    };
+*/
 /*
  * Vector Configuration Instructions
  */

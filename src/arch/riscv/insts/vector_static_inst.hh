@@ -39,33 +39,35 @@
 
 namespace RiscvISA
 {
-/*
+
 struct VecStaticInstFlags {
   enum VecFlags {
-      IsConfigOp = 0,
-      IsMemOp = 1,
-      IsArithmOp = 2,
-      IsFP = 3,
-      IsInt = 4,
-      IsOneSrc = 5,
-      IsTwoSrc = 6,
-      IsThreeSrc = 7,
-      Num_Flags = 8
+      IsVecArithmOp = 0,
+      IsVecMemOp = 1,
+      IsVecConfigOp = 2,
+      IsVecFP = 3,
+      IsVecInt = 4,
+      IsVecOneSrc = 5,
+      IsVecTwoSrc = 6,
+      IsVecThreeSrc = 7,
+      NumVecFlags = 8
   };
-  static const char *FlagsStrings[Num_Flags];
+  static const char *FlagsStrings[NumVecFlags];
 };
-*/
+
 /* VectorStaticInst holds the info of all vector instructions */
-class VectorStaticInst : public StaticInst
+class VectorStaticInst : public StaticInst, public VecStaticInstFlags
 {
 protected:
     using StaticInst::StaticInst;
+    std::bitset<NumVecFlags> vecflags;
 
 public:
       void advancePC(PCState &pc) const override { pc.advance(); }
       /* vector instruction name*/
       virtual std::string getName() const = 0;
 
+      virtual bool isVecConfigOp() const = 0;
       /* general riscv vector instruction */
       virtual bool isVectorInst() const = 0;
       /* riscv vector configuration instruction */
@@ -81,10 +83,6 @@ public:
 
       /* Vector instructions that writes back the result to the scalar rf */
       virtual bool write_to_scalar_reg() const = 0;
-      /* Vector instructions without vector source registers (e.g. vmerge.vx)*/
-      virtual bool arith_no_src() const = 0;
-      /* Vector instructions  that uses src1 as vector source*/
-      virtual bool arith_src1() const = 0;
       /* Vector instructions  that have src2 as vector source*/
       virtual bool arith_src2() const = 0;
       /* Vector instructions  that have src1 and src2 as vector sources*/
@@ -164,27 +162,12 @@ RegIndex vs2() const override { return (RegIndex)x(20, 5); }
 RegIndex vs3() const override { return (RegIndex)x(7, 5); }
 RegIndex vd() const override { return (RegIndex)x(7, 5); }
 
-bool isSetVL() const override {
-  return (getName() == "vsetvli") | (getName() == "vsetvl") ; }
-
 bool write_to_scalar_reg() const override {
   return ((getName() == "vfmv_fs") | (getName() == "vmpopc_m")
     | (getName() == "vmfirst_m"));  }
 
-bool arith_no_src() const override {
-  return ((getName() == "vfmerge_vf") | (getName() == "vmerge_vx")
-    | (getName() == "vmerge_vi")); }
-
-bool arith_src1() const override { return 0; }
-
 bool arith_src2() const override {
-  return ((getName() == "vadd_vi")      | (getName() == "vsub_vi")
-    | (getName() == "vsll_vi")      | (getName() == "vsrl_vi")
-    | (getName() == "vslideup_vi") | (getName() == "vslidedown_vi")
-    | (getName() == "vslideup_vx") | (getName() == "vslidedown_vx")
-    | (getName() == "vslide1up_vx") | (getName() == "vslide1down_vx")
-
-    | (getName() == "vfsqrt_v")
+  return ( (getName() == "vfsqrt_v")
     | (getName() == "vfcvt_x_f_v")  | (getName() == "vfcvt_f_x_v")
     | (getName() == "vfmv_fs")
 
@@ -192,23 +175,40 @@ bool arith_src2() const override {
     );  }
 
 bool arith_src1_src2() const override {
-  return ((getName() == "vfadd_vv") | (getName() == "vfsub_vv")
-    | (getName() == "vfmul_vv")     | (getName() == "vfdiv_vv")
+  return ((getName() == "vfadd_vv") | (getName() == "vfadd_vf") 
+    | (getName() == "vfsub_vv")     | (getName() == "vfsub_vf")
+    | (getName() == "vfmul_vv")     | (getName() == "vfmul_vf")
+    | (getName() == "vfdiv_vv")
     | (getName() == "vfsgnj_vv")
-    | (getName() == "vflt_vv")      | (getName() == "vfle_vv")
-    | (getName() == "vmerge_vv")    | (getName() == "vfmin_vv")
-    | (getName() == "vfmax_vv")
-    | (getName() == "vand_vv")      | (getName() == "vor_vv")
+    | (getName() == "vflt_vv")      
+    | (getName() == "vfle_vv")
+    | (getName() == "vmerge_vv")    
+    | (getName() == "vfmin_vv")     | (getName() == "vfmin_vf")
+    | (getName() == "vfmax_vv")     | (getName() == "vfmax_vf")
+    | (getName() == "vand_vv")      | (getName() == "vand_vx") | (getName() == "vand_vi")
+    | (getName() == "vor_vv")
     | (getName() == "vxor_vv")
-    | (getName() == "vadd_vv")      | (getName() == "vsub_vv")
+
+    | (getName() == "vadd_vv")      | (getName() == "vadd_vx")  | (getName() == "vadd_vi")
+    | (getName() == "vsub_vv")      | (getName() == "vsub_vx")  | (getName() == "vsub_vi")
     | (getName() == "vmul_vv")
-    | (getName() == "vdiv_vv")      | (getName() == "vrem_vv")
-    | (getName() == "vsll_vv")      | (getName() == "vsrl_vv")
+    | (getName() == "vdiv_vv")      
+    | (getName() == "vrem_vv")
+    | (getName() == "vsll_vv")      | (getName() == "vsll_vi")
+    | (getName() == "vsrl_vv")      | (getName() == "vsrl_vi")
     | (getName() == "vmin_vv")
     | (getName() == "vmseq_vv")     | (getName() == "vmslt_vv")
     | (getName() == "vfsgnj_vv")    | (getName() == "vfsgnjn_vv")
     | (getName() == "vfsgnjx_vv")
     | (getName() == "vfredsum_vs")
+
+    | (getName() == "vfmerge_vf") | (getName() == "vmerge_vx")
+    | (getName() == "vmerge_vi")
+
+    | (getName() == "vslideup_vi") | (getName() == "vslidedown_vi")
+    | (getName() == "vslideup_vx") | (getName() == "vslidedown_vx")
+    | (getName() == "vslide1up_vx") | (getName() == "vslide1down_vx")
+
     ); }
 
 bool arith_src1_src2_src3() const override {
@@ -245,15 +245,21 @@ bool is_mask_m()  const override {
   return ((getName() == "vmpopc_m")  | (getName() == "vmfirst_m")
   ); }
 
-bool isVectorInstArith() const override {
+bool isSetVL() const override { // Estas se pueden obtener rapido con un flag de vector inst en el archivo vector.isa
+  return (getName() == "vsetvli") | (getName() == "vsetvl") ; }
+
+bool isVectorInstArith() const override { // Estas se pueden obtener rapido con un flag de vector inst en el archivo vector.isa
   return ((opcode() == 0x57) && (func3() != 0x7)
   ); }
-bool isVectorInstMem() const override {
+bool isVectorInstMem() const override { // Estas se pueden obtener rapido con un flag de vector mem en el archivo vector.isa
   return isLoad() || isStore(); }
 
-bool isVectorInst() const {
+bool isVectorInst() const { 
   return ( isVectorInstArith() || isVectorInstMem() || isSetVL()
   ); }
+
+    //bool isVecConfigOp()          const { return vecflags[IsVecConfigOp]; }
+      bool isVecConfigOp()          const { return opClass() == VectorConfigOp; }
 
 uint32_t width() const override { return x(12, 3); }
 

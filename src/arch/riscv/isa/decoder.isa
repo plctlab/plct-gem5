@@ -1771,7 +1771,9 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: VectorDataOp::vadd_vv();
                 0x1: VectorDataOp::vfadd_vv();
                 0x3: VectorDataOp::vadd_vi();
-                0x7: VectorConfigOp::vsetvli();
+                0x4: VectorDataOp::vadd_vx();
+                0x5: VectorDataOp::vfadd_vf();
+                0x7: VectorConfigOp::vsetvli(VectorConfigOp);
             }
             0x01: decode FUNCT3 {
                 0x1: VectorDataOp::vfredsum_vs();
@@ -1780,15 +1782,19 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: VectorDataOp::vsub_vv();
                 0x1: VectorDataOp::vfsub_vv();
                 0x3: VectorDataOp::vsub_vi();
+                0x4: VectorDataOp::vsub_vx();
+                0x5: VectorDataOp::vfsub_vf();
                 }
             0x04: decode FUNCT3 {
                 0x1: VectorDataOp::vfmin_vv();
+                0x5: VectorDataOp::vfmin_vf();
                 }
             0x05: decode FUNCT3 {
                 0x0: VectorDataOp::vmin_vv();
                 }
             0x06: decode FUNCT3 {
                 0x1: VectorDataOp::vfmax_vv();
+                0x5: VectorDataOp::vfmax_vf();
                 }
             0x08: decode FUNCT3 {
                 0x1: VectorDataOp::vfsgnj_vv();
@@ -1796,6 +1802,8 @@ decode QUADRANT default Unknown::unknown() {
             0x09: decode FUNCT3 {
                 0x0: VectorDataOp::vand_vv();
                 0x1: VectorDataOp::vfsgnjn_vv();
+                0x3: VectorDataOp::vand_vi();
+                0x4: VectorDataOp::vand_vx();
                 }
             0x0A: decode FUNCT3 {
                 0x0: VectorDataOp::vor_vv();
@@ -1843,7 +1851,7 @@ decode QUADRANT default Unknown::unknown() {
             0x20: decode FUNCT3 {
                 //0x0: VectorDataOp::vdivu_vv();
                 0x1: VectorDataOp::vfdiv_vv();
-                0x7: VectorConfigOp::vsetvl();
+                0x7: VectorConfigOp::vsetvl(VectorConfigOp);
                 }
             0x21: decode FUNCT3 {
                 0x2: VectorDataOp::vdiv_vv();
@@ -1861,6 +1869,7 @@ decode QUADRANT default Unknown::unknown() {
             0x24: decode FUNCT3 {
                 //0x0: VectorDataOp::vmulhu_vv();
                 0x1: VectorDataOp::vfmul_vv();
+                0x5: VectorDataOp::vfmul_vf();
                 }
             0x25: decode FUNCT3 {
                 0x0: VectorDataOp::vsll_vv();

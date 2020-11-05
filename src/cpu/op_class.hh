@@ -102,10 +102,10 @@ static const OpClass FloatMemReadOp = Enums::FloatMemRead;
 static const OpClass FloatMemWriteOp = Enums::FloatMemWrite;
 static const OpClass IprAccessOp = Enums::IprAccess;
 static const OpClass InstPrefetchOp = Enums::InstPrefetch;
-static const OpClass VectorArith = Enums::VectorArith;
-static const OpClass VectorMemory = Enums::VectorMemory;
-static const OpClass VectorConfig = Enums::VectorConfig;
-static const OpClass VectorToScalar = Enums::VectorToScalar;
+static const OpClass VectorArithOp = Enums::VectorArith;
+static const OpClass VectorMemoryOp = Enums::VectorMemory;
+static const OpClass VectorConfigOp = Enums::VectorConfig;
+static const OpClass VectorToScalarOp = Enums::VectorToScalar;
 static const OpClass Num_OpClasses = Enums::Num_OpClass;
 
 #endif // __CPU__OP_CLASS_HH__

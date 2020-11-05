@@ -87,7 +87,6 @@ class VectorLane : public SimObject
     uint64_t Dread;
     uint64_t Dstread;
 
-    bool arith_no_src;
     bool arith_src1;
     bool arith_src2;
     bool arith_src1_src2;
@@ -96,6 +95,11 @@ class VectorLane : public SimObject
 
     uint8_t scalar_reg;
     uint64_t scalar_data;
+
+    bool masked_op;
+    bool vx_op;
+    bool vf_op;
+    bool vi_op;
 
 };
 
