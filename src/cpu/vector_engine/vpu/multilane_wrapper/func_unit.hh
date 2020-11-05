@@ -277,7 +277,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vsub_vv") | (operation == "vsub_vi")) {
+    if ((operation == "vsub_vv") || (operation == "vsub_vx") || (operation == "vsub_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
             ,Bitem,Aitem, Ditem);
@@ -376,7 +376,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vsub_vv") | (operation == "vsub_vi")) {
+    if ((operation == "vsub_vv") || (operation == "vsub_vx") || (operation == "vsub_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
@@ -406,7 +406,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vsrl_vv")) {
+    if ((operation == "vsrl_vv") || (operation == "vsrl_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d\n",
             Bitem,Aitem, Ditem);
@@ -424,7 +424,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vand_vv")) {
+    if ((operation == "vand_vv") || (operation == "vand_vx") || (operation == "vand_vi")) {
         Ditem = (Bitem & Aitem);
         DPRINTF(Datapath,"WB Instruction = 0x%x & 0x%x  = 0x%x  \n",
             Bitem,Aitem, Ditem);
