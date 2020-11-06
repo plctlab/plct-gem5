@@ -229,29 +229,18 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
 }
 
 void
-VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
-    uint64_t src1,uint64_t src2,std::function<void()> dependencie_callback)
+VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn,
+    uint64_t src1,uint64_t src2)
 {
-    //Be sure that the instruction was added to some group in base.isa
-    if (insn.isVectorInstArith()) {
-        assert( insn.arith_src2() | insn.arith_src1_src2() | insn.arith_src1_src2_src3() );
-    }
-
-    if ((vector_inst_queue->Instruction_Queue.size()==0)
-        && (vector_inst_queue->Memory_Queue.size()==0)) {
-        vector_inst_queue->startTicking(*this/*,dependencie_callback*/);
-    }
-
     uint64_t PDst,POldDst;
     uint64_t Pvs1,Pvs2;
+    uint64_t PMask;
     uint64_t vd;
     uint64_t vs1,vs2;
-    uint64_t PMask;
     vd = insn.vd();
     vs1 = insn.vs1();
     vs2 = insn.vs2();
-    //vs3 = insn.vs3();
-    
+
     masked_op = (insn.vm()==0);
 
     vx_op = (insn.func3()==4) || (insn.func3()==6);
@@ -260,15 +249,6 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
 
     uint8_t mop = insn.mop();
     bool gather_op = (mop ==3);
-
-    bool has_dst = !insn.write_to_scalar_reg();
-
-    VectorDynInst *vector_dyn_insn = new VectorDynInst(); //inicializar ...
-
-    if(insn.isVecConfigOp())
-    {
-        DPRINTF(VectorInst,"Imprimiendo Vector Config Inst\n");
-    }
 
     if (insn.isSetVL()) {
         rename_vtype = src2;
@@ -325,18 +305,18 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
             //Physical Destination
-            PDst = (has_dst) ? vector_rename->get_frl() :1024;
+            PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
             vector_dyn_insn->set_PDst(PDst);
             //Physical Old Destination
-            POldDst = (has_dst) ? vector_rename->get_preg_rat(vd) : 2014;
+            POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 2014;
             vector_dyn_insn->set_POldDst(POldDst);
             //Physical Src2
             Pvs2 = vector_rename->get_preg_rat(vs2);
             vector_dyn_insn->set_PSrc2(Pvs2);
             // Set the New Destination in the RAT structure
-            if (has_dst) { vector_rename->set_preg_rat(vd,PDst); }
+            if (dst_write_ena) { vector_rename->set_preg_rat(vd,PDst); }
 
-            //if (has_dst) {
+            //if (dst_write_ena) {
             //    if (masked_op) {
             //        DPRINTF(VectorRename,"%s v%lu v%lu, Odst v%lu, mask "
             //            "%lu\n",insn.getName(), PDst,Pvs2, POldDst, PMask);
@@ -353,7 +333,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
             //    }
             //}
 
-            //if (has_dst) {
+            //if (dst_write_ena) {
             //    DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
                 vector_reg_validbit->set_preg_valid_bit(PDst,0);
             //}
@@ -406,6 +386,27 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
             panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
         }
     }
+}
+
+void
+VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
+    uint64_t src1,uint64_t src2,std::function<void()> dependencie_callback)
+{
+    //Be sure that the instruction was added to some group in base.isa
+    if (insn.isVectorInstArith()) {
+        assert( insn.arith_src2() | insn.arith_src1_src2() | insn.arith_src1_src2_src3() );
+    }
+
+    if ((vector_inst_queue->Instruction_Queue.size()==0)
+        && (vector_inst_queue->Memory_Queue.size()==0)) {
+        vector_inst_queue->startTicking(*this/*,dependencie_callback*/);
+    }
+
+    dst_write_ena = !insn.write_to_scalar_reg();
+
+    VectorDynInst *vector_dyn_insn = new VectorDynInst();
+
+    renameVectorInst(insn,vector_dyn_insn,src1,src2);
 
     if (vector_rob->rob_empty()) {
         vector_rob->startTicking(*this);
@@ -431,7 +432,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         printMemInst(insn);
     }
     else if (insn.isVectorInstArith()) {
-        if (has_dst) {
+        if (dst_write_ena) {
             dependencie_callback();
             uint32_t rob_entry = vector_rob->set_rob_entry(
                 vector_dyn_insn->get_POldDst() , 1);

@@ -189,6 +189,9 @@ public:
 
     void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContextPtr& xc ,
         uint64_t src1, uint64_t src2, std::function<void()> dependencie_callback);
+    void renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
+        uint64_t src1,uint64_t src2);
+
     void issue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
         ExecContextPtr& xc,
     uint64_t src1 , uint64_t src2,uint64_t vtype,uint64_t vl,
@@ -228,6 +231,7 @@ public:
 
     uint64_t rename_vtype;
     uint64_t rename_vl;
+    bool dst_write_ena;
 
     uint8_t num_clusters;
     uint8_t num_lanes;
