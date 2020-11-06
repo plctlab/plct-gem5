@@ -157,7 +157,7 @@ InstQueue::evaluate()
         {
             Instruction = Instruction_Queue[i];
 
-            if (Instruction->insn.isSetVL() && i>0){
+            if (Instruction->insn.isVecConfig() && i>0){
                 srcs_ready = 0;
                 break;
             }
@@ -168,7 +168,7 @@ InstQueue::evaluate()
                 working = working ||
                     vectorwrapper->vector_lane[j]->isOccupied();
             }
-            if (Instruction->insn.isSetVL() && working){
+            if (Instruction->insn.isVecConfig() && working){
                 srcs_ready = 0;
                 break;
             }
@@ -179,7 +179,7 @@ InstQueue::evaluate()
             mask = Instruction->dyn_insn->get_PMask();
 
             masked_op = (Instruction->insn.vm()==0) &&
-                !Instruction->insn.isSetVL();
+                !Instruction->insn.isVecConfig();
 
             vx_op = (Instruction->insn.func3()==4) || (Instruction->insn.func3()==6);
             vf_op = (Instruction->insn.func3()==5);
@@ -192,8 +192,8 @@ InstQueue::evaluate()
                 mask_ready = 1;
             }
 
-            if ((Instruction->insn.arith_src1_src2() ||
-                Instruction->insn.arith_src1_src2_src3()) && !( vx_op || vf_op || vi_op)) {
+            if ((Instruction->insn.arith2Srcs() ||
+                Instruction->insn.arith3Srcs()) && !( vx_op || vf_op || vi_op)) {
                 src1_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(src1);
             }
@@ -201,16 +201,16 @@ InstQueue::evaluate()
                 src1_ready =1;
             }
 
-            if (Instruction->insn.arith_src2() ||
-                Instruction->insn.arith_src1_src2() ||
-                Instruction->insn.arith_src1_src2_src3()){
+            if (Instruction->insn.arith1Src() ||
+                Instruction->insn.arith2Srcs() ||
+                Instruction->insn.arith3Srcs()){
                 src2_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(src2);
             } else {
                 src2_ready =1;
             }
 
-            if (Instruction->insn.arith_src1_src2_src3()) {
+            if (Instruction->insn.arith3Srcs()) {
                 src3_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(src3);
             } else {
@@ -248,7 +248,7 @@ InstQueue::evaluate()
 
                 // Setting the Valid Bit
                 bool wb_enable = !Instruction->insn.write_to_scalar_reg()
-                    && !Instruction->insn.isSetVL();
+                    && !Instruction->insn.isVecConfig();
                 uint64_t Dst = Instruction->dyn_insn->get_PDst();
                 if (wb_enable)
                 {

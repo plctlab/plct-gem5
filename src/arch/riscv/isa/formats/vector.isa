@@ -27,13 +27,30 @@
 // Author: Cristóbal Ramírez
 
 // Basic instruction class constructor template.
-def template VectorArithConstructor {{
+def template VectorArith1SrcConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorArithOp)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorArith1SrcOp)
     {
         flags[IsVector] = true;
     }
 }};
+
+def template VectorArith2SrcConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorArith2SrcOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorArith3SrcConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorArith3SrcOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 
 def template VectorMemoryConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
@@ -74,10 +91,26 @@ def template VectorExecute {{
 
 
 // Generate the Code Blocks from templates/decoder
-def format VectorDataOp() {{
+def format VectorData1SrcOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorArithConstructor.subst(iop)
+    decoder_output = VectorArith1SrcConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorData2SrcOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorArith2SrcConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorData3SrcOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorArith3SrcConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

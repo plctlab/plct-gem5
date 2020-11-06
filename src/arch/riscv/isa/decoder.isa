@@ -1768,63 +1768,62 @@ decode QUADRANT default Unknown::unknown() {
         }
         0x15: decode VFUNC_6 {
             0x00: decode FUNCT3 {
-                0x0: VectorDataOp::vadd_vv();
-                0x1: VectorDataOp::vfadd_vv();
-                0x3: VectorDataOp::vadd_vi();
-                0x4: VectorDataOp::vadd_vx();
-                0x5: VectorDataOp::vfadd_vf();
-                0x7: VectorConfigOp::vsetvli(VectorConfigOp);
+                0x0: VectorData2SrcOp::vadd_vv();
+                0x1: VectorData2SrcOp::vfadd_vv();
+                0x3: VectorData2SrcOp::vadd_vi();
+                0x4: VectorData2SrcOp::vadd_vx();
+                0x5: VectorData2SrcOp::vfadd_vf();
+                0x7: VectorConfigOp::vsetvli();
             }
             0x01: decode FUNCT3 {
-                0x1: VectorDataOp::vfredsum_vs();
+                0x1: VectorData2SrcOp::vfredsum_vs();
                 }
             0x02: decode FUNCT3 {
-                0x0: VectorDataOp::vsub_vv();
-                0x1: VectorDataOp::vfsub_vv();
-                0x3: VectorDataOp::vsub_vi();
-                0x4: VectorDataOp::vsub_vx();
-                0x5: VectorDataOp::vfsub_vf();
+                0x0: VectorData2SrcOp::vsub_vv();
+                0x1: VectorData2SrcOp::vfsub_vv();
+                0x3: VectorData2SrcOp::vsub_vi();
+                0x4: VectorData2SrcOp::vsub_vx();
+                0x5: VectorData2SrcOp::vfsub_vf();
                 }
             0x04: decode FUNCT3 {
-                0x1: VectorDataOp::vfmin_vv();
-                0x5: VectorDataOp::vfmin_vf();
+                0x1: VectorData2SrcOp::vfmin_vv();
+                0x5: VectorData2SrcOp::vfmin_vf();
                 }
             0x05: decode FUNCT3 {
-                0x0: VectorDataOp::vmin_vv();
+                0x0: VectorData2SrcOp::vmin_vv();
                 }
             0x06: decode FUNCT3 {
-                0x1: VectorDataOp::vfmax_vv();
-                0x5: VectorDataOp::vfmax_vf();
+                0x1: VectorData2SrcOp::vfmax_vv();
+                0x5: VectorData2SrcOp::vfmax_vf();
                 }
             0x08: decode FUNCT3 {
-                0x1: VectorDataOp::vfsgnj_vv();
+                0x1: VectorData2SrcOp::vfsgnj_vv();
                 }
             0x09: decode FUNCT3 {
-                0x0: VectorDataOp::vand_vv();
-                0x1: VectorDataOp::vfsgnjn_vv();
-                0x3: VectorDataOp::vand_vi();
-                0x4: VectorDataOp::vand_vx();
+                0x0: VectorData2SrcOp::vand_vv();
+                0x1: VectorData2SrcOp::vfsgnjn_vv();
+                0x3: VectorData2SrcOp::vand_vi();
+                0x4: VectorData2SrcOp::vand_vx();
                 }
             0x0A: decode FUNCT3 {
-                0x0: VectorDataOp::vor_vv();
-                0x1: VectorDataOp::vfsgnjx_vv();
+                0x0: VectorData2SrcOp::vor_vv();
+                0x1: VectorData2SrcOp::vfsgnjx_vv();
                 }
             0x0B: decode FUNCT3 {
-                0x0: VectorDataOp::vxor_vv();
+                0x0: VectorData2SrcOp::vxor_vv();
                 }
             0x0C: decode FUNCT3 {
                 0x1: VectorToScalarOp::vfmv_fs();
-                //0x2: VectorToScalarOp::vext_xv();
                 }
             0x0E: decode FUNCT3 {
-                0x3: VectorDataOp::vslideup_vi();
-                0x4: VectorDataOp::vslideup_vx();
-                0x6: VectorDataOp::vslide1up_vx();
+                0x3: VectorData2SrcOp::vslideup_vi();
+                0x4: VectorData2SrcOp::vslideup_vx();
+                0x6: VectorData2SrcOp::vslide1up_vx();
                 }
             0x0F: decode FUNCT3 {
-                0x3: VectorDataOp::vslidedown_vi();
-                0x4: VectorDataOp::vslidedown_vx();
-                0x6: VectorDataOp::vslide1down_vx();
+                0x3: VectorData2SrcOp::vslidedown_vi();
+                0x4: VectorData2SrcOp::vslidedown_vx();
+                0x6: VectorData2SrcOp::vslide1down_vx();
                 }
             0x14: decode FUNCT3 {
                 0x2: VectorToScalarOp::vmpopc_m();
@@ -1833,56 +1832,54 @@ decode QUADRANT default Unknown::unknown() {
                 0x2: VectorToScalarOp::vmfirst_m();
                 }
             0x17: decode FUNCT3 {
-                0x0: VectorDataOp::vmerge_vv();
-                0x3: VectorDataOp::vmerge_vi();
-                0x4: VectorDataOp::vmerge_vx();
-                0x5: VectorDataOp::vfmerge_vf();
+                0x0: VectorData2SrcOp::vmerge_vv();
+                0x3: VectorData2SrcOp::vmerge_vi();
+                0x4: VectorData2SrcOp::vmerge_vx();
+                0x5: VectorData2SrcOp::vfmerge_vf();
                 }
             0x18: decode FUNCT3 {
-                0x0: VectorDataOp::vmseq_vv();
+                0x0: VectorData2SrcOp::vmseq_vv();
                 }
             0x19: decode FUNCT3 {
-                0x1: VectorDataOp::vfle_vv();
+                0x1: VectorData2SrcOp::vfle_vv();
                 }
             0x1B: decode FUNCT3 {
-                0x0: VectorDataOp::vmslt_vv();
-                0x1: VectorDataOp::vflt_vv();
+                0x0: VectorData2SrcOp::vmslt_vv();
+                0x1: VectorData2SrcOp::vflt_vv();
                 }
             0x20: decode FUNCT3 {
-                //0x0: VectorDataOp::vdivu_vv();
-                0x1: VectorDataOp::vfdiv_vv();
-                0x7: VectorConfigOp::vsetvl(VectorConfigOp);
+                0x1: VectorData2SrcOp::vfdiv_vv();
+                0x7: VectorConfigOp::vsetvl();
                 }
             0x21: decode FUNCT3 {
-                0x2: VectorDataOp::vdiv_vv();
+                0x2: VectorData2SrcOp::vdiv_vv();
                 }
             0x22: decode FUNCT3 {
                 0x1: decode VS1{
-                    0x1:VectorDataOp::vfcvt_x_f_v();
-                    0x3:VectorDataOp::vfcvt_f_x_v();
+                    0x1:VectorData1SrcOp::vfcvt_x_f_v();
+                    0x3:VectorData1SrcOp::vfcvt_f_x_v();
                     }
                 }
             0x23: decode FUNCT3 {
-                0x1: VectorDataOp::vfsqrt_v();
-                0x2: VectorDataOp::vrem_vv();
+                0x1: VectorData1SrcOp::vfsqrt_v();
+                0x2: VectorData2SrcOp::vrem_vv();
                 }
             0x24: decode FUNCT3 {
-                //0x0: VectorDataOp::vmulhu_vv();
-                0x1: VectorDataOp::vfmul_vv();
-                0x5: VectorDataOp::vfmul_vf();
+                0x1: VectorData2SrcOp::vfmul_vv();
+                0x5: VectorData2SrcOp::vfmul_vf();
                 }
             0x25: decode FUNCT3 {
-                0x0: VectorDataOp::vsll_vv();
-                0x2: VectorDataOp::vmul_vv();
-                0x3: VectorDataOp::vsll_vi();
+                0x0: VectorData2SrcOp::vsll_vv();
+                0x2: VectorData2SrcOp::vmul_vv();
+                0x3: VectorData2SrcOp::vsll_vi();
                 }
             0x28: decode FUNCT3 {
-                0x0: VectorDataOp::vsrl_vv();
-                0x1: VectorDataOp::vfmadd_vv();
-                0x3: VectorDataOp::vsrl_vi(); // Aqui falta inmediato .. por eso falla ...
+                0x0: VectorData2SrcOp::vsrl_vv();
+                0x1: VectorData3SrcOp::vfmadd_vv();
+                0x3: VectorData2SrcOp::vsrl_vi();
                 }
             0x2C: decode FUNCT3 {
-                0x1: VectorDataOp::vfmacc_vv();
+                0x1: VectorData3SrcOp::vfmacc_vv();
                 }
         }
         0x18: decode FUNCT3 {

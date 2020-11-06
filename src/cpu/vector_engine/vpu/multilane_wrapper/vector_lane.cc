@@ -148,9 +148,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     }
 
     //Source operands used by the instruction
-    arith_src2              = insn.arith_src2();
-    arith_src1_src2         = insn.arith_src1_src2();
-    arith_src1_src2_src3    = insn.arith_src1_src2_src3();
+    arith1Src     = insn.arith1Src();
+    arith2Srcs    = insn.arith2Srcs();
+    arith3Srcs    = insn.arith3Srcs();
     write_to_scalar_reg     = insn.write_to_scalar_reg();
 
     scalar_reg = insn.vd();
@@ -314,7 +314,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 }
                 delete [] Ddata;
         }
-        else if (!insn.arith_src2())
+        else if (!insn.arith1Src())
         {
             srcAReader->initialize(vector_wrapper,src1_count, DATA_SIZE,
                 addr_src1,0,location, xc, [DATA_SIZE,src1_count,this]
@@ -389,7 +389,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             });
         }
 
-        if ((!reduction & (masked_op))| arith_src1_src2_src3 | is_slide)
+        if ((!reduction & (masked_op))| arith3Srcs | is_slide)
             {
             //DPRINTF(VectorLane,"Reading Source DstOld \n" );
             //Leemos el old detination para el caso de mask Op

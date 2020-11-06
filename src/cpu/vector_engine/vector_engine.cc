@@ -131,7 +131,7 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
 {
     bool rob_entry_available = !vector_rob->rob_full();
     bool queue_slots_available = ((insn->isVectorInstArith()
-        || insn->isSetVL()) && !vector_inst_queue->arith_queue_full())
+        || insn->isVecConfig()) && !vector_inst_queue->arith_queue_full())
         || (insn->isVectorInstMem()
         && !vector_inst_queue->mem_queue_full());
 
@@ -215,13 +215,13 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
                 (vf_op) ? "f" :
                 (vi_op) ? " " : "v";
 
-    if (insn.arith_src2()) {
+    if (insn.arith1Src()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s           PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),masked,*(uint64_t*)&pc );
     }
-    else if (insn.arith_src1_src2()) {
+    else if (insn.arith2Srcs()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),masked,*(uint64_t*)&pc );
     }
-    else if (insn.arith_src1_src2_src3()) {
+    else if (insn.arith3Srcs()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),masked,*(uint64_t*)&pc );
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
@@ -250,7 +250,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     uint8_t mop = insn.mop();
     bool gather_op = (mop ==3);
 
-    if (insn.isSetVL()) {
+    if (insn.isVecConfig()) {
         rename_vtype = src2;
         rename_vl = src1;
     }
@@ -300,7 +300,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
         }
     }
     else if (insn.isVectorInstArith()) {
-        if (insn.arith_src2()) {
+        if (insn.arith1Src()) {
             //Physical  Mask
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
@@ -338,7 +338,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
                 vector_reg_validbit->set_preg_valid_bit(PDst,0);
             //}
         }
-        else if (insn.arith_src1_src2() | insn.arith_src1_src2_src3()) {
+        else if (insn.arith2Srcs() | insn.arith3Srcs()) {
             //Physical  Mask
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
@@ -362,7 +362,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             // Set the New Destination in the RAT structure
             vector_rename->set_preg_rat(vd,PDst);
 
-            //if (insn.arith_src1_src2()) {
+            //if (insn.arith2Srcs()) {
             //    if (masked_op) {
             //        DPRINTF(VectorRename,"%s v%lu v%lu v%lu, Odst v%lu ,"
             //            " mask %lu\n",insn.getName(),
@@ -394,7 +394,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
 {
     //Be sure that the instruction was added to some group in base.isa
     if (insn.isVectorInstArith()) {
-        assert( insn.arith_src2() | insn.arith_src1_src2() | insn.arith_src1_src2_src3() );
+        assert( insn.arith1Src() | insn.arith2Srcs() | insn.arith3Srcs() );
     }
 
     if ((vector_inst_queue->Instruction_Queue.size()==0)
@@ -412,7 +412,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_rob->startTicking(*this);
     }
 
-    if (insn.isSetVL()) {
+    if (insn.isVecConfig()) {
         dependencie_callback();
         uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
         vector_dyn_insn->set_rob_entry(rob_entry);
@@ -459,7 +459,7 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
     uint64_t ren_vl, std::function<void(Fault fault)> done_callback) {
 
     uint64_t pc = insn.getPC();
-    if (insn.isSetVL())
+    if (insn.isVecConfig())
     {
         VectorConfigIns++;
         vector_csr->set_vector_length(src1);

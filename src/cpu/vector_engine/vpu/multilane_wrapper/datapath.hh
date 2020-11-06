@@ -133,9 +133,9 @@ private:
     /*********************************
      * Sources used  by the operation
      */
-    bool arith_src2;
-    bool arith_src1_src2;
-    bool arith_src1_src2_src3;
+    bool arith1Src;
+    bool arith2Srcs;
+    bool arith3Srcs;
 
     bool op_imm;
         // Masked Operation

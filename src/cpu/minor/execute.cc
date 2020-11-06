@@ -1246,7 +1246,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     vector_insn->setPC(pc);
                     uint64_t src1,src2;
 
-                    if (vector_insn->isSetVL())
+                    if (vector_insn->isVecConfig())
                     {
                         bool vsetvl = (vector_insn->getName() =="vsetvl");
                         uint64_t rvl = xc->readIntRegOperand(vector_insn,0);

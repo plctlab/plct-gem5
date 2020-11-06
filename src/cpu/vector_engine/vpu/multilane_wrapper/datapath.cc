@@ -97,9 +97,9 @@ Datapath::startTicking(
 
     std::string operation = this->insn->getName();
     vm = this->insn->vm();
-    arith_src2              = this->insn->arith_src2();
-    arith_src1_src2         = this->insn->arith_src1_src2();
-    arith_src1_src2_src3    = this->insn->arith_src1_src2_src3();
+    arith1Src    = this->insn->arith1Src();
+    arith2Srcs    = this->insn->arith2Srcs();
+    arith3Srcs    = this->insn->arith3Srcs();
 
     //op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
     op_imm = (this->insn->func3()==3);
@@ -176,7 +176,7 @@ Datapath::evaluate()
         }
     }
 
-    if (arith_src1_src2_src3) // 3 sources operation
+    if (arith3Srcs) // 3 sources operation
     {
         if ( (vector_lane->AdataQ.size() < simd_size) |
             (vector_lane->BdataQ.size() < simd_size) |
@@ -193,9 +193,9 @@ Datapath::evaluate()
             return;
         }
     }
-    else if (arith_src1_src2 )  // 2 sources operation
+    else if (arith2Srcs)  // 2 sources operation
     {
-        //DPRINTF(VectorEngine," arith_src1_src2 \n" );
+        //DPRINTF(VectorEngine," arith2Srcs \n" );
         if ( (vector_lane->AdataQ.size() < simd_size) |
             (vector_lane->BdataQ.size() < simd_size) )
         {
@@ -211,7 +211,7 @@ Datapath::evaluate()
             return;
         }
     }
-    else if (arith_src2)  // 1 source operation (src2)
+    else if (arith1Src)  // 1 source operation (src2)
     {
         if ( vector_lane->BdataQ.size() < simd_size )
         {
@@ -248,7 +248,7 @@ Datapath::evaluate()
                 }
             }
         }
-        else if (!arith_src2)
+        else if (!arith1Src)
         {
             uint8_t *Aitem = vector_lane->AdataQ.front();
             memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
@@ -270,7 +270,7 @@ Datapath::evaluate()
             delete[] Mitem;
         }
 
-        if (((vm==0) & !vfredsum) | arith_src1_src2_src3 | is_slide)
+        if (((vm==0) & !vfredsum) | arith3Srcs | is_slide)
         {
             uint8_t *Dstitem = vector_lane->DstdataQ.front();
             memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
