@@ -90,7 +90,7 @@ class VectorLane : public SimObject
     bool arith1Src;
     bool arith2Srcs;
     bool arith3Srcs;
-    bool write_to_scalar_reg;
+    bool vector_to_scalar;
 
     uint8_t scalar_reg;
     uint64_t scalar_data;

@@ -82,7 +82,7 @@ public:
       virtual bool isVectorInstArith() const = 0;
 
       /* Vector instructions that writes back the result to the scalar rf */
-      virtual bool write_to_scalar_reg() const = 0;
+      virtual bool VectorToScalar() const = 0;
       /* Vector instructions  that have src2 as vector source*/
       virtual bool arith1Src() const = 0;
       /* Vector instructions  that have src1 and src2 as vector sources*/
@@ -94,9 +94,6 @@ public:
       virtual bool is_slideup() const = 0;
       virtual bool is_slidedown() const = 0;
       virtual bool is_slide() const = 0;
-
-      /* vector operations with masks*/
-      virtual bool is_mask_m() const = 0;
 
       /* vtype field*/
       virtual uint32_t vtype() const = 0;
@@ -145,74 +142,51 @@ class RiscvVectorInsn : public VectorStaticInst
 
   uint32_t bits() { return b; }
 
-  uint32_t opcode() const { return x(0, 7); }
+  uint32_t opcode()          const { return x(0, 7); }
 
-  uint32_t vtype() const  override   { return x(20, 11); }
+  uint32_t vtype()           const  override   { return x(20, 11); }
 
-  uint32_t func3() const override { return x(12, 3); }
-  uint32_t func5() const override { return x(27, 5); }
-  uint32_t func6() const override { return x(26, 6); }
+  uint32_t func3()           const override { return x(12, 3); }
+  uint32_t func5()           const override { return x(27, 5); }
+  uint32_t func6()           const override { return x(26, 6); }
 
-  bool vm() const  override   { return x(25, 1); }
+  bool vm()                  const  override   { return x(25, 1); }
 
-  uint8_t mop() const override { return x(26, 3); } // memory addressing mode
+  uint8_t mop()              const override { return x(26, 3); }
 
-  RegIndex vs1() const override { return (RegIndex)x(15, 5); }
-  RegIndex vs2() const override { return (RegIndex)x(20, 5); }
-  RegIndex vs3() const override { return (RegIndex)x(7, 5); }
-  RegIndex vd() const override { return (RegIndex)x(7, 5); }
+  RegIndex vs1()             const override { return (RegIndex)x(15, 5); }
+  RegIndex vs2()             const override { return (RegIndex)x(20, 5); }
+  RegIndex vs3()             const override { return (RegIndex)x(7, 5); }
+  RegIndex vd()              const override { return (RegIndex)x(7, 5); }
 
-  bool write_to_scalar_reg() const override { return opClass() == VectorToScalarOp; }
+  bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
 
-  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || write_to_scalar_reg(); }
+  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar(); }
 
-  bool arith2Srcs()          const override { return opClass() == VectorArith2SrcOp; }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() ; }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 
-  bool isLoad() const override {
-    return ((getName() == "vlb_v") | (getName() == "vlh_v")
-      | (getName() == "vlw_v")    | (getName() == "vle_v")
-      | (getName() == "vlxe_v")   | (getName() == "vlxw_v")
-      ); }
+  bool isLoad()              const override { return opClass() == VectorMemoryLoadOp; }
 
-  bool isStore() const override {
-    return ((getName() == "vsb_v") | (getName() == "vsh_v")
-      | (getName() == "vsw_v")    | (getName() == "vse_v")
-      ); }
+  bool isStore()             const override { return opClass() == VectorMemoryStoreOp; }
 
-  bool is_slideup() const override {
-    return ((getName() == "vslideup_vi") | (getName() == "vslideup_vx")
-      | (getName() == "vslide1up_vx")
-      ); }
+  bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 
-  bool is_slidedown() const override {
-    return ((getName() == "vslidedown_vi") | (getName() == "vslidedown_vx")
-      | (getName() == "vslide1down_vx")
-      ); }
+  bool is_slidedown()        const override { return opClass() == VectorSlideDownOp; }
 
-  bool is_slide() const override {
-    return ( is_slideup() || is_slidedown()
-      ); }
+  bool is_slide()            const override { return is_slideup() || is_slidedown() ; }
 
-  bool is_mask_m()  const override {
-    return ((getName() == "vmpopc_m")  | (getName() == "vmfirst_m")
-    ); }
+  bool isVectorInstArith()   const override { return arith1Src() || arith2Srcs() || arith3Srcs(); }
 
-  bool isVectorInstArith() const override { // Estas se pueden obtener rapido con un flag de vector inst en el archivo vector.isa
-    return ((opcode() == 0x57) && (func3() != 0x7)
-    ); }
-  bool isVectorInstMem() const override { // Estas se pueden obtener rapido con un flag de vector mem en el archivo vector.isa
-    return isLoad() || isStore(); }
+  bool isVectorInstMem()      const override { return isLoad() || isStore(); }
 
   //bool isVecConfigOp()          const { return vecflags[IsVecConfigOp]; }
   bool isVecConfig()          const override { return opClass() == VectorConfigOp; }
 
-  bool isVectorInst() const { 
-    return ( isVectorInstArith() || isVectorInstMem() || isVecConfig()
-    ); }
+  bool isVectorInst()         const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
 
-  uint32_t width() const override { return x(12, 3); }
+  uint32_t width()            const override { return x(12, 3); }
 
 private:
   const uint32_t b;

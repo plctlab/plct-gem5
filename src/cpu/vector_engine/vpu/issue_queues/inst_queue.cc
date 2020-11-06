@@ -181,6 +181,9 @@ InstQueue::evaluate()
             masked_op = (Instruction->insn.vm()==0) &&
                 !Instruction->insn.isVecConfig();
 
+            /*
+             * Instructions with Scalar operands set the src1_ready signal
+             */
             vx_op = (Instruction->insn.func3()==4) || (Instruction->insn.func3()==6);
             vf_op = (Instruction->insn.func3()==5);
             vi_op = (Instruction->insn.func3()==3);
@@ -247,7 +250,7 @@ InstQueue::evaluate()
                 [Instruction,masked_op/*,queue_slot*/,pc,this](Fault f) {
 
                 // Setting the Valid Bit
-                bool wb_enable = !Instruction->insn.write_to_scalar_reg()
+                bool wb_enable = !Instruction->insn.VectorToScalar()
                     && !Instruction->insn.isVecConfig();
                 uint64_t Dst = Instruction->dyn_insn->get_PDst();
                 if (wb_enable)
@@ -264,7 +267,7 @@ InstQueue::evaluate()
                     Instruction->insn.getName() , *(uint64_t*)&pc);
                 DPRINTF(InstQueue,"Mem Queue Size %d\n",
                     Instruction_Queue.size());
-                if (Instruction->insn.write_to_scalar_reg()) {
+                if (Instruction->insn.VectorToScalar()) {
                     Instruction->dependencie_callback();
                 }
 

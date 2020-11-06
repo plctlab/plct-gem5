@@ -51,10 +51,33 @@ def template VectorArith3SrcConstructor {{
     }
 }};
 
-
-def template VectorMemoryConstructor {{
+def template VectorSlideUpConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryOp)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorSlideUpOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorSlideDownConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorSlideDownOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorMemoryStoreConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryStoreOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorMemoryLoadConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryLoadOp)
     {
         flags[IsVector] = true;
     }
@@ -115,6 +138,22 @@ def format VectorData3SrcOp() {{
     exec_output = VectorExecute.subst(iop)
 }};
 
+def format VectorSlideDownOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorSlideDownConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorSlideUpOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorSlideUpConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
 def format VectorConfigOp( *vecflags) {{
     iop = InstObjParams(name, Name, 'RiscvVectorCfgOp', vecflags)
     header_output = BasicDeclare.subst(iop)
@@ -123,10 +162,18 @@ def format VectorConfigOp( *vecflags) {{
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorMemOp() {{
+def format VectorMemStoreOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorMemOp')
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorMemoryConstructor.subst(iop)
+    decoder_output = VectorMemoryStoreConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorMemLoadOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorMemoryLoadConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

@@ -148,10 +148,10 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     }
 
     //Source operands used by the instruction
-    arith1Src     = insn.arith1Src();
-    arith2Srcs    = insn.arith2Srcs();
-    arith3Srcs    = insn.arith3Srcs();
-    write_to_scalar_reg     = insn.write_to_scalar_reg();
+    arith1Src           = insn.arith1Src();
+    arith2Srcs          = insn.arith2Srcs();
+    arith3Srcs          = insn.arith3Srcs();
+    vector_to_scalar    = insn.VectorToScalar();
 
     scalar_reg = insn.vd();
 
@@ -220,14 +220,14 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         {
             assert(size == DST_SIZE);
 
-            if (!write_to_scalar_reg)
+            if (!vector_to_scalar)
             {
                 this->dstWriter->queueData(data);
             }
             else
             {
                 /*
-                 * write_to_scalar_reg refers to the instructions which are
+                 * vector_to_scalar refers to the instructions which are
                  * executed in the datapath, such as vmfirst_m and vmpopc_m,
                  * There are instructions that also writes to the scalar reg,
                  * however, those instructions only read the first element of
@@ -276,7 +276,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             }
         });
 
-        if (!write_to_scalar_reg)
+        if (!vector_to_scalar)
         {
             dstWriter->initialize(vector_wrapper,dst_count,DST_SIZE,addr_src0,
                 location, xc,[done_callback,dst_count,this](bool done)
@@ -293,9 +293,13 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
         if (vi_op | vx_op | vf_op)
         {
+            bool imm_unsigned = (insn.getName() == "vsll_vi") || (insn.getName() == "vsrl_vi") || (insn.getName() == "vsra_vi");
+
+            uint64_t immediate;
+            immediate = (imm_unsigned) ? (uint64_t)insn.vs1() : ((insn.vs1()>=16) ? (0xfffffffffffffff0 | (uint64_t)insn.vs1()) : (uint64_t)insn.vs1());
+
             uint64_t scalar_data;
-            scalar_data = //(vi_op) ? ((insn.vs1()>=16) ? (0xfffffffffffffff0 | (uint64_t)insn.vs1()) : insn.vs1()) :
-                          (vi_op) ? (uint64_t)insn.vs1():
+            scalar_data = (vi_op) ? immediate :
                           (vx_op | vf_op) ? src1 : 0;
 
             DPRINTF(VectorLane,"scalar data  0x%x vl_count %d\n" ,scalar_data, vl_count);

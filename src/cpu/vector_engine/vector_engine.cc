@@ -208,7 +208,7 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
     std::string masked;
     if(masked_op) {masked = "v0.m";} else {masked = "   ";}
     std::string reg_type;
-    if(insn.write_to_scalar_reg()==1) {reg_type = "x";} else {reg_type = "v";}
+    if(insn.VectorToScalar()==1) {reg_type = "x";} else {reg_type = "v";}
 
     std::string scr1_type;
     scr1_type = (vx_op) ? "x" :
@@ -402,7 +402,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->startTicking(*this/*,dependencie_callback*/);
     }
 
-    dst_write_ena = !insn.write_to_scalar_reg();
+    dst_write_ena = !insn.VectorToScalar();
 
     VectorDynInst *vector_dyn_insn = new VectorDynInst();
 
