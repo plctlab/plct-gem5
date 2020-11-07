@@ -184,6 +184,9 @@
 // 2a0081d7  vor.vv  v3, v0, v1          001010 1 00000 00001 000 00011 1010111
                                                      
 
+// Vector Mask Operations
+// 66422257 vmand.m v4, v4  v4    011001 1 00100 00100 010 00100 1010111
+
 // vsetvli rd, rs1, vtypei    # rd = new vl, rs1 = AVL(application Vector Length), vtypei = new vtype setting
 // if rs1 = x0, then use maximum vector length
 

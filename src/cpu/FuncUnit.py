@@ -57,8 +57,9 @@ class OpClass(Enum):
             'MemRead', 'MemWrite', 'FloatMemRead', 'FloatMemWrite',
             'IprAccess', 'InstPrefetch',
             'VectorArith1Src','VectorArith2Src','VectorArith3Src',
+            'VectorMaskLogical',
             'VectorSlideUp','VectorSlideDown',
-            'VectorToScalar', 
+            'VectorToScalar',
             'VectorMemoryLoad', 'VectorMemoryStore', 
             'VectorConfig']
 

@@ -51,6 +51,14 @@ def template VectorArith3SrcConstructor {{
     }
 }};
 
+def template VectorMaskLogicalConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorMaskLogicalOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 def template VectorSlideUpConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorSlideUpOp)
@@ -134,6 +142,14 @@ def format VectorData3SrcOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorArith3SrcConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorMaskLogicalOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorMaskLogicalConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

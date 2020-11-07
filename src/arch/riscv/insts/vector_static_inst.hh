@@ -82,6 +82,8 @@ public:
       virtual bool isVectorInstArith() const = 0;
 
       /* Vector instructions that writes back the result to the scalar rf */
+      virtual bool VectorMaskLogical() const = 0;
+      /* Vector instructions that writes back the result to the scalar rf */
       virtual bool VectorToScalar() const = 0;
       /* Vector instructions  that have src2 as vector source*/
       virtual bool arith1Src() const = 0;
@@ -161,9 +163,11 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
 
+  bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
+
   bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar(); }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() ; }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical(); }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 

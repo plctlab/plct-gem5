@@ -87,6 +87,7 @@ Datapath::startTicking(
     assert(DST_SIZE != 0);
     //reset config
     is_slide        =0;
+    is_mask_logical =0;
     is_FP           =0;
     is_INT          =0;
     is_FP_Comp      =0;
@@ -107,6 +108,7 @@ Datapath::startTicking(
     vfredsum = (operation == "vfredsum_vs");
 
     is_slide =  this->insn->is_slide();
+    is_mask_logical = this->insn->VectorMaskLogical();
 
     vslideup =  this->insn->is_slideup();
     vslide1up = (operation == "vslide1up_vx");
@@ -529,9 +531,13 @@ Datapath::evaluate()
                                 }
                                 red_SrcCount=red_SrcCount + 1;
                             }
-                        }
-                        else
-                        {
+                        } else if(is_mask_logical) {
+                            bool Aitem = (bool)((bool*)Adata)[i];
+                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            long int Ditem = computeLongMaskLogicalOp(Aitem,Bitem,insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
+                        } else {
                             long int Aitem = (long int)((long int*)Adata)[i];
                             long int Bitem = (long int)((long int*)Bdata)[i];
                             long int Mitem = (0x0000000000000001) &&
@@ -581,6 +587,12 @@ Datapath::evaluate()
 
                                 red_SrcCount=red_SrcCount + 1;
                             }
+                        } else if(is_mask_logical) {
+                            bool Aitem = (bool)((bool*)Adata)[i];
+                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            int Ditem = computeIntMaskLogicalOp(Aitem,Bitem,insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         } else {
                             int Aitem = (int)((int*)Adata)[i] ;
                             int Bitem = (int)((int*)Bdata)[i] ;

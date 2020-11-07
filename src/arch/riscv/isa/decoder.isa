@@ -1808,9 +1808,13 @@ decode QUADRANT default Unknown::unknown() {
             0x0A: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vor_vv();
                 0x1: VectorData2SrcOp::vfsgnjx_vv();
+                0x3: VectorData2SrcOp::vor_vi();
+                0x4: VectorData2SrcOp::vor_vx();
                 }
             0x0B: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vxor_vv();
+                0x3: VectorData2SrcOp::vxor_vi();
+                0x4: VectorData2SrcOp::vxor_vx();
                 }
             0x0C: decode FUNCT3 {
                 0x1: VectorToScalarOp::vfmv_fs();
@@ -1839,13 +1843,31 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x18: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmseq_vv();
+                0x2: VectorMaskLogicalOp::vmandnot_mm();
                 }
             0x19: decode FUNCT3 {
                 0x1: VectorData2SrcOp::vfle_vv();
+                0x2: VectorMaskLogicalOp::vmand_mm();
+                }
+            0x1A: decode FUNCT3 {
+                0x2: VectorMaskLogicalOp::vmor_mm();
                 }
             0x1B: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmslt_vv();
                 0x1: VectorData2SrcOp::vflt_vv();
+                0x2: VectorMaskLogicalOp::vmxor_mm();
+                }
+            0x1C: decode FUNCT3 {
+                0x2: VectorMaskLogicalOp::vmornot_mm();
+                }
+            0x1D: decode FUNCT3 {
+                0x2: VectorMaskLogicalOp::vmnand_mm();
+                }
+            0x1E: decode FUNCT3 {
+                0x2: VectorMaskLogicalOp::vmnor_mm();
+                }
+            0x1F: decode FUNCT3 {
+                0x2: VectorMaskLogicalOp::vmxnor_mm();
                 }
             0x20: decode FUNCT3 {
                 0x1: VectorData2SrcOp::vfdiv_vv();
@@ -1872,14 +1894,17 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: VectorData2SrcOp::vsll_vv();
                 0x2: VectorData2SrcOp::vmul_vv();
                 0x3: VectorData2SrcOp::vsll_vi();
+                0x4: VectorData2SrcOp::vsll_vx();
                 }
             0x28: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsrl_vv();
                 0x1: VectorData3SrcOp::vfmadd_vv();
                 0x3: VectorData2SrcOp::vsrl_vi();
+                0x4: VectorData2SrcOp::vsrl_vx();
                 }
             0x2C: decode FUNCT3 {
                 0x1: VectorData3SrcOp::vfmacc_vv();
+                0x5: VectorData3SrcOp::vfmacc_vf();
                 }
         }
         0x18: decode FUNCT3 {

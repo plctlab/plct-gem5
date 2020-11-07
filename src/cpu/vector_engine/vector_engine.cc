@@ -308,7 +308,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
             vector_dyn_insn->set_PDst(PDst);
             //Physical Old Destination
-            POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 2014;
+            POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
             vector_dyn_insn->set_POldDst(POldDst);
             //Physical Src2
             Pvs2 = vector_rename->get_preg_rat(vs2);
@@ -335,7 +335,10 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
 
             //if (dst_write_ena) {
             //    DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
+            if(dst_write_ena)
+            {
                 vector_reg_validbit->set_preg_valid_bit(PDst,0);
+            }
             //}
         }
         else if (insn.arith2Srcs() | insn.arith3Srcs()) {

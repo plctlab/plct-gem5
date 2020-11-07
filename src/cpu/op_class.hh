@@ -105,6 +105,7 @@ static const OpClass InstPrefetchOp = Enums::InstPrefetch;
 static const OpClass VectorArith1SrcOp = Enums::VectorArith1Src;
 static const OpClass VectorArith2SrcOp = Enums::VectorArith2Src;
 static const OpClass VectorArith3SrcOp = Enums::VectorArith3Src;
+static const OpClass VectorMaskLogicalOp = Enums::VectorMaskLogical;
 static const OpClass VectorSlideUpOp = Enums::VectorSlideUp;
 static const OpClass VectorSlideDownOp = Enums::VectorSlideDown;
 static const OpClass VectorMemoryLoadOp = Enums::VectorMemoryLoad;

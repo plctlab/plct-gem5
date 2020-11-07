@@ -80,6 +80,11 @@ public:
     int compute_int_op(int Aitem, int Bitem,  int Mitem, int Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
+    long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
+        RiscvISA::VectorStaticInst* insn);
+    int computeIntMaskLogicalOp(bool Aitem, bool Bitem,
+        RiscvISA::VectorStaticInst* insn);
+
     double compute_cvt_f_x_64_op( long int Bitem, long int Mitem,
         long int Dstitem, RiscvISA::VectorStaticInst* insn);
     float compute_cvt_f_x_32_op( int Bitem, int Mitem, int Dstitem,
@@ -125,6 +130,7 @@ private:
      * Operation type
      */
     bool is_slide;
+    bool is_mask_logical;
     bool is_FP;
     bool is_INT;
     bool is_INT_to_FP;

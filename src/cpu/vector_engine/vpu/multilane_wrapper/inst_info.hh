@@ -90,7 +90,7 @@ Datapath::get_instruction_info()
         is_FP               = 1;
     }
 
-    if (operation == "vfmacc_vv") {
+    if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
         Oplatency           = 6;
         is_FP               =1;
     }
@@ -143,7 +143,7 @@ Datapath::get_instruction_info()
     }
 
     /**************************************************************************
-     * Intefer Operations
+     * Integer Operations
      *************************************************************************/
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
@@ -171,22 +171,12 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if ((operation == "vsll_vv") || (operation == "vsll_vi")) {
+    if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if ((operation == "vsrl_vv") || (operation == "vsrl_vi")) {
-        Oplatency           = 1;
-        is_INT              = 1;
-    }
-
-    if (operation == "vmseq_vv") {
-        Oplatency           = 1;
-        is_INT              = 1;
-    }
-
-    if (operation == "vmslt_vv") {
+    if ((operation == "vsrl_vv") || (operation == "vsrl_vx") || (operation == "vsrl_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
@@ -196,12 +186,12 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if (operation == "vor_vv") {
+    if ((operation == "vor_vv") || (operation == "vor_vx") || (operation == "vor_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if (operation == "vxor_vv") {
+    if ((operation == "vxor_vv") || (operation == "vxor_vx") || (operation == "vxor_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
@@ -216,30 +206,26 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
     /**************************************************************************
-     * Slide Operations
+     * Operations to create a Mask
      *************************************************************************/
-
-    if ((operation == "vslideup_vi") | (operation == "vslideup_vx")) {
-        Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
-    }
-
-    if (operation == "vslide1up_vx") {
+    if (operation == "vmseq_vv") {
         Oplatency           = 1;
+        is_INT              = 1;
     }
 
-    if ((operation == "vslidedown_vi") | (operation == "vslidedown_vx")) {
-        Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
-    }
-
-    if (operation == "vslide1down_vx") {
+    if (operation == "vmslt_vv") {
         Oplatency           = 1;
-        is_slide            = 1;
+        is_INT              = 1;
     }
-
     /**************************************************************************
-     * Operations with Mask
+     * Mask Operations
      *************************************************************************/
-
+    if ((operation == "vmand_mm") || (operation == "vmnand_mm") || (operation == "vmandnot_mm") ||
+        (operation == "vmxor_mm") || (operation == "vmor_mm") || (operation == "vmnor_mm") ||
+        (operation == "vmornot_mm") || (operation == "vmxnor_mm") ) {
+        Oplatency           = 1;
+        is_INT              = 1;
+    }
     if (operation == "vmpopc_m") {
         Oplatency           = 1;
         is_INT              = 1;
@@ -248,6 +234,30 @@ Datapath::get_instruction_info()
     if (operation == "vmfirst_m") {
         Oplatency           = 1;
         is_INT              = 1;
+    }
+
+    /**************************************************************************
+     * Slide Operations
+     *************************************************************************/
+
+    if ((operation == "vslideup_vi") | (operation == "vslideup_vx")) {
+        Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
+        is_slide            = 1;
+    }
+
+    if (operation == "vslide1up_vx") {
+        Oplatency           = 1;
+        is_slide            = 1;
+    }
+
+    if ((operation == "vslidedown_vi") | (operation == "vslidedown_vx")) {
+        Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
+        is_slide            = 1;
+    }
+
+    if (operation == "vslide1down_vx") {
+        Oplatency           = 1;
+        is_slide            = 1;
     }
 
     assert(is_FP || is_FP_Comp || is_FP_to_INT ||
