@@ -1807,18 +1807,21 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x08: decode FUNCT3 {
                 0x1: VectorData2SrcOp::vfsgnj_vv();
+                0x5: VectorData2SrcOp::vfsgnj_vf();
                 }
             0x09: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vand_vv();
                 0x1: VectorData2SrcOp::vfsgnjn_vv();
                 0x3: VectorData2SrcOp::vand_vi();
                 0x4: VectorData2SrcOp::vand_vx();
+                0x5: VectorData2SrcOp::vfsgnjn_vf();
                 }
             0x0A: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vor_vv();
                 0x1: VectorData2SrcOp::vfsgnjx_vv();
                 0x3: VectorData2SrcOp::vor_vi();
                 0x4: VectorData2SrcOp::vor_vx();
+                0x5: VectorData2SrcOp::vfsgnjx_vf();
                 }
             0x0B: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vxor_vv();
@@ -1898,6 +1901,7 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x20: decode FUNCT3 {
                 0x1: VectorData2SrcOp::vfdiv_vv();
+                0x5: VectorData2SrcOp::vfdiv_vf();
                 0x7: VectorConfigOp::vsetvl();
                 }
             0x21: decode FUNCT3 {

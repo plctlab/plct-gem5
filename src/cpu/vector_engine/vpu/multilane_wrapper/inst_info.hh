@@ -56,7 +56,7 @@ Datapath::get_instruction_info()
         is_FP               = 1;
     }
 
-    if (operation == "vfdiv_vv") {
+    if ((operation == "vfdiv_vv") ||(operation == "vfdiv_vf")) {
         Oplatency           = 14;
         is_FP               = 1;
     }
@@ -65,42 +65,22 @@ Datapath::get_instruction_info()
         is_FP               = 1;
     }
 
-    if ((operation == "vfmin_vv") | (operation == "vfmin_vf")) {
+    /**************************************************************************
+     * Vector Floating-Point MIN/MAX Instructions
+     *************************************************************************/
+
+    if (   (operation == "vfmin_vv") | (operation == "vfmin_vf")
+        || (operation == "vfmax_vv") | (operation == "vfmax_vf")) {
         Oplatency           = 4;
         is_FP               = 1;
     }
 
-    if ((operation == "vfmax_vv") | (operation == "vfmax_vf")) {
-        Oplatency           = 4;
-        is_FP               = 1;
-    }
-
-    if (operation == "vfsgnj_vv") {
-        Oplatency           = 1;
-        is_FP               = 1;
-    }
-
-    if (operation == "vfsgnjn_vv") {
-        Oplatency           = 1;
-        is_FP               = 1;
-    }
-
-    if (operation == "vfsgnjx_vv") {
-        Oplatency           = 1;
-        is_FP               = 1;
-    }
-
-    if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
-        Oplatency           = 6;
-        is_FP               =1;
-    }
-
-    if (operation == "vfmadd_vv")   {
-        Oplatency           = 6;
-        is_FP               = 1;
-    }
-
-    if (operation == "vfmerge_vf")   {
+    /**************************************************************************
+     * Vector Floating-Point Sign-Injection Instructions
+     *************************************************************************/
+    if (   (operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")
+        || (operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")
+        || (operation == "vfsgnjx_vv") || (operation == "vfsgnjx_vf")) {
         Oplatency           = 1;
         is_FP               = 1;
     }
@@ -140,6 +120,25 @@ Datapath::get_instruction_info()
     if (operation == "vfcvt_f_x_v") {
         Oplatency           = 4;
         is_INT_to_FP        = 1;
+    }
+
+    /**************************************************************************
+     * 
+     *************************************************************************/
+
+    if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
+        Oplatency           = 6;
+        is_FP               =1;
+    }
+
+    if (operation == "vfmadd_vv")   {
+        Oplatency           = 6;
+        is_FP               = 1;
+    }
+
+    if (operation == "vfmerge_vf")   {
+        Oplatency           = 1;
+        is_FP               = 1;
     }
 
     /**************************************************************************

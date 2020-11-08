@@ -55,7 +55,7 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
             Bitem, Ditem);
     }
 
-    if ((operation == "vfdiv_vv")) {
+    if ((operation == "vfdiv_vv") || (operation == "vfdiv_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem / Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f / %f  = %f\n" ,Bitem,
             Aitem, Ditem);
@@ -66,6 +66,10 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
         DPRINTF(Datapath,"WB Instruction = sqrt (%f)   = %f  \n",
             Bitem,Ditem);
     }
+
+    /**************************************************************************
+     * Vector Floating-Point MIN/MAX Instructions
+     *************************************************************************/
 
     if ((operation == "vfmin_vv") || (operation == "vfmin_vf")) {
         Ditem = (Aitem < Bitem) ? Aitem:Bitem;
@@ -78,25 +82,33 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnj_vv")) {
+    /**************************************************************************
+     * Vector Floating-Point Sign-Injection Instructions
+     *************************************************************************/
+
+    if ((operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")) {
         Ditem = (Bitem>=0.0) ? fabs(Aitem):-Aitem;
         DPRINTF(Datapath,"WB Instruction = %f , %f  = %f\n",
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnjn_vv")) {
+    if ((operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")) {
         Ditem = (Bitem>=0.0) ?-Aitem: fabs(Aitem);
         DPRINTF(Datapath,"WB Instruction = %f , %f  = %f\n",
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnjx_vv")) {
+    if ((operation == "vfsgnjx_vv") || (operation == "vfsgnjx_vf")) {
         Ditem = ((Bitem>=0.0) & (Aitem >= 0.0)) ? Aitem:
             ((Bitem<0.0) & (Aitem < 0.0)) ?  fabs(Aitem) :
             ((Bitem>=0.0) & (Aitem < 0.0)) ? Aitem : -Aitem;
         DPRINTF(Datapath,"WB Instruction = %f , %f  = %f\n",
             Aitem,Bitem, Ditem);
     }
+
+    /**************************************************************************
+     * 
+     *************************************************************************/
 
     if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
@@ -130,39 +142,44 @@ double
 Datapath::compute_double_fp_op(double Aitem, double Bitem,
      long int Mitem, double Dstitem,  RiscvISA::VectorStaticInst* insn)
 {
-    double Ditem=0;
+    float Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vfadd_vv") | (operation == "vfadd_vf")){
+    if ((operation == "vfadd_vv") | (operation == "vfadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lf + %lf  = %lf\n",
-            Aitem,Bitem, Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf + %lf  = %lf  \n",Aitem,
+            Bitem, Ditem);
     }
+
     if ((operation == "vfsub_vv") | (operation == "vfsub_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lf - %lf  = %lf\n",
-            Bitem, Aitem, Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf - %lf  = %lf  \n",Bitem,
+            Aitem, Ditem);
     }
+
     if ((operation == "vfmul_vv") | (operation == "vfmul_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem :Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lf * %lf  = %lf\n",
-            Aitem,Bitem, Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf * %lf  = %lf  \n",Aitem,
+            Bitem, Ditem);
     }
 
-    if ((operation == "vfdiv_vv")){
+    if ((operation == "vfdiv_vv") || (operation == "vfdiv_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem / Aitem :Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lf / %lf  = %lf\n",
-            Bitem,Aitem, Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf / %lf  = %lf\n" ,Bitem,
+            Aitem, Ditem);
     }
 
-
-    if ((operation == "vfsqrt_v")){
+    if ((operation == "vfsqrt_v")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sqrt(Bitem) : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = sqrt (%lf)   = %lf\n",
+        DPRINTF(Datapath,"WB Instruction = sqrt (%lf)   = %lf  \n",
             Bitem,Ditem);
     }
 
-    if ((operation == "vfmin_vv") || (operation == "vfmin_vf"))  {
+    /**************************************************************************
+     * Vector Floating-Point MIN/MAX Instructions
+     *************************************************************************/
+
+    if ((operation == "vfmin_vv") || (operation == "vfmin_vf")) {
         Ditem = (Aitem < Bitem) ? Aitem:Bitem;
         DPRINTF(Datapath,"WB Instruction = %lf , %lf  = min :%lf\n",
             Aitem,Bitem, Ditem);
@@ -173,25 +190,33 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnj_vv")) {
+    /**************************************************************************
+     * Vector Floating-Point Sign-Injection Instructions
+     *************************************************************************/
+
+    if ((operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")) {
         Ditem = (Bitem>=0.0) ? fabs(Aitem):-Aitem;
-        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf  \n",
+        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnjn_vv")) {
+    if ((operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")) {
         Ditem = (Bitem>=0.0) ?-Aitem: fabs(Aitem);
-        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf  \n",
+        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
 
-    if ((operation == "vfsgnjx_vv")) {
+    if ((operation == "vfsgnjx_vv") || (operation == "vfsgnjx_vf")) {
         Ditem = ((Bitem>=0.0) & (Aitem >= 0.0)) ? Aitem:
             ((Bitem<0.0) & (Aitem < 0.0)) ?  fabs(Aitem) :
             ((Bitem>=0.0) & (Aitem < 0.0)) ? Aitem : -Aitem;
-        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf  \n",
+        DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
+
+    /**************************************************************************
+     * 
+     *************************************************************************/
 
     if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
@@ -209,13 +234,13 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
     if ((operation == "vfmadd_vv")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
             (Aitem * Dstitem) + Bitem  : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lf * %lf + %lf  = %lf\n"
-            ,Aitem,Dstitem,Bitem, Ditem);
+        DPRINTF(Datapath,"WB Instruction = %lf * %lf + %lf  = %lf\n",
+            Aitem,Dstitem,Bitem, Ditem);
     }
 
-    if (vm==0) {
-        DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%lf)"
-            "\n",Mitem,Dstitem);
+    if (vm==0){
+        DPRINTF(Datapath,"WB Instruction is masked vm(%d),"
+            " old(%f)  \n",Mitem,Dstitem);
     }
 
     return Ditem;
