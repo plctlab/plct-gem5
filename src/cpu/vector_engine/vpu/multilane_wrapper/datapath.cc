@@ -473,7 +473,7 @@ Datapath::evaluate()
                         {
                             float Bitem = (float)((float*)Bdata)[i];
                             int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
-                            accumDp = computeSingleFPReduction(accumDp,Bitem,Mitem);
+                            accumSp = computeSingleFPReduction(accumSp,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else {
                             float Aitem = (float)((float*)Adata)[i];

@@ -247,7 +247,7 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
 }
 
 double 
-Datapath::computeDoubleFPReduction(double accumDp,double Bitem,double Mitem)
+Datapath::computeDoubleFPReduction(double accumDp,double Bitem,long int Mitem)
 {
     double reduction;
     std::string operation = insn->getName();
@@ -273,7 +273,7 @@ Datapath::computeDoubleFPReduction(double accumDp,double Bitem,double Mitem)
 }
 
 float
-Datapath::computeSingleFPReduction(float accumDp,float Bitem,float Mitem)
+Datapath::computeSingleFPReduction(float accumDp,float Bitem,int Mitem)
 {
     float reduction;
     std::string operation = insn->getName();

@@ -67,7 +67,7 @@ public:
 
     double compute_double_fp_op(double Aitem, double Bitem, long int Mitem,
         double Dstitem, RiscvISA::VectorStaticInst* insn);
-    double computeDoubleFPReduction(double accumDp,double Bitem,double Mitem);
+    double computeDoubleFPReduction(double accumDp,double Bitem,long int Mitem);
     long int compute_double_fp_comp_op(double Aitem, double Bitem,
         RiscvISA::VectorStaticInst* insn);
 
@@ -75,7 +75,7 @@ public:
 
     float compute_float_fp_op(float Aitem, float Bitem,  int Mitem,
         float Dstitem, RiscvISA::VectorStaticInst* insn);
-    float computeSingleFPReduction(float accumDp,float Bitem,float Mitem);
+    float computeSingleFPReduction(float accumDp,float Bitem,int Mitem);
     int compute_float_fp_comp_op(float Aitem, float Bitem ,
         RiscvISA::VectorStaticInst* insn);
 
