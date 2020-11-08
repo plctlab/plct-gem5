@@ -93,7 +93,7 @@ Datapath::startTicking(
     is_FP_Comp      =0;
     is_INT_to_FP    =0;
     is_FP_to_INT    =0;
-    vfredsum_done   =0;
+    vf_reduction_first_done   =0;
     slide_infligh   =0;
 
     std::string operation = this->insn->getName();
@@ -105,7 +105,7 @@ Datapath::startTicking(
     //op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
     op_imm = (this->insn->func3()==3);
 
-    vfredsum = (operation == "vfredsum_vs");
+    vf_reduction = this->insn->is_reduction();
 
     is_slide =  this->insn->is_slide();
     is_mask_logical = this->insn->VectorMaskLogical();
@@ -164,7 +164,7 @@ Datapath::evaluate()
 
     if ((vm==0)) // Masked Operations uses
     {
-        if (vfredsum)
+        if (vf_reduction)
         {
             if ((vector_lane->MdataQ.size() < simd_size))
             {
@@ -187,10 +187,10 @@ Datapath::evaluate()
            return;
         }
     }
-    else if (vfredsum)   // Reduction Operation
+    else if (vf_reduction)   // Reduction Operation
     {
-        if ( (vector_lane->BdataQ.size() < simd_size) |
-            ((vector_lane->AdataQ.size() < 1) && !vfredsum_done))
+        if ( (vector_lane->BdataQ.size() < simd_size) ||
+            ((vector_lane->AdataQ.size() < 1) && !vf_reduction_first_done))
         {
             return;
         }
@@ -228,29 +228,35 @@ Datapath::evaluate()
 
     for (uint64_t i=0; i<simd_size; ++i) {
 
-        if (vfredsum)
+        /*
+         * Reduction instruction
+         */
+        if (vf_reduction)
         {
             if (vector_lane->AdataQ.size() > 0)
             {
-                vfredsum_done=1;
                 uint8_t *Aitem = vector_lane->AdataQ.front();
                 memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
                 vector_lane->AdataQ.pop_front();
                 delete[] Aitem;
 
-                if (vsew == 3)
-                {
-                    double Accitem = (double)((double*)Adata)[i] ;
-                    accumDp = Accitem;
-                }
-                else
-                {
-                    float Accitem = (float)((float*)Adata)[i] ;
-                    accumSp = Accitem;
-                }
+                //if(!vf_reduction_first_done)
+                //{
+                    if (vsew == 3) {
+                        double Accitem = (double)((double*)Adata)[i] ;
+                        accumDp = Accitem;
+                    } else {
+                        float Accitem = (float)((float*)Adata)[i] ;
+                        accumSp = Accitem;
+                    }
+                    vf_reduction_first_done=1;
+                //}
+                
             }
-        }
-        else if (!arith1Src)
+        /*
+         * If aritmetic instruction with only 1 source means that src1 is not used
+         */
+        } else if (!arith1Src)
         {
             uint8_t *Aitem = vector_lane->AdataQ.front();
             memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
@@ -258,21 +264,35 @@ Datapath::evaluate()
             delete[] Aitem;
         }
 
+        /*
+         * Src2 is always ised by the arithmetic instructions
+         */
         uint8_t *Bitem = vector_lane->BdataQ.front();
         memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
         vector_lane->BdataQ.pop_front();
         delete[] Bitem;
 
-
-        if (vm==0) // Mask register
+        /*
+         * Mask register used by the instruction
+         */
+        if (vm==0)
         {
             uint8_t *Mitem = vector_lane->MdataQ.front();
             memcpy(Mdata+(i*DATA_SIZE), Mitem, DATA_SIZE);
             vector_lane->MdataQ.pop_front();
             delete[] Mitem;
         }
-
-        if (((vm==0) & !vfredsum) | arith3Srcs | is_slide)
+        /*
+         * Dstitem is used to read the old destination register.
+         * This is used when:
+         *       -the instruction uses the mask register meaning that it is neecesary
+         *        to write the old element when the mask is 0 in the corresponding possition
+         *       -the instruction uses 3 sources
+         *       -the instruction is slide, the shifted position should be filled by the old
+         *        destination
+         * When vf_reduction is enable, masked Op does not read old destination
+         */
+        if (((vm==0) & !vf_reduction) | arith3Srcs | is_slide)
         {
             uint8_t *Dstitem = vector_lane->DstdataQ.front();
             memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
@@ -420,16 +440,13 @@ Datapath::evaluate()
                 {
                     if (vsew == 3)
                     {
-                        if (vfredsum)
+                        if (vf_reduction)
                         {
                             double Bitem = (double)((double*)Bdata)[i] ;
                             long int Mitem = (0x0000000000000001) &&
                                 (long int)((long int*)Mdata)[i] ;
-                            accumDp = (vm==1) ? accumDp + Bitem : (Mitem) ?
-                                accumDp + Bitem : accumDp;
+                            accumDp = computeDoubleFPReduction(accumDp,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
-                            DPRINTF(Datapath," Reduction: Source %lf"
-                                " Acc= %lf\n" ,Bitem, accumDp);
                         } else {
                             double Aitem = (double)((double*)Adata)[i] ;
                             double Bitem = (double)((double*)Bdata)[i] ;
@@ -452,15 +469,12 @@ Datapath::evaluate()
                     }
                     else
                     {
-                        if (vfredsum)
+                        if (vf_reduction)
                         {
                             float Bitem = (float)((float*)Bdata)[i];
                             int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
-                            accumSp = (vm==1) ? accumSp + Bitem : (Mitem) ?
-                                accumSp + Bitem : accumSp;
+                            accumDp = computeSingleFPReduction(accumDp,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
-                            DPRINTF(Datapath," Reduction: Source %f "
-                                "Acc= %f  \n" ,Bitem, accumSp);
                         } else {
                             float Aitem = (float)((float*)Adata)[i];
                             float Bitem = (float)((float*)Bdata)[i];
@@ -481,7 +495,7 @@ Datapath::evaluate()
                         }
                     }
 
-                    if (vfredsum && (red_SrcCount==srcCount))
+                    if (vf_reduction && (red_SrcCount==srcCount))
                     {
                         uint8_t *ndata = new uint8_t[DST_SIZE];
                         if (vsew == 3)
@@ -656,7 +670,7 @@ Datapath::evaluate()
     delete[] Dstdata;
 
 
-    if (!vfredsum)
+    if (!vf_reduction)
     {
         if ( (vmpopc && (red_SrcCount==srcCount)) | (vmfirst & first_elem) |
             (vmfirst & (red_SrcCount==srcCount)) )

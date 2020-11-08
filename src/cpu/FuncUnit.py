@@ -58,6 +58,7 @@ class OpClass(Enum):
             'IprAccess', 'InstPrefetch',
             'VectorArith1Src','VectorArith2Src','VectorArith3Src',
             'VectorMaskLogical',
+            'VectorReduction',
             'VectorSlideUp','VectorSlideDown',
             'VectorToScalar',
             'VectorMemoryLoad', 'VectorMemoryStore', 

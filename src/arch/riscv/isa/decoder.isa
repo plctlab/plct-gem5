@@ -1776,7 +1776,7 @@ decode QUADRANT default Unknown::unknown() {
                 0x7: VectorConfigOp::vsetvli();
             }
             0x01: decode FUNCT3 {
-                0x1: VectorData2SrcOp::vfredsum_vs();
+                0x1: VectorReductionOp::vfredsum_vs();
                 }
             0x02: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsub_vv();
@@ -1784,6 +1784,9 @@ decode QUADRANT default Unknown::unknown() {
                 0x3: VectorData2SrcOp::vsub_vi();
                 0x4: VectorData2SrcOp::vsub_vx();
                 0x5: VectorData2SrcOp::vfsub_vf();
+                }
+             0x03: decode FUNCT3 {
+                0x1: VectorReductionOp::vfredosum_vs();
                 }
             0x04: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vminu_vv();
@@ -1793,6 +1796,7 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x05: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmin_vv();
+                0x1: VectorReductionOp::vfredmin_vs();
                 0x4: VectorData2SrcOp::vmin_vx();
                 }
             0x06: decode FUNCT3 {
@@ -1803,6 +1807,7 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x07: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmax_vv();
+                0x1: VectorReductionOp::vfredmax_vs();
                 0x4: VectorData2SrcOp::vmax_vx();
                 }
             0x08: decode FUNCT3 {

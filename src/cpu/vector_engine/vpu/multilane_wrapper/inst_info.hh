@@ -89,7 +89,8 @@ Datapath::get_instruction_info()
      * Floating point reductions
      *************************************************************************/
 
-    if (operation == "vfredsum_vs") {
+    if (   (operation == "vfredsum_vs") || (operation == "vfredosum_vs") 
+        || (operation == "vfredmax_vs") || (operation == "vfredmin_vs")) {
         Oplatency           = 4;
         is_FP               = 1;
     }

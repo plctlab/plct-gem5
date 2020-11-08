@@ -246,6 +246,58 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
     return Ditem;
 }
 
+double 
+Datapath::computeDoubleFPReduction(double accumDp,double Bitem,double Mitem)
+{
+    double reduction;
+    std::string operation = insn->getName();
+
+    if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
+         reduction = (vm==1) ? accumDp + Bitem : (Mitem) ? accumDp + Bitem : accumDp;
+         DPRINTF(Datapath," Reduction: Source %lf  Acc= %lf\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vfredmax_vs") {
+         reduction = (vm==1) ? ((accumDp > Bitem) ? accumDp:Bitem) :
+                     (Mitem) ? ((accumDp > Bitem) ? accumDp:Bitem) : accumDp;
+         DPRINTF(Datapath," Reduction: Source %lf  Max= %lf\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vfredmin_vs") {
+         reduction = (vm==1) ? ((accumDp < Bitem) ? accumDp:Bitem) :
+                     (Mitem) ? ((accumDp < Bitem) ? accumDp:Bitem) : accumDp;
+         DPRINTF(Datapath," Reduction: Source %lf  Min= %lf\n" ,Bitem, reduction);
+    }
+
+    return reduction;
+}
+
+float
+Datapath::computeSingleFPReduction(float accumDp,float Bitem,float Mitem)
+{
+    float reduction;
+    std::string operation = insn->getName();
+
+    if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
+         reduction = (vm==1) ? accumDp + Bitem : (Mitem) ? accumDp + Bitem : accumDp;
+         DPRINTF(Datapath," Reduction: Source %f  Acc= %f\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vfredmax_vs") {
+         reduction = (vm==1) ? ((accumDp > Bitem) ? accumDp:Bitem) :
+                     (Mitem) ? ((accumDp > Bitem) ? accumDp:Bitem) : accumDp;
+         DPRINTF(Datapath," Reduction: Source %f  Max= %f\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vfredmin_vs") {
+         reduction = (vm==1) ? ((accumDp < Bitem) ? accumDp:Bitem) :
+                     (Mitem) ? ((accumDp < Bitem) ? accumDp:Bitem) : accumDp;
+         DPRINTF(Datapath," Reduction: Source %f  Min= %f\n" ,Bitem, reduction);
+    }
+
+    return reduction;
+}
+
 int
 Datapath::compute_float_fp_comp_op(float Aitem, float Bitem,
     RiscvISA::VectorStaticInst* insn)

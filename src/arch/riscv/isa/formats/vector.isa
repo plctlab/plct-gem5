@@ -59,6 +59,14 @@ def template VectorMaskLogicalConstructor {{
     }
 }};
 
+def template VectorReductionConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorReductionOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 def template VectorSlideUpConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorSlideUpOp)
@@ -150,6 +158,14 @@ def format VectorMaskLogicalOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorMaskLogicalConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorReductionOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorReductionConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

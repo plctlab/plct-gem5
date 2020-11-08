@@ -80,7 +80,8 @@ public:
       virtual bool isStore() const = 0;
       /* general riscv vector arithmetic instruction */
       virtual bool isVectorInstArith() const = 0;
-
+      /* Vector reduction instruction */
+      virtual bool is_reduction() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
       virtual bool VectorMaskLogical() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
@@ -167,13 +168,15 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar(); }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical(); }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction(); }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 
   bool isLoad()              const override { return opClass() == VectorMemoryLoadOp; }
 
   bool isStore()             const override { return opClass() == VectorMemoryStoreOp; }
+
+  bool is_reduction()          const override { return opClass() == VectorReductionOp; }
 
   bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 

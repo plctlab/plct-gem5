@@ -67,11 +67,15 @@ public:
 
     double compute_double_fp_op(double Aitem, double Bitem, long int Mitem,
         double Dstitem, RiscvISA::VectorStaticInst* insn);
+    double computeDoubleFPReduction(double accumDp,double Bitem,double Mitem);
     long int compute_double_fp_comp_op(double Aitem, double Bitem,
         RiscvISA::VectorStaticInst* insn);
 
+    
+
     float compute_float_fp_op(float Aitem, float Bitem,  int Mitem,
         float Dstitem, RiscvISA::VectorStaticInst* insn);
+    float computeSingleFPReduction(float accumDp,float Bitem,float Mitem);
     int compute_float_fp_comp_op(float Aitem, float Bitem ,
         RiscvISA::VectorStaticInst* insn);
 
@@ -111,12 +115,12 @@ private:
     const uint64_t VectorLanes;
 
     bool slide_infligh;
-    bool vfredsum_done;
+    bool vf_reduction_first_done;
 
     /*********************************
      * Floating point reductions
      */
-    bool vfredsum;
+    bool vf_reduction;
     /*********************************
      * Slide Operations
      */
