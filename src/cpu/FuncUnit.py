@@ -59,6 +59,7 @@ class OpClass(Enum):
             'VectorArith1Src','VectorArith2Src','VectorArith3Src',
             'VectorMaskLogical',
             'VectorReduction',
+            'VectorFPCompare',
             'VectorSlideUp','VectorSlideDown',
             'VectorToScalar',
             'VectorMemoryLoad', 'VectorMemoryStore', 

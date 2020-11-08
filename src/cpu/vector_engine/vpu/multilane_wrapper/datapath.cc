@@ -109,6 +109,7 @@ Datapath::startTicking(
 
     is_slide =  this->insn->is_slide();
     is_mask_logical = this->insn->VectorMaskLogical();
+    is_FP_Comp  = this->insn->isFPCompare();
 
     vslideup =  this->insn->is_slideup();
     vslide1up = (operation == "vslide1up_vx");
@@ -436,7 +437,7 @@ Datapath::evaluate()
         {
             for (int i=0; i<simd_size; ++i)
             {
-                if (is_FP | is_FP_Comp)  // FLOATING POINT OPERATION
+                if (is_FP )  // FLOATING POINT OPERATION
                 {
                     if (vsew == 3)
                     {

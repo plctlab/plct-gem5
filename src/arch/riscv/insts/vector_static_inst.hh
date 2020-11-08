@@ -82,6 +82,8 @@ public:
       virtual bool isVectorInstArith() const = 0;
       /* Vector reduction instruction */
       virtual bool is_reduction() const = 0;
+      /* Vector Floating-Point Compare Instruction */
+      virtual bool isFPCompare() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
       virtual bool VectorMaskLogical() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
@@ -168,7 +170,7 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar(); }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction(); }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare(); }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 
@@ -177,6 +179,8 @@ class RiscvVectorInsn : public VectorStaticInst
   bool isStore()             const override { return opClass() == VectorMemoryStoreOp; }
 
   bool is_reduction()          const override { return opClass() == VectorReductionOp; }
+
+  bool isFPCompare()          const override { return opClass() == VectorFPCompareOp; }
 
   bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 

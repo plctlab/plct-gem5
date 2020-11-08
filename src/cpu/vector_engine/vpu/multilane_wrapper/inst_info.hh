@@ -96,17 +96,17 @@ Datapath::get_instruction_info()
     }
 
     /**************************************************************************
-     * Floating point comparisons
+     * Vector Floating-Point Compare Instructions
      *************************************************************************/
 
-    if (operation == "vflt_vv") {
+    if (   (operation == "vmfeq_vv") || (operation == "vmfeq_vf")
+        || (operation == "vmfne_vv") || (operation == "vmfne_vf")
+        || (operation == "vmflt_vv") || (operation == "vmflt_vf")
+        || (operation == "vmfle_vv") || (operation == "vmfle_vf")
+        || (operation == "vmfgt_vf")
+        || (operation == "vmfge_vf") ) {
         Oplatency           = 4;
-        is_FP_Comp          = 1;
-    }
-
-    if (operation == "vfle_vv") {
-        Oplatency           = 4;
-        is_FP_Comp          = 1;
+        is_FP               = 1;
     }
 
     /**************************************************************************
@@ -271,6 +271,6 @@ Datapath::get_instruction_info()
         is_slide            = 1;
     }
 
-    assert(is_FP || is_FP_Comp || is_FP_to_INT ||
+    assert(is_FP || is_FP_to_INT ||
         is_INT_to_FP || is_INT || is_slide);
 }

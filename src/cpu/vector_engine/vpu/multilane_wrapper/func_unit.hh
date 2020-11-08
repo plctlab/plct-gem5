@@ -305,14 +305,39 @@ Datapath::compute_float_fp_comp_op(float Aitem, float Bitem,
     int Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vflt_vv")) {
+    if ((operation == "vmfeq_vv") || (operation == "vmfeq_vf")) {
+        Ditem = (Bitem == Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %f == %f  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vmfne_vv") || (operation == "vmfne_vf")) {
+        Ditem = (Bitem != Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %f != %f  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vmflt_vv") || (operation == "vmflt_vf")) {
         Ditem = (Bitem < Aitem) ? 1 : 0;
         DPRINTF(Datapath,"WB Instruction = %f < %f  = %d  \n",
             Bitem,Aitem, Ditem);
     }
-    if ((operation == "vfle_vv")) {
+
+    if ((operation == "vmfle_vv") || (operation == "vmfle_vf")) {
         Ditem = (Bitem <= Aitem) ? 1 : 0;
         DPRINTF(Datapath,"WB Instruction = %f <= %f  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if (operation == "vmfgt_vf") {
+        Ditem = (Bitem > Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %f > %f  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if (operation == "vmfge_vf") {
+        Ditem = (Bitem >= Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %f >= %f  = %d  \n",
             Bitem,Aitem, Ditem);
     }
 
@@ -326,14 +351,39 @@ Datapath::compute_double_fp_comp_op(double Aitem, double Bitem,
     long int Ditem=0;
     std::string operation = insn->getName();
 
-    if ((operation == "vflt_vv")) {
-        Ditem = (Bitem < Aitem) ? 1 : 0;
-        DPRINTF(Datapath,"WB Instruction = %f < %f  = %d  \n",
+    if ((operation == "vmfeq_vv") || (operation == "vmfeq_vf")) {
+        Ditem = (Bitem == Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %lf == %lf  = %d  \n",
             Bitem,Aitem, Ditem);
     }
-    if ((operation == "vfle_vv")) {
+
+    if ((operation == "vmfne_vv") || (operation == "vmfne_vf")) {
+        Ditem = (Bitem != Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %lf != %lf  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vmflt_vv") || (operation == "vmflt_vf")) {
+        Ditem = (Bitem < Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %lf < %lf  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vmfle_vv") || (operation == "vmfle_vf")) {
         Ditem = (Bitem <= Aitem) ? 1 : 0;
-        DPRINTF(Datapath,"WB Instruction = %f <= %f  = %d  \n",
+        DPRINTF(Datapath,"WB Instruction = %lf <= %lf  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if (operation == "vmfgt_vf") {
+        Ditem = (Bitem > Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %lf > %lf  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if (operation == "vmfge_vf") {
+        Ditem = (Bitem >= Aitem) ? 1 : 0;
+        DPRINTF(Datapath,"WB Instruction = %lf >= %lf  = %d  \n",
             Bitem,Aitem, Ditem);
     }
 
