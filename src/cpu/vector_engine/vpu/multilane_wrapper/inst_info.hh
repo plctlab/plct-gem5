@@ -143,7 +143,7 @@ Datapath::get_instruction_info()
     }
 
     /**************************************************************************
-     * Integer Operations
+     * Integer Instructions
      *************************************************************************/
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
@@ -156,17 +156,17 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if (operation == "vmul_vv") {
+    if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if (operation == "vdiv_vv") {
+    if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
         Oplatency           = 41;
         is_INT              = 1;
     }
 
-    if (operation == "vrem_vv") {
+    if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Oplatency           = 41;
         is_INT              = 1;
     }
@@ -196,27 +196,38 @@ Datapath::get_instruction_info()
         is_INT              = 1;
     }
 
-    if (operation == "vmin_vv") {
-        Oplatency           = 1;
-        is_INT              = 1;
-    }
-
     if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
         Oplatency           = 1;
         is_INT              = 1;
     }
+
     /**************************************************************************
-     * Operations to create a Mask
+     * Vector Integer Min/Max Instructions
      *************************************************************************/
-    if (operation == "vmseq_vv") {
+
+    if (   (operation == "vminu_vv") || (operation == "vminu_vx")
+        || (operation == "vmin_vv") || (operation == "vmin_vx")
+        || (operation == "vmaxu_vv") || (operation == "vmaxu_vx")
+        || (operation == "vmax_vv") || (operation == "vmax_vx") ) {
         Oplatency           = 1;
         is_INT              = 1;
     }
 
-    if (operation == "vmslt_vv") {
+    /**************************************************************************
+     * Vector Integer Comparison Instructions
+     *************************************************************************/
+    if (   (operation == "vmseq_vv") || (operation == "vmseq_vx") || (operation == "vmseq_vi")
+        || (operation == "vmsne_vv") || (operation == "vmsne_vx") || (operation == "vmsne_vi")
+        || (operation == "vmsltu_vv") || (operation == "vmsltu_vx")
+        || (operation == "vmslt_vv") || (operation == "vmslt_vx")
+        || (operation == "vmsleu_vv") || (operation == "vmsleu_vx") || (operation == "vmsleu_vi")
+        || (operation == "vmsle_vv") || (operation == "vmsle_vx") || (operation == "vmsle_vi")
+        || (operation == "vmsgtu_vx") || (operation == "vmsgtu_vi")
+        || (operation == "vmsgt_vx") || (operation == "vmsgt_vi") ) {
         Oplatency           = 1;
         is_INT              = 1;
     }
+
     /**************************************************************************
      * Mask Operations
      *************************************************************************/
