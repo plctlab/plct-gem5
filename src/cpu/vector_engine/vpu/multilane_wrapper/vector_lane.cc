@@ -315,6 +315,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 uint8_t *ndata = new uint8_t[DST_SIZE];
                 memcpy(ndata, Ddata+(i*DST_SIZE), DST_SIZE);
                 this->AdataQ.push_back(ndata);
+                if (DATA_SIZE==8){ DPRINTF(VectorLane,"queue Data srcAReader "
+                    "0x%x , queue_size = %d \n" , *(uint64_t *) ndata ,
+                    this->AdataQ.size());}
+                if (DATA_SIZE==4){ DPRINTF(VectorLane,"queue Data srcAReader "
+                    "0x%x , queue_size = %d \n" , *(uint32_t *) ndata ,
+                    this->AdataQ.size());}
                 }
                 delete [] Ddata;
         }

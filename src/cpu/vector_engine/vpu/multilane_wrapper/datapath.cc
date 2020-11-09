@@ -86,47 +86,58 @@ Datapath::startTicking(
     assert(DATA_SIZE != 0);
     assert(DST_SIZE != 0);
     //reset config
-    is_slide        =0;
-    is_mask_logical =0;
     is_FP           =0;
     is_INT          =0;
+    is_convert      =0;
+    is_slide        =0;
+
+    is_mask_logical =0;
     is_FP_Comp      =0;
     is_INT_to_FP    =0;
     is_FP_to_INT    =0;
-    vf_reduction_first_done   =0;
+    vf_reduction_first_done =0;
     slide_infligh   =0;
 
     std::string operation = this->insn->getName();
+
+    /* 4 main groups */
+    is_FP         = this->insn->isFP();
+    is_INT        = this->insn->isInt();
+    is_convert    = this->insn->isConvert();
+    is_slide      =  this->insn->is_slide();
+    assert(is_FP || is_INT || is_slide || is_convert);
+
+    /* Masked Operation? */
     vm = this->insn->vm();
-    arith1Src    = this->insn->arith1Src();
+
+    /* Number of sources used by the isntruction */
+    arith1Src     = this->insn->arith1Src();
     arith2Srcs    = this->insn->arith2Srcs();
     arith3Srcs    = this->insn->arith3Srcs();
-
+    /* Conversion between Int<->FP */
     is_INT_to_FP    = this->insn->isConvertIntToFP();
     is_FP_to_INT    = this->insn->isConvertFPToInt();
-    is_convert      = is_INT_to_FP || is_FP_to_INT;
-    //op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
-    op_imm = (this->insn->func3()==3);
 
-    vf_reduction = this->insn->is_reduction();
-
-    is_slide =  this->insn->is_slide();
-    is_mask_logical = this->insn->VectorMaskLogical();
+    /* isFPCompare is a FP subset */
     is_FP_Comp  = this->insn->isFPCompare();
-
+    /* INT operation with an immediate */
+    op_imm = (this->insn->func3()==3);
+    /* Floating point reductions */
+    vf_reduction = this->insn->is_reduction();
+    /* Vector Slides */
     vslideup =  this->insn->is_slideup();
     vslide1up = (operation == "vslide1up_vx");
     vslidedown = this->insn->is_slidedown();
     vslide1down = (operation == "vslide1down_vx");
-
+    /* Vector Mask-Register Logical Instructions */
     vmpopc = (operation == "vmpopc_m");
     vmfirst = (operation == "vmfirst_m");
+    is_mask_logical = this->insn->VectorMaskLogical();
 
     //Accumulator for reductions, vmpopc and vmfirst
     accumInt =-1;
 
     get_instruction_info();
-    assert(is_FP || is_INT || is_slide || is_convert);
 
     uint64_t pc = this->insn->getPC();
     DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"

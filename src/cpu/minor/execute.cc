@@ -1234,13 +1234,8 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     completed_inst = false;
                 } else {
                     doInstCommitAccounting(inst);
-                    //ExecContext * xc = new ExecContext(cpu,
-                    //    *cpu.threads[thread_id],*this, inst);
-
                     ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
                         *cpu.threads[thread_id],*this, inst);
-
-                     DPRINTF(CpuVectorIssue,"ExecContextPtr %p %d \n",xc.get(),xc.get());
 
                     uint64_t  pc = inst->pc.instAddr();
                     vector_insn->setPC(pc);
@@ -1256,10 +1251,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                         uint64_t gvl = cpu.ve_interface->reqAppVectorLength(
                             rvl,vtype,(vector_insn->vs1()==0));
 
-                        DPRINTF(CpuVectorIssue,"vsetvl: %d \n",vsetvl );
-                        DPRINTF(CpuVectorIssue,"rvl: %d \n",rvl );
-                        DPRINTF(CpuVectorIssue,"vtype: %d \n",vtype );
-                        DPRINTF(CpuVectorIssue,"gvl: %d \n",gvl );
+                        DPRINTF(CpuVectorIssue,"vsetvl: %d, rvl: %d vtype: %d gvl: %d \n",vsetvl,rvl,vtype,gvl );
 
                         xc->setMiscReg(RiscvISA::MISCREG_VL,gvl);
                         xc->setMiscReg(RiscvISA::MISCREG_VTYPE,vtype);

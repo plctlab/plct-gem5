@@ -39,7 +39,7 @@
 
 namespace RiscvISA
 {
-
+/*
 struct VecStaticInstFlags {
   enum VecFlags {
       IsVecArithmOp = 0,
@@ -54,13 +54,13 @@ struct VecStaticInstFlags {
   };
   static const char *FlagsStrings[NumVecFlags];
 };
-
+*/
 /* VectorStaticInst holds the info of all vector instructions */
-class VectorStaticInst : public StaticInst, public VecStaticInstFlags
+class VectorStaticInst : public StaticInst//, public VecStaticInstFlags
 {
 protected:
     using StaticInst::StaticInst;
-    std::bitset<NumVecFlags> vecflags;
+    //std::bitset<NumVecFlags> vecflags;
 
 public:
       void advancePC(PCState &pc) const override { pc.advance(); }
@@ -99,6 +99,10 @@ public:
       virtual bool arith2Srcs() const = 0;
       /* Vector instructions  with 3 vector sources (e.g. vmadd)*/
       virtual bool arith3Srcs() const = 0;
+
+      virtual bool isFP()  const = 0;
+      virtual bool isInt()  const = 0;
+      virtual bool isConvert()  const = 0;
 
       /* vector slides */
       virtual bool is_slideup() const = 0;
@@ -169,6 +173,11 @@ class RiscvVectorInsn : public VectorStaticInst
   RegIndex vs3()             const override { return (RegIndex)x(7, 5); }
   RegIndex vd()              const override { return (RegIndex)x(7, 5); }
 
+  bool isFP()                const  override   { return ((func3()==1) || (func3()==5)) && !isConvert(); }
+  bool isInt()               const  override   { return ((func3()==0) || (func3()==2) || (func3()==3) || (func3()==4) || (func3()==6)) && !is_slide(); }
+  bool isConvert()           const override { return isConvertIntToFP() || isConvertFPToInt(); }
+  bool is_slide()            const override { return is_slideup() || is_slidedown() ; }
+
   bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
@@ -193,8 +202,6 @@ class RiscvVectorInsn : public VectorStaticInst
   bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 
   bool is_slidedown()        const override { return opClass() == VectorSlideDownOp; }
-
-  bool is_slide()            const override { return is_slideup() || is_slidedown() ; }
 
   bool isVectorInstArith()   const override { return arith1Src() || arith2Srcs() || arith3Srcs(); }
 
