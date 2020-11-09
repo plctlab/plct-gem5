@@ -102,6 +102,9 @@ Datapath::startTicking(
     arith2Srcs    = this->insn->arith2Srcs();
     arith3Srcs    = this->insn->arith3Srcs();
 
+    is_INT_to_FP    = this->insn->isConvertIntToFP();
+    is_FP_to_INT    = this->insn->isConvertFPToInt();
+    is_convert      = is_INT_to_FP || is_FP_to_INT;
     //op_imm = (operation =="vfadd_vi") | (operation =="vadd_vi");
     op_imm = (this->insn->func3()==3);
 
@@ -123,6 +126,7 @@ Datapath::startTicking(
     accumInt =-1;
 
     get_instruction_info();
+    assert(is_FP || is_INT || is_slide || is_convert);
 
     uint64_t pc = this->insn->getPC();
     DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"

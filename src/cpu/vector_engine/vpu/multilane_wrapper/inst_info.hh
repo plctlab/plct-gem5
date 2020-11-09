@@ -110,20 +110,6 @@ Datapath::get_instruction_info()
     }
 
     /**************************************************************************
-     * Floating point conversions
-     *************************************************************************/
-
-    if (operation == "vfcvt_x_f_v") {
-        Oplatency           = 4;
-        is_FP_to_INT        = 1;
-    }
-
-    if (operation == "vfcvt_f_x_v") {
-        Oplatency           = 4;
-        is_INT_to_FP        = 1;
-    }
-
-    /**************************************************************************
      * 
      *************************************************************************/
 
@@ -140,6 +126,15 @@ Datapath::get_instruction_info()
     if (operation == "vfmerge_vf")   {
         Oplatency           = 1;
         is_FP               = 1;
+    }
+
+    /**************************************************************************
+     * Single-Width Floating-Point/Integer Type-Convert Instructions
+     *************************************************************************/
+
+    if (   (operation == "vfcvt_x_f_v") || (operation == "vfcvt_xu_f_v")
+        || (operation == "vfcvt_f_x_v") || (operation == "vfcvt_f_xu_v")) { 
+        Oplatency           = 4;
     }
 
     /**************************************************************************
@@ -253,24 +248,17 @@ Datapath::get_instruction_info()
 
     if ((operation == "vslideup_vi") | (operation == "vslideup_vx")) {
         Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
-        is_slide            = 1;
     }
 
     if (operation == "vslide1up_vx") {
         Oplatency           = 1;
-        is_slide            = 1;
     }
 
     if ((operation == "vslidedown_vi") | (operation == "vslidedown_vx")) {
         Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
-        is_slide            = 1;
     }
 
     if (operation == "vslide1down_vx") {
         Oplatency           = 1;
-        is_slide            = 1;
     }
-
-    assert(is_FP || is_FP_to_INT ||
-        is_INT_to_FP || is_INT || is_slide);
 }

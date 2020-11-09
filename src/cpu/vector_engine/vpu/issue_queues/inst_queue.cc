@@ -265,8 +265,9 @@ InstQueue::evaluate()
 
                 DPRINTF(InstQueue,"Executed instruction %s , pc 0x%lx\n",
                     Instruction->insn.getName() , *(uint64_t*)&pc);
-                DPRINTF(InstQueue,"Mem Queue Size %d\n",
+                DPRINTF(InstQueue,"Arith Queue Size %d\n",
                     Instruction_Queue.size());
+                
                 if (Instruction->insn.VectorToScalar()) {
                     Instruction->dependencie_callback();
                 }

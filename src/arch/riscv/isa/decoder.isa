@@ -1923,8 +1923,10 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x22: decode FUNCT3 {
                 0x1: decode VS1{
-                    0x1:VectorData1SrcOp::vfcvt_x_f_v();
-                    0x3:VectorData1SrcOp::vfcvt_f_x_v();
+                    0x0:VectorConvertFPToIntOp::vfcvt_xu_f_v();
+                    0x1:VectorConvertFPToIntOp::vfcvt_x_f_v();
+                    0x2:VectorConvertIntToFPOp::vfcvt_f_xu_v();
+                    0x3:VectorConvertIntToFPOp::vfcvt_f_x_v();
                     }
                 }
             0x23: decode FUNCT3 {

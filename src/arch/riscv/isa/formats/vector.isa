@@ -67,6 +67,22 @@ def template VectorReductionConstructor {{
     }
 }};
 
+def template VectorConvertIntToFPConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorConvertIntToFPOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorConvertFPToIntConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorConvertFPToIntOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 def template VectorFPCompareConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorFPCompareOp)
@@ -174,6 +190,22 @@ def format VectorReductionOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorReductionConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorConvertIntToFPOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorConvertIntToFPConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorConvertFPToIntOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorConvertFPToIntConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

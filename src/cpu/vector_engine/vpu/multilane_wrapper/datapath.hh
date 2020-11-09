@@ -75,7 +75,7 @@ public:
 
     float compute_float_fp_op(float Aitem, float Bitem,  int Mitem,
         float Dstitem, RiscvISA::VectorStaticInst* insn);
-    float computeSingleFPReduction(float accumDp,float Bitem,int Mitem);
+    float computeSingleFPReduction(float accumSp,float Bitem,int Mitem);
     int compute_float_fp_comp_op(float Aitem, float Bitem ,
         RiscvISA::VectorStaticInst* insn);
 
@@ -139,6 +139,7 @@ private:
     bool is_INT;
     bool is_INT_to_FP;
     bool is_FP_to_INT;
+    bool is_convert;
     bool is_FP_Comp;
     /*********************************
      * Sources used  by the operation

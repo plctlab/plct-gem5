@@ -82,6 +82,11 @@ public:
       virtual bool isVectorInstArith() const = 0;
       /* Vector reduction instruction */
       virtual bool is_reduction() const = 0;
+
+      /* Single-Width Floating-Point/Integer Type-Convert Instructions */
+      virtual bool isConvertIntToFP() const = 0;
+      virtual bool isConvertFPToInt() const = 0;
+
       /* Vector Floating-Point Compare Instruction */
       virtual bool isFPCompare() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
@@ -178,9 +183,12 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isStore()             const override { return opClass() == VectorMemoryStoreOp; }
 
-  bool is_reduction()          const override { return opClass() == VectorReductionOp; }
+  bool isConvertIntToFP()    const override { return opClass() == VectorConvertIntToFPOp; }
+  bool isConvertFPToInt()    const override { return opClass() == VectorConvertFPToIntOp; }
 
-  bool isFPCompare()          const override { return opClass() == VectorFPCompareOp; }
+  bool is_reduction()        const override { return opClass() == VectorReductionOp; }
+
+  bool isFPCompare()         const override { return opClass() == VectorFPCompareOp; }
 
   bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 
@@ -190,14 +198,14 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isVectorInstArith()   const override { return arith1Src() || arith2Srcs() || arith3Srcs(); }
 
-  bool isVectorInstMem()      const override { return isLoad() || isStore(); }
+  bool isVectorInstMem()     const override { return isLoad() || isStore(); }
 
   //bool isVecConfigOp()          const { return vecflags[IsVecConfigOp]; }
-  bool isVecConfig()          const override { return opClass() == VectorConfigOp; }
+  bool isVecConfig()         const override { return opClass() == VectorConfigOp; }
 
-  bool isVectorInst()         const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
+  bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
 
-  uint32_t width()            const override { return x(12, 3); }
+  uint32_t width()           const override { return x(12, 3); }
 
 private:
   const uint32_t b;

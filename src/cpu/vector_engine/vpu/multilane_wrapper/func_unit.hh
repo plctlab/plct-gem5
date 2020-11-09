@@ -273,25 +273,25 @@ Datapath::computeDoubleFPReduction(double accumDp,double Bitem,long int Mitem)
 }
 
 float
-Datapath::computeSingleFPReduction(float accumDp,float Bitem,int Mitem)
+Datapath::computeSingleFPReduction(float accumSp,float Bitem,int Mitem)
 {
     float reduction;
     std::string operation = insn->getName();
 
     if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
-         reduction = (vm==1) ? accumDp + Bitem : (Mitem) ? accumDp + Bitem : accumDp;
+         reduction = (vm==1) ? accumSp + Bitem : (Mitem) ? accumSp + Bitem : accumSp;
          DPRINTF(Datapath," Reduction: Source %f  Acc= %f\n" ,Bitem, reduction);
     }
 
     if (operation == "vfredmax_vs") {
-         reduction = (vm==1) ? ((accumDp > Bitem) ? accumDp:Bitem) :
-                     (Mitem) ? ((accumDp > Bitem) ? accumDp:Bitem) : accumDp;
+         reduction = (vm==1) ? ((accumSp > Bitem) ? accumSp:Bitem) :
+                     (Mitem) ? ((accumSp > Bitem) ? accumSp:Bitem) : accumSp;
          DPRINTF(Datapath," Reduction: Source %f  Max= %f\n" ,Bitem, reduction);
     }
 
     if (operation == "vfredmin_vs") {
-         reduction = (vm==1) ? ((accumDp < Bitem) ? accumDp:Bitem) :
-                     (Mitem) ? ((accumDp < Bitem) ? accumDp:Bitem) : accumDp;
+         reduction = (vm==1) ? ((accumSp < Bitem) ? accumSp:Bitem) :
+                     (Mitem) ? ((accumSp < Bitem) ? accumSp:Bitem) : accumSp;
          DPRINTF(Datapath," Reduction: Source %f  Min= %f\n" ,Bitem, reduction);
     }
 
@@ -847,6 +847,12 @@ Datapath::compute_cvt_f_x_64_op( long int Bitem, long int Mitem,
             Bitem, Ditem);
     }
 
+    if ((operation == "vfcvt_f_xu_v")) {
+        Ditem = (double)(*(uint64_t*)&Bitem);
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%d)  = %0.2f\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
@@ -860,6 +866,12 @@ Datapath::compute_cvt_f_x_32_op( int Bitem, int Mitem, int Dstitem,
     if ((operation == "vfcvt_f_x_v")) {
         Ditem = (float)Bitem;
         DPRINTF(Datapath,"WB Instruction =  cast (%d)  = %0.2f\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_f_xu_v")) {
+        Ditem = (float)(*(uint32_t*)&Bitem);
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%d)  = %0.2f\n",
             Bitem, Ditem);
     }
 
@@ -879,6 +891,12 @@ Datapath::compute_cvt_x_f_64_op( double Bitem, long int Mitem,
             Bitem, Ditem);
     }
 
+    if ((operation == "vfcvt_xu_f_v")) {
+        Ditem = (unsigned long int)Bitem;
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
@@ -890,8 +908,14 @@ Datapath::compute_cvt_x_f_32_op( float Bitem, int Mitem,
     std::string operation = insn->getName();
 
     if ((operation == "vfcvt_x_f_v")) {
-        Ditem = (int)Bitem;
+        Ditem = (unsigned int)Bitem;
         DPRINTF(Datapath,"WB Instruction =  cast (%0.2f) = %d\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_xu_f_v")) {
+        Ditem = (unsigned int)Bitem;
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2f) = %d\n",
             Bitem, Ditem);
     }
 
