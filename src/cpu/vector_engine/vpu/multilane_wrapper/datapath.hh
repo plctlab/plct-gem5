@@ -63,7 +63,7 @@ public:
     Datapath(DatapathParams *p);
     ~Datapath();
 
-    void get_instruction_info();
+    void get_instruction_latency();
 
     double compute_double_fp_op(double Aitem, double Bitem, long int Mitem,
         double Dstitem, RiscvISA::VectorStaticInst* insn);

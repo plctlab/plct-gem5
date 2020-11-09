@@ -37,7 +37,7 @@
 // Y LAS LATENCIAS PUES SE DEFINEN UNAS ESTANDAR PARA CADA TIPO. EN LUGAR DE INDIVIDUAL ....
 
 void
-Datapath::get_instruction_info()
+Datapath::get_instruction_latency()
 {
     std::string operation = insn->getName();
 
@@ -75,12 +75,13 @@ Datapath::get_instruction_info()
     /**************************************************************************
      * Vector Floating-Point Sign-Injection Instructions
      *************************************************************************/
+    /*
     if (   (operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")
         || (operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")
         || (operation == "vfsgnjx_vv") || (operation == "vfsgnjx_vf")) {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Floating point reductions
      *************************************************************************/
@@ -114,11 +115,11 @@ Datapath::get_instruction_info()
     if (operation == "vfmadd_vv")   {
         Oplatency           = 6;
     }
-
+    /*
     if (operation == "vfmerge_vf")   {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Single-Width Floating-Point/Integer Type-Convert Instructions
      *************************************************************************/
@@ -131,7 +132,7 @@ Datapath::get_instruction_info()
     /**************************************************************************
      * Integer Instructions
      *************************************************************************/
-
+    /*
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Oplatency           = 1;
     }
@@ -143,7 +144,7 @@ Datapath::get_instruction_info()
     if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
         Oplatency           = 1;
     }
-
+    */
     if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
         Oplatency           = 41;
     }
@@ -151,7 +152,7 @@ Datapath::get_instruction_info()
     if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Oplatency           = 41;
     }
-
+    /*
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
         Oplatency           = 1;
     }
@@ -175,21 +176,22 @@ Datapath::get_instruction_info()
     if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Vector Integer Min/Max Instructions
      *************************************************************************/
-
+    /*
     if (   (operation == "vminu_vv") || (operation == "vminu_vx")
         || (operation == "vmin_vv") || (operation == "vmin_vx")
         || (operation == "vmaxu_vv") || (operation == "vmaxu_vx")
         || (operation == "vmax_vv") || (operation == "vmax_vx") ) {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Vector Integer Comparison Instructions
      *************************************************************************/
+    /*
     if (   (operation == "vmseq_vv") || (operation == "vmseq_vx") || (operation == "vmseq_vi")
         || (operation == "vmsne_vv") || (operation == "vmsne_vx") || (operation == "vmsne_vi")
         || (operation == "vmsltu_vv") || (operation == "vmsltu_vx")
@@ -200,10 +202,11 @@ Datapath::get_instruction_info()
         || (operation == "vmsgt_vx") || (operation == "vmsgt_vi") ) {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Mask Operations
      *************************************************************************/
+    /*
     if ((operation == "vmand_mm") || (operation == "vmnand_mm") || (operation == "vmandnot_mm") ||
         (operation == "vmxor_mm") || (operation == "vmor_mm") || (operation == "vmnor_mm") ||
         (operation == "vmornot_mm") || (operation == "vmxnor_mm") ) {
@@ -216,7 +219,7 @@ Datapath::get_instruction_info()
     if (operation == "vmfirst_m") {
         Oplatency           = 1;
     }
-
+    */
     /**************************************************************************
      * Slide Operations
      *************************************************************************/
@@ -224,16 +227,17 @@ Datapath::get_instruction_info()
     if ((operation == "vslideup_vi") | (operation == "vslideup_vx")) {
         Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
     }
-
+    /*
     if (operation == "vslide1up_vx") {
         Oplatency           = 1;
     }
-
+    */
     if ((operation == "vslidedown_vi") | (operation == "vslidedown_vx")) {
         Oplatency =((slide_count%VectorLanes)== 0) ? 1:slide_count%VectorLanes;
     }
-
+    /*
     if (operation == "vslide1down_vx") {
         Oplatency           = 1;
     }
+    */
 }

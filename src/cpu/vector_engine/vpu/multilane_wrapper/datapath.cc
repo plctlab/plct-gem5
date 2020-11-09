@@ -37,7 +37,7 @@
 #include <queue>
 
 #include "cpu/vector_engine/vpu/multilane_wrapper/func_unit.hh"
-#include "cpu/vector_engine/vpu/multilane_wrapper/inst_info.hh"
+#include "cpu/vector_engine/vpu/multilane_wrapper/inst_latency.hh"
 #include "debug/Datapath.hh"
 #include "debug/VectorEngine.hh"
 
@@ -98,7 +98,17 @@ Datapath::startTicking(
     vf_reduction_first_done =0;
     slide_infligh   =0;
 
+
     std::string operation = this->insn->getName();
+
+    /* Default Operation Latency
+     * Note: In case the Operation takes more than 1 cycle to be executed
+     * the instruction should be added to inst_latency.hh file to define 
+     * the new lantecy
+     */
+    Oplatency       =1;
+    /*get the instruction latency in case it is not 1*/
+    get_instruction_latency();
 
     /* 4 main groups */
     is_FP         = this->insn->isFP();
@@ -137,7 +147,7 @@ Datapath::startTicking(
     //Accumulator for reductions, vmpopc and vmfirst
     accumInt =-1;
 
-    get_instruction_info();
+    
 
     uint64_t pc = this->insn->getPC();
     DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"
