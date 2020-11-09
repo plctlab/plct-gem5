@@ -36,8 +36,8 @@
 #include <deque>
 #include <functional>
 
-#include "debug/VectorCsrReg.hh"
-#include "params/VectorCsrReg.hh"
+#include "debug/VectorConfig.hh"
+#include "params/VectorConfig.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
 
@@ -49,42 +49,24 @@
  * The VL is given in elements.
  */
 
-class VectorCsrReg : public SimObject
+class VectorConfig : public SimObject
 {
 
 public:
-    VectorCsrReg(VectorCsrRegParams *p);
-    ~VectorCsrReg();
+    VectorConfig(VectorConfigParams *p);
+    ~VectorConfig();
 
     uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
     uint64_t vector_length_in_bits(uint64_t vl, uint64_t vtype);
     uint64_t get_max_vector_length_elem(uint64_t vsew);
     uint64_t get_max_vector_length_bits();
 
-    uint64_t get_vector_length(){ return vector_length; }
-    void set_vector_length(uint64_t val){
-        vector_length  = val;
-        DPRINTF(VectorCsrReg,"Setting vl : %d\n", vector_length);
-    }
-
-    uint64_t get_vtype_vlmul() const { return vtype.vlmul; }
-    uint64_t get_vtype_vsew() const { return vtype.vsew; }
-    uint64_t get_vtype_vediv() const { return vtype.vediv; }
-
-    void set_vtype(uint64_t val)
-    {
-    vtype.vlmul = vt(val,0,2);
-    vtype.vsew = vt(val,2,3);
-    vtype.vediv = vt(val,5,2);
-    DPRINTF(VectorCsrReg,"Setting vtype : %d , vlmul %d , vsew %d, vediv %d\n"
-        ,val, vtype.vlmul, vtype.vsew , vtype.vediv);
-    }
+    uint64_t get_vtype_vlmul(uint64_t vtype) const { return vt(vtype,0,2); }
+    uint64_t get_vtype_vsew(uint64_t vtype) const { return vt(vtype,2,3); }
+    uint64_t get_vtype_vediv(uint64_t vtype) const { return vt(vtype,5,2); }
 
 private:
     uint64_t max_vector_length;
-    uint64_t vector_length;
-
-    struct vtype{ uint64_t vlmul; uint64_t vsew; uint64_t vediv; } vtype;
 
     uint64_t vt(uint64_t val, int lo, int len) const {
       return (val >> lo) & ((uint64_t(1) << len)-1);

@@ -37,7 +37,7 @@ class VectorEngine(SimObject):
     type = 'VectorEngine'
     cxx_header = "cpu/vector_engine/vector_engine.hh"
 
-    vector_csr = Param.VectorCsrReg("Vector CSR Copy")
+    vector_config = Param.VectorConfig("Vector CSR Copy")
 
     vector_reg = Param.VectorRegister("Vector Register");
     vector_reg_port = VectorMasterPort("Vector Register Port")

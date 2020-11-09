@@ -55,9 +55,9 @@ class VectorLane : public SimObject
 
     bool isOccupied();
     void issue(VectorEngine& vector_wrapper,RiscvISA::VectorStaticInst& insn,
-        VectorDynInst *dyn_insn, ExecContextPtr& xc,uint64_t src1,
+        VectorDynInst *dyn_insn, ExecContextPtr& xc, uint64_t src1,
+        uint64_t vtype,uint64_t vl,
         std::function<void(Fault fault)> done_callback);
-
     //internal state for current instruction
     //these need to be public so Datapath can access them
     std::deque<uint8_t*> AdataQ;

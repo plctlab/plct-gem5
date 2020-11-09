@@ -28,15 +28,15 @@
  * Author: Cristóbal Ramírez
  */
 
-#include "cpu/vector_engine/vpu/csr_local/vector_csr.hh"
+#include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 
 #include <bitset>
 #include <cstdint>
 #include <deque>
 #include <functional>
 
-#include "debug/VectorCsrReg.hh"
-#include "params/VectorCsrReg.hh"
+#include "debug/VectorConfig.hh"
+#include "params/VectorConfig.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
 
@@ -44,19 +44,17 @@
  * VPU local Configuration
  */
 
-VectorCsrReg::VectorCsrReg(VectorCsrRegParams *p) :
-SimObject(p) ,  max_vector_length(p->max_vl),vector_length(0),
-                vtype({.vlmul=0,.vsew=3,.vediv=0})
+VectorConfig::VectorConfig(VectorConfigParams *p) :
+SimObject(p) ,  max_vector_length(p->max_vl)
 {
-    DPRINTF(VectorCsrReg, "Created the VectorCsrReg object \n");
 }
 
-VectorCsrReg::~VectorCsrReg()
+VectorConfig::~VectorConfig()
 {
 }
 
 uint64_t
-VectorCsrReg::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl){
+VectorConfig::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl){
 uint32_t gvl=0;
 uint32_t vsew = vt(vtype,2,3);
 
@@ -78,7 +76,7 @@ return (r_mvl) ? gvl:(rvl>gvl) ? gvl:rvl;
 }
 
 uint64_t
-VectorCsrReg::vector_length_in_bits(uint64_t vl, uint64_t vtype){
+VectorConfig::vector_length_in_bits(uint64_t vl, uint64_t vtype){
 uint64_t vl_bits=0;
 uint32_t vsew = vt(vtype,2,3);
 
@@ -100,7 +98,7 @@ return  vl_bits;
 }
 
 uint64_t
-VectorCsrReg::get_max_vector_length_elem(uint64_t vsew){
+VectorConfig::get_max_vector_length_elem(uint64_t vsew){
 uint32_t mvl=0;
 switch (vsew)
 {
@@ -119,12 +117,12 @@ return mvl;
 }
 
 uint64_t
-VectorCsrReg::get_max_vector_length_bits(){
+VectorConfig::get_max_vector_length_bits(){
     return max_vector_length;
 }
 
-VectorCsrReg *
-VectorCsrRegParams::create()
+VectorConfig *
+VectorConfigParams::create()
 {
-    return new VectorCsrReg(this);
+    return new VectorConfig(this);
 }

@@ -26,14 +26,12 @@
 #
 # Author: Cristóbal Ramírez
 
-Import('*')
+from m5.params import *
 
-if not env['BUILD_VECTOR_ENGINE']:
-    Return()
+from m5.SimObject import SimObject
 
-SimObject('VectorCsrReg.py')
+class VectorConfig(SimObject):
+    type = 'VectorConfig'
+    cxx_header = "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 
-Source('vector_csr.cc')
-
-DebugFlag('VectorCsrReg')
-
+    max_vl 	= Param.Unsigned("Maximun VL")

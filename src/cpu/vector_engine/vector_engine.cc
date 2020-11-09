@@ -45,7 +45,7 @@
 
 VectorEngine::VectorEngine(VectorEngineParams *p) :
 SimObject(p),
-vector_csr(p->vector_csr),
+vector_config(p->vector_config),
 VectorCacheMasterId(p->system->getMasterId(this, name() + ".vector_cache")),
 vectormem_port(name() + ".vector_mem_port", this, p->vector_rf_ports),
 vector_reg(p->vector_reg),
@@ -74,7 +74,7 @@ last_vl(0)
     DPRINTF(VectorEngineInfo,"Number of Physical Registers: %d \n"
         ,vector_rename->PhysicalRegs );
     DPRINTF(VectorEngineInfo,"Maximum VL: %d-bits\n"
-        , vector_csr->get_max_vector_length_bits() );
+        , vector_config->get_max_vector_length_bits() );
     DPRINTF(VectorEngineInfo,"Register File size: %dKB\n"
         , (float)vector_reg->get_size()/1024.0 );
     DPRINTF(VectorEngineInfo,"Vector Reorder buffer size: %d\n"
@@ -229,8 +229,7 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
 }
 
 void
-VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn,
-    uint64_t src1,uint64_t src2)
+VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn)
 {
     uint64_t PDst,POldDst;
     uint64_t Pvs1,Pvs2;
@@ -250,11 +249,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     uint8_t mop = insn.mop();
     bool gather_op = (mop ==3);
 
-    if (insn.isVecConfig()) {
-        rename_vtype = src2;
-        rename_vl = src1;
-    }
-    else if (insn.isVectorInstMem()) {
+    if (insn.isVectorInstMem()) {
         if (insn.isLoad())
         {
             if (gather_op)
@@ -395,6 +390,15 @@ void
 VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
     uint64_t src1,uint64_t src2,std::function<void()> dependencie_callback)
 {
+    if (insn.isVecConfig()) {
+        last_vtype = src2;
+        last_vl = src1;
+        dependencie_callback();
+        printConfigInst(insn,src1,src2);
+        VectorConfigIns++;
+        return;
+    }
+
     //Be sure that the instruction was added to some group in base.isa
     if (insn.isVectorInstArith()) {
         assert( insn.arith1Src() | insn.arith2Srcs() | insn.arith3Srcs() );
@@ -409,29 +413,20 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
 
     VectorDynInst *vector_dyn_insn = new VectorDynInst();
 
-    renameVectorInst(insn,vector_dyn_insn,src1,src2);
+    renameVectorInst(insn,vector_dyn_insn);
 
     if (vector_rob->rob_empty()) {
         vector_rob->startTicking(*this);
     }
 
-    if (insn.isVecConfig()) {
-        dependencie_callback();
-        uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
-        vector_dyn_insn->set_rob_entry(rob_entry);
-        vector_inst_queue->Instruction_Queue.push_back(
-            new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
-            NULL,src1,src2,0,0));
-        printConfigInst(insn,src1,src2);
-    }
-    else if (insn.isVectorInstMem()) {
+    if (insn.isVectorInstMem()) {
         dependencie_callback();
         uint32_t rob_entry = vector_rob->set_rob_entry(
             vector_dyn_insn->get_POldDst(), insn.isLoad());
         vector_dyn_insn->set_rob_entry(rob_entry);
         vector_inst_queue->Memory_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
-                NULL,src1,src2,rename_vtype,rename_vl));
+                NULL,src1,src2,last_vtype,last_vl));
         printMemInst(insn);
     }
     else if (insn.isVectorInstArith()) {
@@ -442,13 +437,13 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
-                NULL,src1,src2,rename_vtype,rename_vl));
+                NULL,src1,src2,last_vtype,last_vl));
         } else {
             uint32_t rob_entry = vector_rob->set_rob_entry(0 , 0);
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
-                dependencie_callback,src1,src2,rename_vtype,rename_vl));
+                dependencie_callback,src1,src2,last_vtype,last_vl));
         }
         printArithInst(insn,src1);
     } else {
@@ -458,30 +453,24 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
 
 void
 VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
-    ExecContextPtr& xc ,uint64_t src1 ,uint64_t src2,uint64_t ren_vtype,
-    uint64_t ren_vl, std::function<void(Fault fault)> done_callback) {
+    ExecContextPtr& xc ,uint64_t src1 ,uint64_t src2,uint64_t vtype,
+    uint64_t vl, std::function<void(Fault fault)> done_callback) {
 
     uint64_t pc = insn.getPC();
-    if (insn.isVecConfig())
-    {
-        VectorConfigIns++;
-        vector_csr->set_vector_length(src1);
-        vector_csr->set_vtype(src2);
-        done_callback(NoFault);
-    }
-    else if (insn.isVectorInstMem())
+    
+    if (insn.isVectorInstMem())
     {
         VectorMemIns++;
         DPRINTF(VectorEngine,"Sending instruction %s to VMU, pc 0x%lx\n"
             ,insn.getName() , *(uint64_t*)&pc );
-        vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,ren_vtype,
-            ren_vl, done_callback);
+        vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,vtype,
+            vl, done_callback);
 
-        SumVL = SumVL.value() + vector_csr->vector_length_in_bits(ren_vl,ren_vtype);
+        SumVL = SumVL.value() + vector_config->vector_length_in_bits(vl,vtype);
     }
     else if (insn.isVectorInstArith()) {
 
-        SumVL = SumVL.value() + vector_csr->vector_length_in_bits(ren_vl,ren_vtype);
+        SumVL = SumVL.value() + vector_config->vector_length_in_bits(vl,vtype);
         VectorArithmeticIns++;
         uint8_t lane_id_available = 0;
         for (int i=0 ; i< num_clusters ; i++) {
@@ -492,7 +481,7 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
             dyn_insn->get_PSrc1(), dyn_insn->get_PSrc2(),
             dyn_insn->get_POldDst(), lane_id_available , *(uint64_t*)&pc);
         vector_lane[lane_id_available]->issue(*this,insn,dyn_insn, xc, src1,
-            done_callback);
+            vtype, vl,done_callback);
     } else {
         panic("Invalid Vector Instruction, insn=%#h\n", insn.machInst);
     }

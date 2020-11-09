@@ -69,18 +69,17 @@ void
 VectorLane::issue(VectorEngine& vector_wrapper,
     RiscvISA::VectorStaticInst& insn,
     VectorDynInst *dyn_insn, ExecContextPtr& xc,uint64_t src1,
+    uint64_t vtype,uint64_t vl,
     std::function<void(Fault fault)> done_callback)
 {
     assert(!occupied);
     occupied = true;
 
-    DPRINTF(VectorLane,"Executing instruction %s in cluster %d\n",
-        insn.getName() , lane_id);
     vectorwrapper = &vector_wrapper;
 
     // 0 = 8-bit , 1 = 16-bit , 2 = 32-bit , 3 = 64-bit , 4 = 128-bit
     uint64_t vsew;
-    vsew = vectorwrapper->vector_csr->get_vtype_vsew();
+    vsew = vectorwrapper->vector_config->get_vtype_vsew(vtype);
     uint8_t SIZE =  (vsew == 3) ? sizeof(double) :
                     (vsew == 2) ? sizeof(float) :
                     (vsew == 1) ? sizeof(uint16_t) :
@@ -112,7 +111,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     vi_op = (insn.func3()==3);
 
     //address in bytes
-    uint64_t mvl_bits =vectorwrapper->vector_csr->get_max_vector_length_bits();
+    uint64_t mvl_bits =vectorwrapper->vector_config->get_max_vector_length_bits();
     addr_src0 = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
     addr_src1 = (uint64_t)dyn_insn->get_PSrc1() * mvl_bits / 8;
     addr_src2 = (uint64_t)dyn_insn->get_PSrc2() * mvl_bits / 8;
@@ -125,12 +124,14 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     //how many items will get written to dst by the end of the operation
     uint64_t dst_count;
     uint64_t src1_count;
-    uint64_t vl_count = vectorwrapper->vector_csr->get_vector_length();
+    uint64_t vl_count = vl;
     uint64_t mvl_element =
-        vectorwrapper->vector_csr->get_max_vector_length_elem(vsew);
-    DPRINTF(VectorLane,"vl_count %d\n",vl_count );
-    DPRINTF(VectorLane,"mvl_element %d\n",mvl_element );
+        vectorwrapper->vector_config->get_max_vector_length_elem(vsew);
 
+    DPRINTF(VectorLane,"Executing instruction %s in cluster %d, , vl = %d , mvl =  %d\n",
+        insn.getName(), lane_id , vl_count,mvl_element);
+
+    /* mvl_element is used to write with "0" the tail elements */
     if (reduction)
     {
         dst_count = 1;

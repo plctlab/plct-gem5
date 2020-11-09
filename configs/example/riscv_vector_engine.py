@@ -200,7 +200,7 @@ if( (connect_to_l2) or (connect_to_dram)):
 system.cpu.ve_interface = VectorEngineInterface(
     vector_engine = VectorEngine(
         vector_rf_ports = vector_rf_ports,
-        vector_csr = VectorCsrReg(
+        vector_config = VectorConfig(
             max_vl = options.max_vl
         ),
         vector_reg = VectorRegister(

@@ -93,9 +93,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     bool  location;
 
     uint64_t mvl_bits =
-        vectorwrapper->vector_csr->get_max_vector_length_bits();
+        vectorwrapper->vector_config->get_max_vector_length_bits();
     uint64_t mvl_elem =
-        vectorwrapper->vector_csr->get_max_vector_length_elem(vsew);
+        vectorwrapper->vector_config->get_max_vector_length_elem(vsew);
 
     if (insn.isLoad())
     {

@@ -69,7 +69,7 @@ uint64_t
 VectorEngineInterface::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl)
 {
     DPRINTF(VectorEngineInterface,"resquesting a vector length\n");
-     uint64_t gvl = vector_engine->vector_csr->
+     uint64_t gvl = vector_engine->vector_config->
         reqAppVectorLength(rvl,vtype,r_mvl);
     return gvl;
 }

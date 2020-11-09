@@ -45,7 +45,6 @@ OoO_queues(p->OoO_queues),
 vector_mem_queue_size(p->vector_mem_queue_size),
 vector_arith_queue_size(p->vector_arith_queue_size)
 {
-    //idle_count_by_dependency = 0;
 }
 
 InstQueue::~InstQueue()
@@ -75,17 +74,7 @@ InstQueue::startTicking(
     VectorEngine& vector_wrapper/*,
     std::function<void()> dependencie_callback*/)
 {
-//    assert(!running);
-//    DPRINTF(InstQueue,"InstQueue startTicking \n");
-
-    //copy over the configuration inputs
     this->vectorwrapper = &vector_wrapper;
-    //this->dependencie_callback = dependencie_callback;
-
-//    this->insn = &insn;
-//    this->xc = xc;
-//    this->dataCallback = data_callback;
-
     start();
 }
 
@@ -156,21 +145,11 @@ InstQueue::evaluate()
         for (int i=0 ; i< queue_size ; i++)
         {
             Instruction = Instruction_Queue[i];
-
-            if (Instruction->insn.isVecConfig() && i>0){
-                srcs_ready = 0;
-                break;
-            }
-
             bool working = 0;
             for (int j=0 ; j< vectorwrapper->num_clusters ; j++)
             {
                 working = working ||
                     vectorwrapper->vector_lane[j]->isOccupied();
-            }
-            if (Instruction->insn.isVecConfig() && working){
-                srcs_ready = 0;
-                break;
             }
 
             src1 = Instruction->dyn_insn->get_PSrc1();
@@ -178,8 +157,7 @@ InstQueue::evaluate()
             src3 = Instruction->dyn_insn->get_POldDst();
             mask = Instruction->dyn_insn->get_PMask();
 
-            masked_op = (Instruction->insn.vm()==0) &&
-                !Instruction->insn.isVecConfig();
+            masked_op = (Instruction->insn.vm()==0);
 
             /*
              * Instructions with Scalar operands set the src1_ready signal
@@ -247,11 +225,10 @@ InstQueue::evaluate()
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
                 Instruction->xc,Instruction->src1,Instruction->src2,
                  Instruction->rename_vtype,Instruction->rename_vl,
-                [Instruction,masked_op/*,queue_slot*/,pc,this](Fault f) {
+                [Instruction,masked_op,pc,this](Fault f) {
 
                 // Setting the Valid Bit
-                bool wb_enable = !Instruction->insn.VectorToScalar()
-                    && !Instruction->insn.isVecConfig();
+                bool wb_enable = !Instruction->insn.VectorToScalar();
                 uint64_t Dst = Instruction->dyn_insn->get_PDst();
                 if (wb_enable)
                 {

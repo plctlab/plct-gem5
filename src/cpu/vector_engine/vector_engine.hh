@@ -48,7 +48,7 @@
 #include "cpu/vector_engine/req_state.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
 #include "cpu/vector_engine/vmu/vector_mem_unit.hh"
-#include "cpu/vector_engine/vpu/csr_local/vector_csr.hh"
+#include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 #include "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
 #include "cpu/vector_engine/vpu/multilane_wrapper/vector_lane.hh"
 #include "cpu/vector_engine/vpu/register_file/vector_reg.hh"
@@ -147,7 +147,7 @@ public:
     VectorEngine(VectorEngineParams *p);
     ~VectorEngine();
 
-    VectorCsrReg  *   vector_csr;
+    VectorConfig  *   vector_config;
     //used to identify ports uniquely to whole memory system
     MasterID VectorCacheMasterId;
     VectorMemPort vectormem_port;
@@ -189,8 +189,7 @@ public:
 
     void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContextPtr& xc ,
         uint64_t src1, uint64_t src2, std::function<void()> dependencie_callback);
-    void renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-        uint64_t src1,uint64_t src2);
+    void renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn);
 
     void issue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
         ExecContextPtr& xc,
@@ -229,8 +228,6 @@ public:
     bool vf_op;
     bool vi_op;
 
-    uint64_t rename_vtype;
-    uint64_t rename_vl;
     bool dst_write_ena;
 
     uint8_t num_clusters;
