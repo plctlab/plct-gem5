@@ -173,7 +173,7 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
 
-  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar(); }
+  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar() || isConvertIntToFP() || isConvertFPToInt(); }
 
   bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare(); }
 
