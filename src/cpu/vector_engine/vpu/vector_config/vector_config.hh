@@ -61,9 +61,9 @@ public:
     uint64_t get_max_vector_length_elem(uint64_t vsew);
     uint64_t get_max_vector_length_bits();
 
-    uint64_t get_vtype_vlmul(uint64_t vtype) const { return vt(vtype,0,2); }
-    uint64_t get_vtype_vsew(uint64_t vtype) const { return vt(vtype,2,3); }
-    uint64_t get_vtype_vediv(uint64_t vtype) const { return vt(vtype,5,2); }
+    uint64_t get_vtype_vlmul(uint64_t vtype);
+    uint64_t get_vtype_vsew(uint64_t vtype);
+    uint64_t get_vtype_vediv(uint64_t vtype);
 
 private:
     uint64_t max_vector_length;

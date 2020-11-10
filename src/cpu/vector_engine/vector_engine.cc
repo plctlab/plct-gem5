@@ -135,8 +135,24 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
         || (insn->isVectorInstMem()
         && !vector_inst_queue->mem_queue_full());
 
-    return  !vector_rename->frl_empty() && queue_slots_available
+    /* Usually, the Vector engine must ensure to have at least 1 physical register to accept an instruction.
+     * However, for widening operations this is different. When Widening operation with LMUL=2 means that 
+     * the vector engine must have at least 2 physical registers available in order to acceept the instruction.
+     * When LMUL=4, means that the vector engine must have at least 4 physical registers available in order 
+     * to accept the instruction. And finally when LMUL=8, means that the vector engine must have at least 
+     * 8 physical registers available in order to accept the instruction.
+     */ 
+    bool is_widening = insn->isWConvertFPToInt() || insn->isWConvertIntToFP() || insn->isWConvertFPToFP();
+    uint8_t lmul = vector_config->get_vtype_vlmul(last_vtype);
+
+    bool enough_physical_regs = (lmul == 1) ? vector_rename->frl_elements() >= 1 :
+                                (is_widening && (lmul == 2)) ? vector_rename->frl_elements() >= 2 :
+                                (is_widening && (lmul == 4)) ? vector_rename->frl_elements() >= 4 :
+                                (is_widening && (lmul == 8)) ? vector_rename->frl_elements() >= 8 : 0;
+    return  enough_physical_regs && queue_slots_available
         && rob_entry_available;
+    //return  !vector_rename->frl_empty() && queue_slots_available
+    //    && rob_entry_available;
 }
 
 bool
@@ -248,6 +264,12 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
 
     uint8_t mop = insn.mop();
     bool gather_op = (mop ==3);
+
+    bool is_widening = insn.isWConvertFPToInt() || insn.isWConvertIntToFP() || insn.isWConvertFPToFP();
+
+    if(is_widening) {
+        panic("Widening Instruction insn=%#h is not supported\n", insn.machInst);
+    }
 
     if (insn.isVectorInstMem()) {
         if (insn.isLoad())

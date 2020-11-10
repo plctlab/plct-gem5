@@ -67,6 +67,11 @@ public:
         }
     }
 
+    uint32_t frl_elements()
+    {
+        return frl_mem.size();
+    }
+
     uint64_t get_frl()
     {
         if (frl_mem.size()>0) {

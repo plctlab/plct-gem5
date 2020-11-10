@@ -86,6 +86,10 @@ public:
       /* Single-Width Floating-Point/Integer Type-Convert Instructions */
       virtual bool isConvertIntToFP() const = 0;
       virtual bool isConvertFPToInt() const = 0;
+      /* Widening Floating-Point/Integer Type-Convert Instructions */
+      virtual bool isWConvertFPToInt() const = 0;
+      virtual bool isWConvertIntToFP() const = 0;
+      virtual bool isWConvertFPToFP() const = 0;
 
       /* Vector Floating-Point Compare Instruction */
       virtual bool isFPCompare() const = 0;
@@ -182,7 +186,11 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
 
-  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) || VectorToScalar() || isConvertIntToFP() || isConvertFPToInt(); }
+  bool arith1Src()           const override { return (opClass() == VectorArith1SrcOp) 
+                                                    || VectorToScalar() 
+                                                    || isConvertFPToInt() || isConvertIntToFP()
+                                                    || isWConvertFPToInt() || isWConvertIntToFP() || isWConvertFPToFP()
+                                                    ; }
 
   bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare(); }
 
@@ -194,6 +202,10 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isConvertIntToFP()    const override { return opClass() == VectorConvertIntToFPOp; }
   bool isConvertFPToInt()    const override { return opClass() == VectorConvertFPToIntOp; }
+
+  bool isWConvertFPToInt()    const override { return opClass() == VectorWConvertFPToIntOp; }
+  bool isWConvertIntToFP()    const override { return 0; }//opClass() == VectorWConvertIntToFPOp; }
+  bool isWConvertFPToFP()     const override { return 0; }//opClass() == VectorWConvertFPToFPOp; }
 
   bool is_reduction()        const override { return opClass() == VectorReductionOp; }
 

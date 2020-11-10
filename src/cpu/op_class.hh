@@ -109,6 +109,7 @@ static const OpClass VectorMaskLogicalOp = Enums::VectorMaskLogical;
 static const OpClass VectorReductionOp = Enums::VectorReduction;
 static const OpClass VectorConvertIntToFPOp = Enums::VectorConvertIntToFP;
 static const OpClass VectorConvertFPToIntOp = Enums::VectorConvertFPToInt;
+static const OpClass VectorWConvertFPToIntOp = Enums::VectorWConvertFPToInt;
 static const OpClass VectorFPCompareOp = Enums::VectorFPCompare;
 static const OpClass VectorSlideUpOp = Enums::VectorSlideUp;
 static const OpClass VectorSlideDownOp = Enums::VectorSlideDown;

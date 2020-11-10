@@ -121,6 +121,20 @@ VectorConfig::get_max_vector_length_bits(){
     return max_vector_length;
 }
 
+uint64_t
+VectorConfig::get_vtype_vlmul(uint64_t vtype) {
+    return vt(vtype,0,2);
+}
+uint64_t
+VectorConfig::get_vtype_vsew(uint64_t vtype) {
+    return vt(vtype,2,3);
+}
+
+uint64_t
+VectorConfig::get_vtype_vediv(uint64_t vtype) {
+    return vt(vtype,5,2);
+}
+
 VectorConfig *
 VectorConfigParams::create()
 {

@@ -60,6 +60,7 @@ class OpClass(Enum):
             'VectorMaskLogical',
             'VectorReduction',
             'VectorConvertIntToFP','VectorConvertFPToInt',
+            'VectorWConvertFPToInt',
             'VectorFPCompare',
             'VectorSlideUp','VectorSlideDown',
             'VectorToScalar',
