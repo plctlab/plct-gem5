@@ -610,7 +610,6 @@ VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
         }
 }
 
-
 bool
 VectorEngine::VectorMemPort::sendTimingReadReq(Addr addr, uint64_t size,
     ThreadContext *tc, uint64_t req_id, uint8_t channel)

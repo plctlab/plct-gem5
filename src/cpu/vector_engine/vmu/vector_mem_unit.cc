@@ -66,10 +66,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     vectorwrapper = &vector_wrapper;
 
     uint64_t vl_count = vl ;
-
-    //uint64_t vlmul = vt(vtype,0,2);
-    uint64_t vsew = vt(vtype,2,3);
-    //uint64_t vediv = vt(vtype,5,2);
+    uint64_t vsew = vectorwrapper->vector_config->get_vtype_vsew(vtype);
 
     uint8_t DST_SIZE =  (vsew == 3) ? sizeof(double) :
                         (vsew == 2) ? sizeof(float) :
