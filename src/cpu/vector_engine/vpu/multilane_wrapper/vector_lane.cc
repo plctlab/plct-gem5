@@ -78,12 +78,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     vectorwrapper = &vector_wrapper;
 
     // 0 = 8-bit , 1 = 16-bit , 2 = 32-bit , 3 = 64-bit , 4 = 128-bit
-    uint64_t vsew;
-    vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
+    uint64_t sew;
+    sew = vectorwrapper->vector_config->get_vtype_sew(vtype);
     /* destination data type size in bytes */
-    uint8_t SIZE = vsew/8;
+    uint8_t SIZE = sew/8;
     assert(SIZE != 0);
-    assert((vsew == 3) || (vsew == 2)); // Only 64-bit and 32-bit Operations are supported
+    assert((sew == 64) || (sew == 32)); // Only 64-bit and 32-bit Operations are supported
 
     //In this moment there are not implemented widening and narrowing,
     //then dst and src are similar sizes
@@ -212,7 +212,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             assert(slide_count < vl_count);
         }
 
-        dataPath->startTicking(*this, insn, vl_count, dst_count, vsew,
+        dataPath->startTicking(*this, insn, vl_count, dst_count, sew,
         slide_count ,src1,
         [dyn_insn,done_callback,xc,mvl_element,vl_count,DST_SIZE,this]
         (uint8_t *data, uint8_t size, bool done)

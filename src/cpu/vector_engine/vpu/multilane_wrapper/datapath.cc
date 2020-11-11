@@ -81,10 +81,10 @@ Datapath::startTicking(
     red_SrcCount = 0;
     slide_SrcCount = 0;
     srcB_data_slide_count = 0;
-    DATA_SIZE = (vsew == 3) ? sizeof(double) : (vsew == 2) ? sizeof(float) : 0;
-    DST_SIZE = (vsew == 3) ? sizeof(double) : (vsew == 2) ? sizeof(float) : 0;
-    assert(DATA_SIZE != 0);
-    assert(DST_SIZE != 0);
+    DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
+    DST_SIZE = vsew/8;  // Esto cambiará para widening y narrowing
+    assert((DATA_SIZE == 8) || (DATA_SIZE == 4));   // Only supported 64-bit and 32-bit operations
+    assert((DST_SIZE == 8) || (DST_SIZE == 4));     // Only supported 64-bit and 32-bit operations
     //reset config
     is_FP           =0;
     is_INT          =0;
@@ -268,7 +268,7 @@ Datapath::evaluate()
 
                 //if(!vf_reduction_first_done)
                 //{
-                    if (vsew == 3) {
+                    if (vsew == 64) {
                         double Accitem = (double)((double*)Adata)[i] ;
                         accumDp = Accitem;
                     } else {
@@ -342,7 +342,7 @@ Datapath::evaluate()
         {
             for (int i=0; i<simd_size; ++i)
             {
-                if (vsew == 3)
+                if (vsew == 64)
                 {
                     uint64_t Bitem = ((uint64_t*)Bdata)[i] ;
                     srcB_data_slide_64[srcB_data_slide_count] = Bitem;
@@ -357,7 +357,7 @@ Datapath::evaluate()
 
             for (int i=0; i<simd_size; ++i)
             {
-                if (vsew == 3)
+                if (vsew == 64)
                 {
                     uint64_t slide_1element = src1;
                     long int Mitem = (0x0000000000000001) &&
@@ -464,7 +464,7 @@ Datapath::evaluate()
             {
                 if (is_FP )  // FLOATING POINT OPERATION
                 {
-                    if (vsew == 3)
+                    if (vsew == 64)
                     {
                         if (vf_reduction)
                         {
@@ -524,7 +524,7 @@ Datapath::evaluate()
                     if (vf_reduction && (red_SrcCount==srcCount))
                     {
                         uint8_t *ndata = new uint8_t[DST_SIZE];
-                        if (vsew == 3)
+                        if (vsew == 64)
                         {
                             memcpy(ndata, (uint8_t*)&accumDp, DST_SIZE);
                             dataCallback(ndata, DST_SIZE , 0);
@@ -536,7 +536,7 @@ Datapath::evaluate()
                 }
                 else if (is_INT)
                 {
-                    if (vsew == 3)
+                    if (vsew == 64)
                     {
                         if (vmpopc | vmfirst)
                         {
@@ -647,7 +647,7 @@ Datapath::evaluate()
                 }
                 else if (is_INT_to_FP)
                 {
-                    if (vsew == 3)
+                    if (vsew == 64)
                     {
                         long int Bitem = (long int)((long int*)Bdata)[i];
                         long int Mitem = (0x0000000000000001) &&
@@ -667,7 +667,7 @@ Datapath::evaluate()
                 }
                 else if (is_FP_to_INT)
                 {
-                    if (vsew == 3)
+                    if (vsew == 64)
                     {
                         double Bitem = (double)((double*)Bdata)[i] ;
                         long int Mitem = (0x0000000000000001) &&
