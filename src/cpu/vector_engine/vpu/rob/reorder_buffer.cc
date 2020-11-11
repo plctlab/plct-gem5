@@ -44,7 +44,7 @@ ReorderBuffer::ReorderBuffer(ReorderBufferParams *p):
 TickedObject(p),occupied(false), ROB_Size(p->ROB_Size)
 {
     for (int i=0 ; i<ROB_Size ; i++) {
-        rob.push_back(new ROB(0,0));
+        rob.push_back(new rob_entry(0,0));
     }
     tail=0;
     head=0;

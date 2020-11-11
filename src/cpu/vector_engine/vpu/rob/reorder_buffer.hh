@@ -46,16 +46,16 @@ class VectorEngine;
 class ReorderBuffer : public TickedObject
 {
 public:
-    class ROB {
-          public:
-            ROB(uint16_t old_dst, bool valid_old_dst):
-            old_dst(old_dst),valid_old_dst(valid_old_dst),executed(0) {}
-            ~ROB() {}
-
-            uint16_t old_dst;
-            bool valid_old_dst;
-            bool executed;
-        };
+    class rob_entry {
+        public:
+        rob_entry(uint16_t old_dst, bool valid_old_dst):
+        old_dst(old_dst),valid_old_dst(valid_old_dst),executed(0) {}
+        ~rob_entry() {}
+        //private:
+        uint16_t old_dst;
+        bool valid_old_dst;
+        bool executed;
+    };
 
     ReorderBuffer(ReorderBufferParams *p);
     ~ReorderBuffer();
@@ -74,11 +74,11 @@ protected:
     bool occupied;
 public:
     const uint64_t ROB_Size;
-    std::vector<ROB *> rob;
+private:
+    std::vector<rob_entry *> rob;
     uint32_t tail;
     uint32_t head;
     int valid_elements;
-private:
     VectorEngine* vectorwrapper;
 public:
     Stats::Scalar VectorROBentriesUsed;

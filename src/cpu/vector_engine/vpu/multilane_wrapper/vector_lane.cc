@@ -79,11 +79,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     // 0 = 8-bit , 1 = 16-bit , 2 = 32-bit , 3 = 64-bit , 4 = 128-bit
     uint64_t vsew;
-    vsew = vectorwrapper->vector_config->get_vtype_vsew(vtype);
-    uint8_t SIZE =  (vsew == 3) ? sizeof(double) :
-                    (vsew == 2) ? sizeof(float) :
-                    (vsew == 1) ? sizeof(uint16_t) :
-                    (vsew == 0) ? sizeof(uint8_t) : 0;
+    vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
+    /* destination data type size in bytes */
+    uint8_t SIZE = vsew/8;
     assert(SIZE != 0);
     assert((vsew == 3) || (vsew == 2)); // Only 64-bit and 32-bit Operations are supported
 
@@ -111,7 +109,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     vi_op = (insn.func3()==3);
 
     //address in bytes
-    uint64_t mvl_bits =vectorwrapper->vector_config->get_max_vector_length_bits();
+    uint64_t mvl_bits =vectorwrapper->vector_config->get_max_vector_length_bits(vtype);
     addr_src0 = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
     addr_src1 = (uint64_t)dyn_insn->get_PSrc1() * mvl_bits / 8;
     addr_src2 = (uint64_t)dyn_insn->get_PSrc2() * mvl_bits / 8;
@@ -126,7 +124,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t src1_count;
     uint64_t vl_count = vl;
     uint64_t mvl_element =
-        vectorwrapper->vector_config->get_max_vector_length_elem(vsew);
+        vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
 
     DPRINTF(VectorLane,"Executing instruction %s in cluster %d, , vl = %d , mvl =  %d\n",
         insn.getName(), lane_id , vl_count,mvl_element);

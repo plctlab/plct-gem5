@@ -74,7 +74,7 @@ last_vl(0)
     DPRINTF(VectorEngineInfo,"Number of Physical Registers: %d \n"
         ,vector_rename->PhysicalRegs );
     DPRINTF(VectorEngineInfo,"Maximum VL: %d-bits\n"
-        , vector_config->get_max_vector_length_bits() );
+        , vector_config->get_mvl_lmul1_bits() );
     DPRINTF(VectorEngineInfo,"Register File size: %dKB\n"
         , (float)vector_reg->get_size()/1024.0 );
     DPRINTF(VectorEngineInfo,"Vector Reorder buffer size: %d\n"
@@ -143,7 +143,7 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
      * 8 physical registers available in order to accept the instruction.
      */ 
     bool is_widening = insn->isWConvertFPToInt() || insn->isWConvertIntToFP() || insn->isWConvertFPToFP();
-    uint8_t lmul = vector_config->get_vtype_vlmul(last_vtype);
+    uint8_t lmul = vector_config->get_vtype_lmul(last_vtype);
 
     bool enough_physical_regs = (lmul == 1) ? vector_rename->frl_elements() >= 1 :
                                 (is_widening && (lmul == 2)) ? vector_rename->frl_elements() >= 2 :
@@ -247,7 +247,14 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
 void
 VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn)
 {
-    uint64_t PDst,POldDst;
+    /*
+     * The bigger LMUL value is 8, then for LMUL=8 it is needed to assign 8 physical registers
+     * for LMUL=4 it is needed to assign 4 physical registers
+     * for LMUL=2 it is needed to assign 2 physical registers
+     * for LMUL=1 it is needed to assign 1 physical register
+     */
+    uint64_t PDst;//[8];
+    uint64_t POldDst;//[8];
     uint64_t Pvs1,Pvs2;
     uint64_t PMask;
     uint64_t vd;
@@ -266,6 +273,8 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     bool gather_op = (mop ==3);
 
     bool is_widening = insn.isWConvertFPToInt() || insn.isWConvertIntToFP() || insn.isWConvertFPToFP();
+    //uint8_t lmul = vector_config->get_vtype_lmul(last_vtype);
+    //uint8_t physical_regs_count = lmul;
 
     if(is_widening) {
         panic("Widening Instruction insn=%#h is not supported\n", insn.machInst);

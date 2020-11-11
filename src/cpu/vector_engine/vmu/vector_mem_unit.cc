@@ -66,12 +66,10 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     vectorwrapper = &vector_wrapper;
 
     uint64_t vl_count = vl ;
-    uint64_t vsew = vectorwrapper->vector_config->get_vtype_vsew(vtype);
+    uint64_t vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
 
-    uint8_t DST_SIZE =  (vsew == 3) ? sizeof(double) :
-                        (vsew == 2) ? sizeof(float) :
-                        (vsew == 1) ? sizeof(uint16_t) :
-                        (vsew == 0) ? sizeof(uint8_t) : 0;
+    /* destination data type size in bytes */
+    uint8_t DST_SIZE = vsew/8;
     assert(DST_SIZE != 0);
 
     uint8_t mop = insn.mop();
@@ -90,9 +88,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     bool  location;
 
     uint64_t mvl_bits =
-        vectorwrapper->vector_config->get_max_vector_length_bits();
+        vectorwrapper->vector_config->get_max_vector_length_bits(vtype);
     uint64_t mvl_elem =
-        vectorwrapper->vector_config->get_max_vector_length_elem(vsew);
+        vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
 
     if (insn.isLoad())
     {
