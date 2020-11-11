@@ -32,6 +32,8 @@
 
 #include <cassert>
 #include <string>
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "base/logging.hh"
@@ -196,29 +198,44 @@ VectorEngine::printConfigInst(RiscvISA::VectorStaticInst& insn, uint64_t src1,ui
 }
 
 void
-VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn)
+VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
     uint64_t pc = insn.getPC();
     bool gather_op = (insn.mop() ==3);
 
+    uint32_t PDst = vector_dyn_insn->get_PDst();
+    uint32_t POldDst = vector_dyn_insn->get_POldDst();
+    uint32_t Pvs2 = vector_dyn_insn->get_PSrc2();
+    uint32_t PMask = vector_dyn_insn->get_PMask();
+
+    std::stringstream mask_ren;
+    if (masked_op) {
+        mask_ren << "v" << PMask << ".m";
+    } else {
+        mask_ren << "";
+    }
+
     if (insn.isLoad())
     {
         if (gather_op){
-            DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc );
+            DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
+            DPRINTF(VectorRename,"%s v%d v%d %s  old_dst v%d ,  \n",insn.getName(),PDst,Pvs2,mask_ren.str(),POldDst);
         } else {
-            DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
+            DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc);
+            DPRINTF(VectorRename,"%s v%d %s  old_dst v%d\n",insn.getName(),PDst,mask_ren.str(),POldDst);
         }
     }
     else if (insn.isStore())
     {
         DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
+        DPRINTF(VectorRename,"%s v%d %s\n",insn.getName(),PDst,mask_ren.str());
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
 }
 
 void
-VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
+VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn,uint64_t src1)
 {
     uint64_t pc = insn.getPC();
     std::string masked;
@@ -231,18 +248,36 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,uint64_t src1)
                 (vf_op) ? "f" :
                 (vi_op) ? " " : "v";
 
+    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() : vector_dyn_insn->get_PDst();
+    uint32_t POldDst = vector_dyn_insn->get_POldDst();
+    uint32_t Pvs1 = (vx_op || vf_op || vi_op) ? insn.vs1() : vector_dyn_insn->get_PSrc1();
+    uint32_t Pvs2 = vector_dyn_insn->get_PSrc2();
+    uint32_t PMask = vector_dyn_insn->get_PMask();
+
+    std::stringstream mask_ren;
+    if (masked_op) {
+        mask_ren << "v" << PMask << ".m";
+    } else {
+        mask_ren << "";
+    }
+
     if (insn.arith1Src()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s           PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),masked,*(uint64_t*)&pc );
+        DPRINTF(VectorRename,"%s %s%d v%d %s  old_dst v%d\n",insn.getName(),reg_type,PDst,Pvs2,mask_ren.str(),POldDst);
     }
     else if (insn.arith2Srcs()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),masked,*(uint64_t*)&pc );
+        DPRINTF(VectorRename,"%s %s%d v%d %s%d %s  old_dst v%d\n",insn.getName(),reg_type,PDst,Pvs2,scr1_type,Pvs1,mask_ren.str(),POldDst);
     }
     else if (insn.arith3Srcs()) {
         DPRINTF(VectorInst,"%s %s%d v%d %s%d %s       PC 0x%X\n",insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),masked,*(uint64_t*)&pc );
+        DPRINTF(VectorRename,"%s %s%d v%d %s%d v%d %s old_dst v%d\n",insn.getName(),reg_type,PDst,Pvs2,scr1_type,Pvs1,POldDst,mask_ren.str(),POldDst);
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
 }
+
+
 
 void
 VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn)
@@ -281,91 +316,56 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     }
 
     if (insn.isVectorInstMem()) {
-        if (insn.isLoad())
-        {
-            if (gather_op)
-            {
+        if (insn.isLoad()) {
+            if (gather_op) {
                 Pvs2 = vector_rename->get_preg_rat(vs2);
                 vector_dyn_insn->set_PSrc2(Pvs2);
             }
-            // //Physical  Mask
+            /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
-            //Physical Destination
+            /* Physical Destination */
             PDst = vector_rename->get_frl();
             vector_dyn_insn->set_PDst(PDst);
-            //Physical Old Destination
+            /* Physical Old Destination */
             POldDst = vector_rename->get_preg_rat(vd);
             vector_dyn_insn->set_POldDst(POldDst);
-            // Setting the New Destination in the RAT structure
+            /* Setting the New Destination in the RAT structure */
             vector_rename->set_preg_rat(vd,PDst);
-
-            //if (masked_op) {
-            //    DPRINTF(VectorRename,"%s v%lu , Odst v%lu , mask v%lu\n"
-            //        ,insn.getName(), PDst, POldDst, PMask);
-            //} else {
-            //    DPRINTF(VectorRename,"%s v%lu , Odst v%lu\n"
-            //        ,insn.getName(), PDst, POldDst);
-            //}
-
-            //DPRINTF(VectorValidBit,"Set Valid-bit %d : %d\n",PDst,0);
+            /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
+            DPRINTF(VectorValidBit,"Set Valid-bit %d : %d\n",PDst,0);
         }
-        else if (insn.isStore())
-        {
-            //Physical source
+        else if (insn.isStore()) {
+            // TODO: maked stores are not implemented
+            /* Physical Destination corresponds to the source for store operations */
             PDst = vector_rename->get_preg_rat(vd);
+            /* Physical Destination */
             vector_dyn_insn->set_PDst(PDst);
-            // MASKED NOT IMPLEMENTED FOR STORES
-            //if (masked_op) {
-            //    DPRINTF(VectorRename,"%s v%lu ,  , mask %lu\n"
-            //        ,insn.getName(), PDst, PMask);
-            //} else {
-            //    DPRINTF(VectorRename,"%s v%lu \n",insn.getName(), PDst);
-            //}
         }
     }
     else if (insn.isVectorInstArith()) {
         if (insn.arith1Src()) {
-            //Physical  Mask
+            /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
-            //Physical Destination
+            /* Physical Destination */
             PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
             vector_dyn_insn->set_PDst(PDst);
-            //Physical Old Destination
+            /* Physical Old Destination */
             POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
             vector_dyn_insn->set_POldDst(POldDst);
-            //Physical Src2
+            /* Physical source 2 */
             Pvs2 = vector_rename->get_preg_rat(vs2);
             vector_dyn_insn->set_PSrc2(Pvs2);
-            // Set the New Destination in the RAT structure
-            if (dst_write_ena) { vector_rename->set_preg_rat(vd,PDst); }
-
-            //if (dst_write_ena) {
-            //    if (masked_op) {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu, Odst v%lu, mask "
-            //            "%lu\n",insn.getName(), PDst,Pvs2, POldDst, PMask);
-            //    } else {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu, Odst v%lu\n"
-            //            ,insn.getName(), PDst,Pvs2, POldDst);
-            //    }
-            //} else {
-            //    if (masked_op) {
-            //        DPRINTF(VectorRename,"%s v%lu, mask %lu\n"
-            //            ,insn.getName(),Pvs2, PMask);
-            //    } else {
-            //        DPRINTF(VectorRename,"%s v%lu\n",insn.getName(),Pvs2);
-            //    }
-            //}
-
-            //if (dst_write_ena) {
-            //    DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
-            if(dst_write_ena)
-            {
+            /* dst_write_ena is set when the instruction has a vector destination register */
+            if(dst_write_ena) {
+                /* Setting the New Destination in the RAT structure */
+                vector_rename->set_preg_rat(vd,PDst);
+                /* Setting to 0 the new physical destinatio valid bit*/
                 vector_reg_validbit->set_preg_valid_bit(PDst,0);
+                DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
             }
-            //}
         }
         else if (insn.arith2Srcs() | insn.arith3Srcs()) {
             //Physical  Mask
@@ -377,40 +377,20 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             //Physical Old Destination
             POldDst = vector_rename->get_preg_rat(vd);
             vector_dyn_insn->set_POldDst(POldDst);
-
-            if( !vx_op && !vf_op && !vi_op)
-            {
-                //Physical Src1
+            /* The instructions use an scalar value as source 1 */
+            if( !vx_op && !vf_op && !vi_op) {
+                 /* Physical source 1 */
                 Pvs1 = vector_rename->get_preg_rat(vs1);
                 vector_dyn_insn->set_PSrc1(Pvs1);
             }
-
-            //Physical Src2
+            /* Physical source 2 */
             Pvs2 = vector_rename->get_preg_rat(vs2);
             vector_dyn_insn->set_PSrc2(Pvs2);
-            // Set the New Destination in the RAT structure
+            /* Setting the New Destination in the RAT structure */
             vector_rename->set_preg_rat(vd,PDst);
-
-            //if (insn.arith2Srcs()) {
-            //    if (masked_op) {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu v%lu, Odst v%lu ,"
-            //            " mask %lu\n",insn.getName(),
-            //            PDst,Pvs1,Pvs2, POldDst, PMask);
-            //    } else {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu v%lu, Odst v%lu\n"
-            //            ,insn.getName(), PDst,Pvs1,Pvs2, POldDst);}
-            //} else {
-            //    if (masked_op) {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu v%lu v%lu, Odst v%lu"
-            //            ", mask %lu\n",insn.getName(),
-            //            PDst,Pvs1,Pvs2,POldDst, POldDst, PMask);
-            //    } else {
-            //        DPRINTF(VectorRename,"%s v%lu v%lu v%lu v%lu, Odst v%lu"
-            //            "\n",insn.getName(), PDst,Pvs1,Pvs2,POldDst, POldDst);}
-            //}
-
-            //DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
+            /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
+            DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
         } else {
             panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
         }
@@ -430,7 +410,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         return;
     }
 
-    //Be sure that the instruction was added to some group in base.isa
+    /* Be sure that the instruction was added to some group in base.isa */
     if (insn.isVectorInstArith()) {
         assert( insn.arith1Src() | insn.arith2Srcs() | insn.arith3Srcs() );
     }
@@ -458,7 +438,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->Memory_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 NULL,src1,src2,last_vtype,last_vl));
-        printMemInst(insn);
+        printMemInst(insn,vector_dyn_insn);
     }
     else if (insn.isVectorInstArith()) {
         if (dst_write_ena) {
@@ -476,7 +456,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 dependencie_callback,src1,src2,last_vtype,last_vl));
         }
-        printArithInst(insn,src1);
+        printArithInst(insn,vector_dyn_insn,src1);
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }
@@ -507,10 +487,8 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
         for (int i=0 ; i< num_clusters ; i++) {
             if (!vector_lane[i]->isOccupied()) { lane_id_available = i; }
         }
-        DPRINTF(VectorEngine,"Sending instruction %s v%d v%d v%d, old v%d ,to "
-            "cluster %d, pc 0x%lx\n",insn.getName() ,dyn_insn->get_PDst(),
-            dyn_insn->get_PSrc1(), dyn_insn->get_PSrc2(),
-            dyn_insn->get_POldDst(), lane_id_available , *(uint64_t*)&pc);
+        DPRINTF(VectorEngine,"Sending instruction %s to cluster %d, pc 0x%lx\n",
+            insn.getName(), lane_id_available , *(uint64_t*)&pc);
         vector_lane[lane_id_available]->issue(*this,insn,dyn_insn, xc, src1,
             vtype, vl,done_callback);
     } else {
