@@ -345,55 +345,36 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
         }
     }
     else if (insn.isVectorInstArith()) {
-        if (insn.arith1Src()) {
-            /* Physical  Mask */
-            PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
-            vector_dyn_insn->set_PMask(PMask);
-            /* Physical Destination */
-            PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
-            vector_dyn_insn->set_PDst(PDst);
-            /* Physical Old Destination */
-            POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
-            vector_dyn_insn->set_POldDst(POldDst);
-            /* Physical source 2 */
-            Pvs2 = vector_rename->get_preg_rat(vs2);
-            vector_dyn_insn->set_PSrc2(Pvs2);
-            /* dst_write_ena is set when the instruction has a vector destination register */
-            if(dst_write_ena) {
-                /* Setting the New Destination in the RAT structure */
-                vector_rename->set_preg_rat(vd,PDst);
-                /* Setting to 0 the new physical destinatio valid bit*/
-                vector_reg_validbit->set_preg_valid_bit(PDst,0);
-                DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
-            }
+        /* Physical  Mask */
+        PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
+        vector_dyn_insn->set_PMask(PMask);
+        /* Physical Destination */
+        PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
+        vector_dyn_insn->set_PDst(PDst);
+        /* Physical Old Destination */
+        POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
+        vector_dyn_insn->set_POldDst(POldDst);
+        /* Physical source 2 */
+        Pvs2 = vector_rename->get_preg_rat(vs2);
+        vector_dyn_insn->set_PSrc2(Pvs2);
+        /* When the instruction use an scalar value as source 1, the physical source 1 is disable
+         * When the instruction uses only 1 source (insn.arith1Src()), the  source 1 is disable
+         */
+        if( !(vx_op || vf_op || vi_op) && !insn.arith1Src()) {
+             /* Physical source 1 */
+            Pvs1 = vector_rename->get_preg_rat(vs1);
+            vector_dyn_insn->set_PSrc1(Pvs1);
         }
-        else if (insn.arith2Srcs() | insn.arith3Srcs()) {
-            //Physical  Mask
-            PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
-            vector_dyn_insn->set_PMask(PMask);
-            //Physical Destination
-            PDst = vector_rename->get_frl();
-            vector_dyn_insn->set_PDst(PDst);
-            //Physical Old Destination
-            POldDst = vector_rename->get_preg_rat(vd);
-            vector_dyn_insn->set_POldDst(POldDst);
-            /* The instructions use an scalar value as source 1 */
-            if( !vx_op && !vf_op && !vi_op) {
-                 /* Physical source 1 */
-                Pvs1 = vector_rename->get_preg_rat(vs1);
-                vector_dyn_insn->set_PSrc1(Pvs1);
-            }
-            /* Physical source 2 */
-            Pvs2 = vector_rename->get_preg_rat(vs2);
-            vector_dyn_insn->set_PSrc2(Pvs2);
+        /* dst_write_ena is set when the instruction has a vector destination register */
+        if(dst_write_ena) {
             /* Setting the New Destination in the RAT structure */
             vector_rename->set_preg_rat(vd,PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
             DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
-        } else {
-            panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
         }
+    } else {
+            panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
 }
 
