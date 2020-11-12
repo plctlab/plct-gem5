@@ -87,9 +87,15 @@ public:
       virtual bool isConvertIntToFP() const = 0;
       virtual bool isConvertFPToInt() const = 0;
       /* Widening Floating-Point/Integer Type-Convert Instructions */
+      virtual bool isWidening() const = 0;
       virtual bool isWConvertFPToInt() const = 0;
       virtual bool isWConvertIntToFP() const = 0;
       virtual bool isWConvertFPToFP() const = 0;
+      /* Narrowing Floating-Point/Integer Type-Convert Instructions */
+      virtual bool isNarrowing() const = 0;
+      virtual bool isNConvertFPToInt() const = 0;
+      virtual bool isNConvertIntToFP() const = 0;
+      virtual bool isNConvertFPToFP() const = 0;
 
       /* Vector Floating-Point Compare Instruction */
       virtual bool isFPCompare() const = 0;
@@ -204,8 +210,14 @@ class RiscvVectorInsn : public VectorStaticInst
   bool isConvertFPToInt()    const override { return opClass() == VectorConvertFPToIntOp; }
 
   bool isWConvertFPToInt()    const override { return opClass() == VectorWConvertFPToIntOp; }
-  bool isWConvertIntToFP()    const override { return 0; }//opClass() == VectorWConvertIntToFPOp; }
-  bool isWConvertFPToFP()     const override { return 0; }//opClass() == VectorWConvertFPToFPOp; }
+  bool isWConvertIntToFP()    const override { return opClass() == VectorWConvertIntToFPOp; }
+  bool isWConvertFPToFP()     const override { return opClass() == VectorWConvertFPToFPOp; }
+  bool isNConvertFPToInt()    const override { return opClass() == VectorNConvertFPToIntOp; }
+  bool isNConvertIntToFP()    const override { return opClass() == VectorNConvertIntToFPOp; }
+  bool isNConvertFPToFP()     const override { return opClass() == VectorNConvertFPToFPOp; }
+
+  bool isWidening()           const override { return isWConvertFPToInt() || isWConvertIntToFP() || isWConvertFPToFP(); }
+  bool isNarrowing()          const override { return isNConvertFPToInt() || isNConvertIntToFP() || isNConvertFPToFP(); }
 
   bool is_reduction()        const override { return opClass() == VectorReductionOp; }
 

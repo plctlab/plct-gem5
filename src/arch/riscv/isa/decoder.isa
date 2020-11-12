@@ -1927,18 +1927,18 @@ decode QUADRANT default Unknown::unknown() {
                     0x1:VectorConvertFPToIntOp::vfcvt_x_f_v();    // Convert float to signed integer.
                     0x2:VectorConvertIntToFPOp::vfcvt_f_xu_v();   // Convert unsigned integer to float.
                     0x3:VectorConvertIntToFPOp::vfcvt_f_x_v();    // Convert signed integer to float.
-
+                    // Widening Operations are not fully supported. WIP
                     0x8:VectorWConvertFPToIntOp::vfwcvt_xu_f_v(); // Convert float to double-width unsigned integer.
                     0x9:VectorWConvertFPToIntOp::vfwcvt_x_f_v();  // Convert float to double-width signed integer.
-                    //0xA:VectorWConvertIntToFPOp::vfwcvt_f_xu_v(); // Convert unsigned integer to double-width float.
-                    //0xB:VectorWConvertIntToFPOp::vfwcvt_f_x_v();  // Convert signed integer to double-width float.
-                    //0xC:VectorWConvertFPToFPOp::vfwcvt_f_f_v();  // Convert single-width float to double-width float.
-
-                    //0x10:VectorNConvertFPToIntOp::vfncvt_xu_f_v(); // Convert double-width float to unsigned integer.
-                    //0x11:VectorNConvertFPToIntOp::vfncvt_x_f_v();  // Convert double-width float to signed integer.
-                    //0x12:VectorNConvertIntToFPOp::vfncvt_f_xu_v(); // Convert double-width unsigned integer to float.
-                    //0x13:VectorNConvertIntToFPOp::vfncvt_f_x_v();  // Convert double-width signed integer to float
-                    //0x14:VectorNConvertIntToFPOp::vfncvt_f_f_v();  // Convert double-width float to single-width float.
+                    0xA:VectorWConvertIntToFPOp::vfwcvt_f_xu_v(); // Convert unsigned integer to double-width float.
+                    0xB:VectorWConvertIntToFPOp::vfwcvt_f_x_v();  // Convert signed integer to double-width float.
+                    0xC:VectorWConvertFPToFPOp::vfwcvt_f_f_v();  // Convert single-width float to double-width float.
+                    // Narrowing Operations are not fully supported. WIP
+                    0x10:VectorNConvertFPToIntOp::vfncvt_xu_f_v(); // Convert double-width float to unsigned integer.
+                    0x11:VectorNConvertFPToIntOp::vfncvt_x_f_v();  // Convert double-width float to signed integer.
+                    0x12:VectorNConvertIntToFPOp::vfncvt_f_xu_v(); // Convert double-width unsigned integer to float.
+                    0x13:VectorNConvertIntToFPOp::vfncvt_f_x_v();  // Convert double-width signed integer to float
+                    0x14:VectorNConvertFPToFPOp::vfncvt_f_f_v();  // Convert double-width float to single-width float.
                     }
                 }
             0x23: decode FUNCT3 {

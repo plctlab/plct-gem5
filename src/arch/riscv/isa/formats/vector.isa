@@ -91,6 +91,46 @@ def template VectorWConvertFPToIntConstructor {{
     }
 }};
 
+def template VectorWConvertIntToFPConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorWConvertIntToFPOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorWConvertFPToFPConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorWConvertFPToFPOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorNConvertFPToIntConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertFPToIntOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorNConvertIntToFPConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertIntToFPOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
+def template VectorNConvertFPToFPConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertFPToFPOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 def template VectorFPCompareConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorFPCompareOp)
@@ -222,6 +262,46 @@ def format VectorWConvertFPToIntOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorWConvertFPToIntConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorWConvertIntToFPOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorWConvertIntToFPConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorWConvertFPToFPOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorWConvertFPToFPConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorNConvertFPToIntOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorNConvertFPToIntConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorNConvertIntToFPOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorNConvertIntToFPConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorNConvertFPToFPOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorNConvertFPToFPConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

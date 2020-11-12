@@ -110,6 +110,11 @@ static const OpClass VectorReductionOp = Enums::VectorReduction;
 static const OpClass VectorConvertIntToFPOp = Enums::VectorConvertIntToFP;
 static const OpClass VectorConvertFPToIntOp = Enums::VectorConvertFPToInt;
 static const OpClass VectorWConvertFPToIntOp = Enums::VectorWConvertFPToInt;
+static const OpClass VectorWConvertIntToFPOp = Enums::VectorWConvertIntToFP;
+static const OpClass VectorWConvertFPToFPOp = Enums::VectorWConvertFPToFP;
+static const OpClass VectorNConvertFPToIntOp = Enums::VectorNConvertFPToInt;
+static const OpClass VectorNConvertIntToFPOp = Enums::VectorNConvertIntToFP;
+static const OpClass VectorNConvertFPToFPOp = Enums::VectorNConvertFPToFP;
 static const OpClass VectorFPCompareOp = Enums::VectorFPCompare;
 static const OpClass VectorSlideUpOp = Enums::VectorSlideUp;
 static const OpClass VectorSlideDownOp = Enums::VectorSlideDown;
@@ -120,3 +125,10 @@ static const OpClass VectorToScalarOp = Enums::VectorToScalar;
 static const OpClass Num_OpClasses = Enums::Num_OpClass;
 
 #endif // __CPU__OP_CLASS_HH__
+
+
+
+
+
+
+
