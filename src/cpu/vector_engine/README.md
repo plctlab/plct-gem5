@@ -20,6 +20,8 @@ bit elements), reducing the number of available physical registers, and with onl
 The model is based on the Working draft of the proposed RISC-V V vector extension.
 Stable release, v0.7.1 : https://github.com/riscv/riscv-v-spec
 
+If you use this software or a modified version of it for your research, please cite the paper: Cristóbal Ramirez, César Hernandez, Oscar Palomar, Osman Unsal, Marco Ramírez, and Adrián Cristal. 2020. A RISC-V Simulator and Benchmark Suite for Designing and Evaluating Vector Architectures. ACM Trans. Archit. Code Optim. 17, 4, Article 38 (October 2020), 29 pages. https://doi.org/10.1145/3422667
+
 ### Vectorized Benchmark Suite:
 
 To help evaluate these architectures, we developed a novel Vectorized Benchmark Suite which
