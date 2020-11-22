@@ -278,7 +278,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         if (!vector_to_scalar)
         {
             dstWriter->initialize(vector_wrapper,dst_count,DST_SIZE,addr_src0,
-                location, xc,[done_callback,dst_count,this](bool done)
+                0,location, xc,[done_callback,dst_count,this](bool done)
             {
                 ++Dread;
                 if (done) {

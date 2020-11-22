@@ -78,6 +78,14 @@ MemUnitWriteTiming::queueData(uint8_t *data)
     dataQ.push_back(data);
 }
 
+void
+MemUnitWriteTiming::queueAddrs(uint8_t *data)
+{
+    assert(running && !done);
+    AddrsQ.push_back(data);
+}
+
+
 //to main mem will ALWAYS succeed. vector_reg will be bandwidth throttled
 //either way, on writes, we must wait for responses!
 //
@@ -85,16 +93,19 @@ MemUnitWriteTiming::queueData(uint8_t *data)
 //   exec_context must memcpy the data!
 void
 MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
-    uint64_t DST_SIZE,uint64_t mem_addr, bool location,
+    uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop, bool location,
     ExecContextPtr& xc, std::function<void(bool)> on_item_store)
 {
     assert(!running && !done);
     assert(count > 0);
     assert(!dataQ.size());
+    assert(!AddrsQ.size());
 
     vectorwrapper = &vector_wrapper;
 
     uint64_t SIZE = DST_SIZE;
+
+    bool vindexed = (mop == 3);
 
     // This function tries to get up to 'get_up_to' elements from the front of
     // the input queue. if there are less elements, it returns all of them
@@ -151,12 +162,9 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         };
     };
 
-    writeFunction = [try_write,location,fin,xc,vaddr,vstride,
+    writeFunction = [try_write,location,fin,xc,vaddr,vstride,vindexed,
         on_item_store,SIZE,count,this](void) ->bool
     {
-        uint64_t i = this->vecIndex;
-        uint64_t addr = vaddr + SIZE*(vstride*i);
-
         //scratch and cache could use different line sizes
         uint64_t line_size;
         switch ((int)location) {
@@ -165,27 +173,96 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             default: panic("invalid location"); break;
         }
 
-        //we can always write 1 element
-        uint64_t line_addr = addr - (addr % line_size);
-        uint64_t consec_items = 1;
+        uint64_t line_addr;
+        //uint8_t items_in_line;
+        uint64_t addr;
+        uint64_t i = this->vecIndex;
+        uint64_t consec_items;
 
-        //now find any consecutive items that we can also write
-        for (uint64_t j=1; j<(line_size/SIZE) && (i+j)<count; ++j) {
-            uint64_t next_addr = vaddr +
-                SIZE*((i+j)*vstride );
-            uint64_t next_line_addr = next_addr - (next_addr % line_size);
-            if (next_addr-SIZE*j == addr && line_addr == next_line_addr) {
-                ++consec_items;
-            } else {
-                break;
+        if (!vindexed) //no indexed operation
+        {
+            //we can always write 1 element
+            addr = vaddr + SIZE*(vstride*i);
+            line_addr = addr - (addr % line_size);
+            consec_items = 1;
+
+            //now find any consecutive items that we can also write
+            for (uint64_t j=1; j<(line_size/SIZE) && (i+j)<count; ++j) {
+                uint64_t next_addr = vaddr +
+                    SIZE*((i+j)*vstride );
+                uint64_t next_line_addr = next_addr - (next_addr % line_size);
+                if (next_addr-SIZE*j == addr && line_addr == next_line_addr) {
+                    ++consec_items;
+                } else {
+                    break;
+                }
             }
-        }
+        } else { //indexed operation
+
+            uint64_t can_get = this->AddrsQ.size();
+            if (!can_get) {
+                DPRINTF(MemUnitWriteTiming, "try_read AddrsQ Addrs empty\n");
+                return false;
+            }
+            uint64_t got = std::min(line_size/SIZE, can_get);
+            uint8_t *buf = new uint8_t[got*SIZE];
+            for (uint8_t i=0; i<got; ++i) {
+                memcpy(buf+SIZE*i, this->AddrsQ[i], SIZE);
+            }
+
+            uint64_t index_addr;
+            if (SIZE == 8) {
+            index_addr = (uint64_t)((uint64_t*)buf)[0];
+            }
+            else if (SIZE == 4) {
+            index_addr = (uint64_t)((uint32_t*)buf)[0];
+            }
+            else{
+                panic("Memory operation : size not implemented");
+            }
+            addr = vaddr + index_addr;
+            line_addr = addr - (addr % line_size);
+            consec_items = 1;
+            //line_offsets.push_back(addr % line_size);
+            //items_in_line = 1;
+
+            //DPRINTF(MemUnitWriteTiming, "Trying to get mora than 1 element"
+            //    " from a line\n");
+            //DPRINTF(MemUnitWriteTiming, "reading addr  %#x ,line_addr %#x "
+            //    "with %d \n",addr, line_addr, items_in_line);
+
+            //try to write more items in the same cache-line
+            //for (uint8_t j=1; j<got; j++) {
+            //    if (SIZE == 8) {
+            //    index_addr = (uint64_t)((uint64_t*)buf)[j];
+            //    }
+            //    else if (SIZE == 4) {
+            //    index_addr = (uint64_t)((uint32_t*)buf)[j];
+            //    }
+
+            //    uint64_t next_addr = vaddr + index_addr;
+            //    uint64_t next_line_addr = next_addr - (next_addr % line_size);
+
+            //    DPRINTF(MemUnitWriteTiming, "next_addr  %#x  \n",next_addr);
+            //    DPRINTF(MemUnitWriteTiming, "next_line_addr  %#x ,line_addr "
+            //        "%#x  \n",next_line_addr, line_addr);
+
+            //    if (next_line_addr == line_addr) {
+            //        items_in_line += 1;
+            //        line_offsets.push_back(next_addr % line_size);
+            //    } else {
+            //        break;
+            //    }
+            //    DPRINTF(MemUnitWriteTiming,"items_in_line %d\n",items_in_line);
+            //}
+            delete buf;
+        } //end indexed operation
 
         //now see if there is any data in the queue to write
         DPRINTF(MemUnitWriteTiming,"getting data to write %d items at %#x\n",
             consec_items, addr);
 
-        return try_write(consec_items, [fin,location,xc,addr,SIZE,
+        return try_write(consec_items, [fin,location,xc,addr,SIZE,vindexed,
             count,i,this](uint8_t * data, uint32_t items_ready) -> uint8_t
         {
             DPRINTF(MemUnitWriteTiming, "got %d items to write at %#x\n",
@@ -205,6 +282,11 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             }
 
             if (success) {
+                if (vindexed) {
+                    for (uint8_t j=0; j<items_ready; j++) {
+                        this->AddrsQ.pop_front();
+                        }
+                }
                 this->vecIndex += items_ready;
                 this->done = (this->vecIndex == count);
                 return items_ready;

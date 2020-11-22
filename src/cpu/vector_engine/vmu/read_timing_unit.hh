@@ -67,7 +67,7 @@ private:
 
     volatile bool done;
     std::function<bool(void)> readFunction;
-    //For indexed op
+    //Used by indexed Operations to hold the element index
     std::deque<uint8_t *> dataQ;
     //modified by readFunction closure over time
     uint64_t vecIndex;
