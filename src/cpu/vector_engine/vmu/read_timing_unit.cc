@@ -170,13 +170,15 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
             uint64_t index_addr;
             if (SIZE == 8) {
-            index_addr = (uint64_t)((uint64_t*)buf)[0];
-            }
-            else if (SIZE == 4) {
-            index_addr = (uint64_t)((uint32_t*)buf)[0];
-            }
-            else{
-                index_addr=0;
+                index_addr = (uint64_t)((uint64_t*)buf)[0];
+            } else if (SIZE == 4) {
+                index_addr = (uint64_t)((uint32_t*)buf)[0];
+            } else if (SIZE == 2) {
+                index_addr = (uint16_t)((uint16_t*)buf)[0];
+            } else if (SIZE == 1) {
+                index_addr = (uint8_t)((uint8_t*)buf)[0];
+            } else{
+                panic("invalid mem req SIZE");
             }
             addr = vaddr + index_addr;
             line_addr = addr - (addr % line_size);
@@ -191,10 +193,15 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             //try to read more items in the same cache-line
             for (uint8_t j=1; j<got; j++) {
                 if (SIZE == 8) {
-                index_addr = (uint64_t)((uint64_t*)buf)[j];
-                }
-                else if (SIZE == 4) {
-                index_addr = (uint64_t)((uint32_t*)buf)[j];
+                    index_addr = (uint64_t)((uint64_t*)buf)[j];
+                } else if (SIZE == 4) {
+                    index_addr = (uint64_t)((uint32_t*)buf)[j];
+                } else if (SIZE == 2) {
+                    index_addr = (uint16_t)((uint16_t*)buf)[j];
+                } else if (SIZE == 1) {
+                    index_addr = (uint8_t)((uint8_t*)buf)[j];
+                } else {
+                    panic("invalid mem req SIZE"); break;
                 }
 
                 uint64_t next_addr = vaddr + index_addr;

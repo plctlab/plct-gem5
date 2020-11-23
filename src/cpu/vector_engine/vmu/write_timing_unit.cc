@@ -213,49 +213,19 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
             uint64_t index_addr;
             if (SIZE == 8) {
-            index_addr = (uint64_t)((uint64_t*)buf)[0];
-            }
-            else if (SIZE == 4) {
-            index_addr = (uint64_t)((uint32_t*)buf)[0];
-            }
-            else{
-                panic("Memory operation : size not implemented");
+                index_addr = (uint64_t)((uint64_t*)buf)[0];
+            } else if (SIZE == 4) {
+                index_addr = (uint64_t)((uint32_t*)buf)[0];
+            } else if (SIZE == 2) {
+                index_addr = (uint16_t)((uint16_t*)buf)[0];
+            } else if (SIZE == 1) {
+                index_addr = (uint8_t)((uint8_t*)buf)[0];
+            } else{
+                panic("invalid mem req SIZE");
             }
             addr = vaddr + index_addr;
             line_addr = addr - (addr % line_size);
             consec_items = 1;
-            //line_offsets.push_back(addr % line_size);
-            //items_in_line = 1;
-
-            //DPRINTF(MemUnitWriteTiming, "Trying to get mora than 1 element"
-            //    " from a line\n");
-            //DPRINTF(MemUnitWriteTiming, "reading addr  %#x ,line_addr %#x "
-            //    "with %d \n",addr, line_addr, items_in_line);
-
-            //try to write more items in the same cache-line
-            //for (uint8_t j=1; j<got; j++) {
-            //    if (SIZE == 8) {
-            //    index_addr = (uint64_t)((uint64_t*)buf)[j];
-            //    }
-            //    else if (SIZE == 4) {
-            //    index_addr = (uint64_t)((uint32_t*)buf)[j];
-            //    }
-
-            //    uint64_t next_addr = vaddr + index_addr;
-            //    uint64_t next_line_addr = next_addr - (next_addr % line_size);
-
-            //    DPRINTF(MemUnitWriteTiming, "next_addr  %#x  \n",next_addr);
-            //    DPRINTF(MemUnitWriteTiming, "next_line_addr  %#x ,line_addr "
-            //        "%#x  \n",next_line_addr, line_addr);
-
-            //    if (next_line_addr == line_addr) {
-            //        items_in_line += 1;
-            //        line_offsets.push_back(next_addr % line_size);
-            //    } else {
-            //        break;
-            //    }
-            //    DPRINTF(MemUnitWriteTiming,"items_in_line %d\n",items_in_line);
-            //}
             delete buf;
         } //end indexed operation
 
