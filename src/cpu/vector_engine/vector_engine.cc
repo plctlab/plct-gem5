@@ -341,7 +341,6 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             vector_rename->set_preg_rat(vd,PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
-            DPRINTF(VectorValidBit,"Set Valid-bit %d : %d\n",PDst,0);
         }
         else if (insn.isStore()) {
             
@@ -385,7 +384,6 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             vector_rename->set_preg_rat(vd,PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
-            DPRINTF(VectorValidBit,"Set Valid-bit %d: %d\n",PDst,0);
         }
     } else {
             panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
@@ -404,6 +402,8 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         VectorConfigIns++;
         return;
     }
+
+    DPRINTF(VectorInst,"src1 %d, src2 %d\n",src1,src2);
 
     /* Be sure that the instruction was added to some group in base.isa */
     if (insn.isVectorInstArith()) {
@@ -469,7 +469,7 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
         VectorMemIns++;
         DPRINTF(VectorEngine,"Sending instruction %s to VMU, pc 0x%lx\n"
             ,insn.getName() , *(uint64_t*)&pc );
-        vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,vtype,
+        vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,src2,vtype,
             vl, done_callback);
 
         SumVL = SumVL.value() + vector_config->vector_length_in_bits(vl,vtype);
@@ -758,7 +758,6 @@ bool
 VectorEngine::writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
     ThreadContext *tc, uint8_t channel, std::function<void(void)> callback)
 {
-    DPRINTF(VectorEngine, "inside writeVectorMem\n");
     uint64_t id = (uniqueReqId++);
     Vector_ReqState *pending = new Vector_W_ReqState(id, callback);
     vector_PendingReqQ.push_back(pending);
@@ -775,8 +774,8 @@ VectorEngine::writeVectorReg(Addr addr, uint8_t *data,
     uint32_t size, uint8_t channel,
     std::function<void(void)> callback)
 {
-    DPRINTF(VectorEngine, "writeVectorReg got %d bytes to write at %#x\n"
-        ,size, addr);
+    //DPRINTF(VectorEngine, "writeVectorReg got %d bytes to write at %#x\n"
+    //    ,size, addr);
     uint64_t id = (uniqueReqId++);
     Vector_ReqState *pending = new Vector_W_ReqState(id, callback);
     vector_PendingReqQ.push_back(pending);

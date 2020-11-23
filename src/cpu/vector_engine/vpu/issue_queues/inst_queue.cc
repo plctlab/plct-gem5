@@ -203,10 +203,10 @@ InstQueue::evaluate()
 
             if (srcs_ready) {
                 queue_slot = i;
+
                 pc = Instruction->insn.getPC();
-                DPRINTF(InstQueue,"Instruction %s , pc 0x%lx\n",
-                    Instruction->insn.getName() , *(uint64_t*)&pc);
-                DPRINTF(InstQueue,"Issuing Queue slot %d\n",queue_slot);
+                DPRINTF(InstQueue,"Issuing arith inst %s with pc 0x%lx from queue slot %d\n",
+                    Instruction->insn.getName(),*(uint64_t*)&pc,queue_slot);
                 Instruction->issued = 1;
                 break;
             }
@@ -215,13 +215,6 @@ InstQueue::evaluate()
         if (srcs_ready)
         {
             Instruction_Queue.erase(Instruction_Queue.begin()+queue_slot);
-
-            uint64_t pc_arith = Instruction->insn.getPC();
-            DPRINTF(InstQueue,"Issuing Arith_Instruction %s, rd %d, pc 0x%lx\n"
-                ,Instruction->insn.getName(),Instruction->dyn_insn->get_PDst(),
-                *(uint64_t*)&pc_arith);
-
-            //Instruction_Queue.pop_front();
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
                 Instruction->xc,Instruction->src1,Instruction->src2,
                  Instruction->rename_vtype,Instruction->rename_vl,
@@ -258,7 +251,7 @@ InstQueue::evaluate()
         else
         {
             idle_count_by_dependency ++;
-            DPRINTF(InstQueue,"Sources not ready");
+            //DPRINTF(InstQueue,"Sources not ready\n");
         }
     }
     // Stores are executed in order
@@ -327,9 +320,8 @@ InstQueue::evaluate()
             if (src_ready) {
                 queue_slot = i;
                 pc = Mem_Instruction->insn.getPC();
-                DPRINTF(InstQueue,"Mem_Instruction %s , pc 0x%lx\n",
-                    Mem_Instruction->insn.getName() , *(uint64_t*)&pc);
-                DPRINTF(InstQueue,"Issuing Queue slot %d\n",queue_slot);
+                DPRINTF(InstQueue,"Issuing mem inst %s with pc 0x%lx from queue slot %d\n",
+                    Mem_Instruction->insn.getName(),*(uint64_t*)&pc,queue_slot);
                 Mem_Instruction->issued = 1;
                 break;
             }
@@ -339,10 +331,6 @@ InstQueue::evaluate()
         {
             //Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
             Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
-            uint64_t pc_mem = Mem_Instruction->insn.getPC();
-            DPRINTF(InstQueue,"Issuing Mem_Instruction %s , rd %d, pc 0x%lx\n",
-                Mem_Instruction->insn.getName() ,Dst, *(uint64_t*)&pc_mem);
-
             vectorwrapper->issue(Mem_Instruction->insn,
                 Mem_Instruction->dyn_insn,Mem_Instruction->xc,
                 Mem_Instruction->src1,Mem_Instruction->src2,
@@ -377,7 +365,7 @@ InstQueue::evaluate()
         }
         else
         {
-            DPRINTF(InstQueue,"Sources not ready");
+            //DPRINTF(InstQueue,"Sources not ready\n");
         }
     }
 }

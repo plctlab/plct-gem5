@@ -36,9 +36,13 @@
 VectorValidBit::VectorValidBit(VectorValidBitParams *p):
 TickedObject(p),occupied(false), PhysicalRegs(p->PhysicalRegs)
 {
-    for (uint64_t i=0; i<PhysicalRegs; i++)
+    for (uint64_t i=0; i<32; i++)
         {
             reg_valid_bit.push_back(1);
+        }
+    for (uint64_t i=32; i<PhysicalRegs; i++)
+        {
+            reg_valid_bit.push_back(0);
         }
 }
 
@@ -73,7 +77,7 @@ VectorValidBit::isOccupied()
 void
 VectorValidBit::startTicking()
 {
-    DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
+    //DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
     start();
 }
 
@@ -81,7 +85,7 @@ VectorValidBit::startTicking()
 void
 VectorValidBit::stopTicking()
 {
-    DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
+    //DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
     stop();
 }
 /*

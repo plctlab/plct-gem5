@@ -122,9 +122,16 @@ class RiscvVectorMemOp : public RiscvVectorInsn
            * TODO: is still pending strided which uses rs2 as
            * second operand.
            */
+          if(mop()==2) { // Strided memory access
+            _numSrcRegs =  2;
+            _numDestRegs = 0;
+            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            _srcRegIdx[1] = RegId(IntRegClass, vs2());
+          } else {
             _numSrcRegs =  1;
             _numDestRegs = 0;
             _srcRegIdx[0] = RegId(IntRegClass, vs1());
+          }
         }
 
         std::string generateDisassembly(Addr pc,

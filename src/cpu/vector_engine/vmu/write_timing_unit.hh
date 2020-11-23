@@ -59,8 +59,9 @@ public:
     void queueData(uint8_t *data);
     void queueAddrs(uint8_t *data);
     void initialize(VectorEngine& vector_wrapper, uint64_t count,
-        uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop, bool location,
-        ExecContextPtr& xc,std::function<void(bool)> on_item_store);
+        uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop,uint64_t stride,
+        bool location,ExecContextPtr& xc,
+        std::function<void(bool)> on_item_store);
 
 private:
     //set by params

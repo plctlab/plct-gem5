@@ -30,7 +30,11 @@
 
 #include "cpu/vector_engine/vmu/vector_mem_unit.hh"
 
-#include <cstdint>
+#include <cassert>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 #include "base/logging.hh"
 #include "debug/VectorMemUnit.hh"
@@ -57,17 +61,32 @@ bool VectorMemUnit::isOccupied()
 
 void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
-    ExecContextPtr& xc, uint64_t src1,uint64_t vtype,uint64_t vl,
-    std::function<void(Fault fault)> done_callback)
+    ExecContextPtr& xc, uint64_t src1,uint64_t src2,uint64_t vtype,
+    uint64_t vl,std::function<void(Fault fault)> done_callback)
 {
     /* Note:
-     * Vector store unitstride is working
-     * Vector store indexed is working
-     * Vector store stride is disabled (WIP)
-     * Vector load unitstride is working
-     * Vector load indexed is working
-     * Vector load stride is disabled (WIP)
      * Masked memory operations are not supported (WIP)
+     * ========================================================
+     *  Vector Load/Store Addressing Modes   - version 0.7
+     * ========================================================
+     *  mop [2:0] encoding for loads
+     *     0 0 0  zero-extended unit-stride  VLxU,VLE        - VLxU not implemented
+     *     0 0 1  reserved
+     *     0 1 0  zero-extended strided      VLSxU, VLSE     - VLSxU not implemented
+     *     0 1 1  zero-extended indexed      VLXxU, VLXE     - VLXxU not implemented
+     *     1 0 0  sign-extended unit-stride  VLx  (x!=E)     - not implemented
+     *     1 0 1  reserved
+     *     1 1 0  sign-extended strided      VLSx (x!=E)     - not implemented
+     *     1 1 1  sign-extended indexed      VLXx (x!=E)     - not implemented
+     *  mop [2:0] encoding for stores
+     *     0 0 0  unit-stride                VSx
+     *     0 0 1  reserved
+     *     0 1 0  strided                    VSSx
+     *     0 1 1  indexed-ordered            VSXx
+     *     1 0 0  reserved
+     *     1 0 1  reserved
+     *     1 1 0  reserved
+     *     1 1 1  indexed-unordered          VSUXx            - not implemented
      */
 
     assert(!occupied);
@@ -82,8 +101,15 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     uint8_t DST_SIZE = vsew/8;
     assert(DST_SIZE != 0);
 
-    uint8_t mop;
-    bool indexed;
+    uint8_t mop = insn.mop();
+    bool indexed = (mop == 3);
+    bool strided = (mop == 2);
+    uint64_t stride =  (strided) ? src2:1;
+
+    std::stringstream mem_mop;
+    if (indexed) { mem_mop << "indexed"; } 
+    else if (strided) { mem_mop << "strided (" << stride <<")"; }
+    else { mem_mop << " "; }
 
     //If vl_count == 0 then callback, means that the VL = 0
     if (vl_count == 0) {
@@ -104,18 +130,16 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
     if (insn.isLoad())
     {
-        mop = insn.mop();
-        indexed = (mop ==3);
-
+        
         mem_addr0 = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
         location0 = 1; // 1 Vecor Register
 
-        DPRINTF(VectorMemUnit,"Vector Load to Register Addrs: 0x%lx size:%lu\n"
-            ,mem_addr0 ,vl_count);
+        DPRINTF(VectorMemUnit,"Vector Load %s to Register v%d, vl:%lu\n",
+        mem_mop.str(),dyn_insn->get_PDst() ,vl_count);
 
         //NOTE: need to initialize the writer BEFORE the reader!
         memWriter->initialize(vector_wrapper,mvl_elem,DST_SIZE,mem_addr0,
-            0,location0, xc,[done_callback,this](bool done){
+            0,1,location0, xc,[done_callback,this](bool done){
             if (done) {
                 this->occupied = false;
                 done_callback(NoFault);
@@ -124,8 +148,8 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
         mem_addr = src1;
         location = 0;
-        DPRINTF(VectorMemUnit,"Vector Load from Base Memory Addrs: 0x%lx\n",
-            mem_addr );
+        DPRINTF(VectorMemUnit,"Vector Load %s from Base Memory Addrs: 0x%lx\n",
+             mem_mop.str(),mem_addr );
 
         if (indexed)
         {
@@ -133,7 +157,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             DPRINTF(VectorMemUnit,"Vector Load Index from Vs2 Reg Addrs: "
                 "0x%lx\n",mem_addr1 );
             memReader_addr->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr1,
-            0,location0,xc,[DST_SIZE,this]
+            0,1,location0,xc,[DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
             {
                 uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -160,7 +184,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         }
 
         memReader->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr,
-        mop,location, xc,[mvl_elem,vl_count,DST_SIZE,this]
+        mop,stride,location, xc,[mvl_elem,vl_count,DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
         {
             uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -218,18 +242,15 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         });
     } else if (insn.isStore()) {
 
-        mop = insn.mop();
-        indexed = (mop ==3);
-
         mem_addr0 = src1;
         location0 = 0; // 0 = Memoria
 
-        DPRINTF(VectorMemUnit,"Vector Store to Memory Addrs: 0x%lx ,int reg :"
-            " x%d ,count= %lu \n",mem_addr0, dyn_insn->get_PSrc1() , vl_count);
+        DPRINTF(VectorMemUnit,"Vector Store %s to Memory Addrs: 0x%lx\n",
+             mem_mop.str(),mem_addr0 );
 
         //NOTE: need to initialize the writer BEFORE the reader!
         memWriter->initialize(vector_wrapper,vl_count,DST_SIZE,mem_addr0,
-            mop,location0, xc,[done_callback,this](bool done) {
+            mop,stride,location0, xc,[done_callback,this](bool done) {
             if (done) {
                 this->occupied = false;
                 done_callback(NoFault);
@@ -243,7 +264,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             DPRINTF(VectorMemUnit,"Vector Store: Index from vector register v%d\n",
                 dyn_insn->get_PSrc2());
             memReader_addr->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr1,
-            0,location0,xc,[DST_SIZE,this]
+            0,1,location0,xc,[DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
             {
                 uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -275,7 +296,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
                 dyn_insn->get_PDst());
 
         memReader->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr,
-            0,location, xc,[DST_SIZE,this](uint8_t*data, uint8_t size, bool done)
+            0,1,location, xc,[DST_SIZE,this](uint8_t*data, uint8_t size, bool done)
         {
             uint8_t *ndata = new uint8_t[DST_SIZE];
             memcpy(ndata, data, DST_SIZE);
