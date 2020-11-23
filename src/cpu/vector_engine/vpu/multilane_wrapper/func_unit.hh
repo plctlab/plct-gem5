@@ -112,8 +112,14 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, int Mitem,
 
     if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
+        if(vm==0) {
+            DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
             Aitem,Bitem,Ditem);
+        } else {
+            DPRINTF(Datapath,"WB Instruction = %f = %f\n",
+            Aitem,Ditem);
+        }
+        
     }
 
     if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
@@ -220,8 +226,13 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
 
     if ((operation == "vfmerge_vf")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = %lf : %lf  = %lf\n",
+        if(vm==0) {
+            DPRINTF(Datapath,"WB Instruction = %lf : %lf  = %f\n",
             Aitem,Bitem,Ditem);
+        } else {
+            DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem,Ditem);
+        }
     }
 
     if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
@@ -459,8 +470,13 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
 
     if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
+        if(vm==0) {
+            DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
             Aitem,Bitem,Ditem);
+        } else {
+            DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Aitem,Ditem);
+        }
     }
 
     /**************************************************************************
@@ -620,8 +636,13 @@ Datapath::compute_int_op(int Aitem, int Bitem, int Mitem,
 
     if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
-            Aitem,Bitem, Ditem);
+        if(vm==0) {
+            DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
+            Aitem,Bitem,Ditem);
+        } else {
+            DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Aitem,Ditem);
+        }
     }
 
     /**************************************************************************
