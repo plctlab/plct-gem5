@@ -65,23 +65,23 @@ public:
 
     void get_instruction_latency();
 
-    double compute_double_fp_op(double Aitem, double Bitem, long int Mitem,
+    double compute_double_fp_op(double Aitem, double Bitem, uint8_t Mitem,
         double Dstitem, RiscvISA::VectorStaticInst* insn);
-    double computeDoubleFPReduction(double accumDp,double Bitem,long int Mitem);
+    double computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem);
     long int compute_double_fp_comp_op(double Aitem, double Bitem,
         RiscvISA::VectorStaticInst* insn);
 
     
 
-    float compute_float_fp_op(float Aitem, float Bitem,  int Mitem,
+    float compute_float_fp_op(float Aitem, float Bitem,  uint8_t Mitem,
         float Dstitem, RiscvISA::VectorStaticInst* insn);
-    float computeSingleFPReduction(float accumSp,float Bitem,int Mitem);
+    float computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem);
     int compute_float_fp_comp_op(float Aitem, float Bitem ,
         RiscvISA::VectorStaticInst* insn);
 
     long int compute_long_int_op(long int Aitem, long int Bitem,
-        long int Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
-    int compute_int_op(int Aitem, int Bitem,  int Mitem, int Dstitem,
+        uint8_t Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
+    int compute_int_op(int Aitem, int Bitem,  uint8_t Mitem, int Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
     long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
@@ -89,14 +89,14 @@ public:
     int computeIntMaskLogicalOp(bool Aitem, bool Bitem,
         RiscvISA::VectorStaticInst* insn);
 
-    double compute_cvt_f_x_64_op( long int Bitem, long int Mitem,
+    double compute_cvt_f_x_64_op( long int Bitem, uint8_t Mitem,
         long int Dstitem, RiscvISA::VectorStaticInst* insn);
-    float compute_cvt_f_x_32_op( int Bitem, int Mitem, int Dstitem,
+    float compute_cvt_f_x_32_op( int Bitem, uint8_t Mitem, int Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
-    long int compute_cvt_x_f_64_op( double Bitem, long int Mitem,
+    long int compute_cvt_x_f_64_op( double Bitem, uint8_t Mitem,
         double Dstitem, RiscvISA::VectorStaticInst* insn);
-    int compute_cvt_x_f_32_op( float Bitem, int Mitem, float Dstitem,
+    int compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem, float Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
     void startTicking(VectorLane& data_op_unit,

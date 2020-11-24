@@ -139,6 +139,14 @@ def template VectorFPCompareConstructor {{
     }
 }};
 
+def template VectorIntCompareConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorIntCompareOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 def template VectorSlideUpConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorSlideUpOp)
@@ -310,6 +318,14 @@ def format VectorFPCompareOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorFPCompareConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorIntCompareOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorIntCompareConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

@@ -1859,57 +1859,57 @@ decode QUADRANT default Unknown::unknown() {
                 0x5: VectorData2SrcOp::vfmerge_vf();
                 }
             0x18: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmseq_vv();
+                0x0: VectorIntCompareOp::vmseq_vv();
                 0x1: VectorFPCompareOp::vmfeq_vv();
                 0x2: VectorMaskLogicalOp::vmandnot_mm();
-                0x3: VectorData2SrcOp::vmseq_vi();
-                0x4: VectorData2SrcOp::vmseq_vx();
+                0x3: VectorIntCompareOp::vmseq_vi();
+                0x4: VectorIntCompareOp::vmseq_vx();
                 0x5: VectorFPCompareOp::vmfeq_vf();
                 }
             0x19: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmsne_vv();
+                0x0: VectorIntCompareOp::vmsne_vv();
                 0x1: VectorFPCompareOp::vmfle_vv();
                 0x2: VectorMaskLogicalOp::vmand_mm();
-                0x3: VectorData2SrcOp::vmsne_vi();
-                0x4: VectorData2SrcOp::vmsne_vx();
+                0x3: VectorIntCompareOp::vmsne_vi();
+                0x4: VectorIntCompareOp::vmsne_vx();
                 0x5: VectorFPCompareOp::vmfle_vf();
                 }
             0x1A: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmsltu_vv();
+                0x0: VectorIntCompareOp::vmsltu_vv();
                 0x2: VectorMaskLogicalOp::vmor_mm();
-                0x4: VectorData2SrcOp::vmsltu_vx();
+                0x4: VectorIntCompareOp::vmsltu_vx();
                 }
             0x1B: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmslt_vv();
+                0x0: VectorIntCompareOp::vmslt_vv();
                 0x1: VectorFPCompareOp::vmflt_vv();
                 0x2: VectorMaskLogicalOp::vmxor_mm();
-                0x4: VectorData2SrcOp::vmslt_vx();
+                0x4: VectorIntCompareOp::vmslt_vx();
                 0x5: VectorFPCompareOp::vmflt_vf();
                 }
             0x1C: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmsleu_vv();
+                0x0: VectorIntCompareOp::vmsleu_vv();
                 0x1: VectorFPCompareOp::vmfne_vv();
                 0x2: VectorMaskLogicalOp::vmornot_mm();
-                0x3: VectorData2SrcOp::vmsleu_vi();
-                0x4: VectorData2SrcOp::vmsleu_vx();
+                0x3: VectorIntCompareOp::vmsleu_vi();
+                0x4: VectorIntCompareOp::vmsleu_vx();
                 0x5: VectorFPCompareOp::vmfne_vf();
                 }
             0x1D: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmsle_vv();
+                0x0: VectorIntCompareOp::vmsle_vv();
                 0x2: VectorMaskLogicalOp::vmnand_mm();
-                0x3: VectorData2SrcOp::vmsle_vi();
-                0x4: VectorData2SrcOp::vmsle_vx();
+                0x3: VectorIntCompareOp::vmsle_vi();
+                0x4: VectorIntCompareOp::vmsle_vx();
                 0x5: VectorFPCompareOp::vmfgt_vf();
                 }
             0x1E: decode FUNCT3 {
                 0x2: VectorMaskLogicalOp::vmnor_mm();
-                0x3: VectorData2SrcOp::vmsgtu_vi();
-                0x4: VectorData2SrcOp::vmsgtu_vx();
+                0x3: VectorIntCompareOp::vmsgtu_vi();
+                0x4: VectorIntCompareOp::vmsgtu_vx();
                 }
             0x1F: decode FUNCT3 {
                 0x2: VectorMaskLogicalOp::vmxnor_mm();
-                0x3: VectorData2SrcOp::vmsgt_vi();
-                0x4: VectorData2SrcOp::vmsgt_vx();
+                0x3: VectorIntCompareOp::vmsgt_vi();
+                0x4: VectorIntCompareOp::vmsgt_vx();
                 0x5: VectorFPCompareOp::vmfge_vf();
                 }
             0x20: decode FUNCT3 {

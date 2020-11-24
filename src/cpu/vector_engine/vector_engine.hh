@@ -259,6 +259,14 @@ public:
 private:
     uint64_t last_vtype;
     uint64_t last_vl;
+
+    /* lmul parameter */
+    uint8_t last_lmul=1;
+    /* Physical registers */
+    uint64_t PDst;
+    uint64_t POldDst;
+    uint64_t Pvs1,Pvs2;
+    uint64_t PMask;
 };
 
 #endif // __CPU_VECTOR_ENGINE_HH__

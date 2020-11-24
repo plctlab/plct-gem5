@@ -90,7 +90,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t DATA_SIZE = SIZE;
     uint64_t DST_SIZE = SIZE;
 
-    uint64_t addr_src0;
+    uint64_t addr_dst;
     uint64_t addr_src1;
     uint64_t addr_src2;
     uint64_t addr_Mask;
@@ -101,16 +101,19 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     move_to_core = (insn.getName() =="vfmv_fs");
 
     uint64_t i;
-    // Masked operation
-    masked_op = (insn.vm()==0);
     // OPIVI, OPIVX , OPFVF and OPMVX formats
     vx_op = (insn.func3()==4) || (insn.func3()==6);
     vf_op = (insn.func3()==5);
     vi_op = (insn.func3()==3);
-
+    // Masked operation
+    masked_op = (insn.vm()==0);
+    /*Mask destination. Two instructions types creates a mask: isFPCompare()  isIntCompare()*/
+    bool mask_dst = insn.isMaskDst();
+    uint64_t mask_dst_data = 0;
+    //uint8_t mask_elements = 0;
     //address in bytes
     uint64_t mvl_bits =vectorwrapper->vector_config->get_max_vector_length_bits(vtype);
-    addr_src0 = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
+    addr_dst = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
     addr_src1 = (uint64_t)dyn_insn->get_PSrc1() * mvl_bits / 8;
     addr_src2 = (uint64_t)dyn_insn->get_PSrc2() * mvl_bits / 8;
     addr_Mask = (uint64_t)dyn_insn->get_PMask() * mvl_bits / 8;
@@ -214,14 +217,26 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
         dataPath->startTicking(*this, insn, vl_count, dst_count, sew,
         slide_count ,src1,
-        [dyn_insn,done_callback,xc,mvl_element,vl_count,DST_SIZE,this]
-        (uint8_t *data, uint8_t size, bool done)
-        {
+        [dyn_insn,done_callback,xc,mvl_element,vl_count,DST_SIZE,mask_dst,mask_dst_data,this]
+        (uint8_t *data, uint8_t size, bool done) mutable {
             assert(size == DST_SIZE);
 
             if (!vector_to_scalar)
             {
-                this->dstWriter->queueData(data);
+                if(mask_dst) {
+                    mask_dst_data = *(uint8_t *)data;
+                    delete data;
+                    uint8_t *ndata = new uint8_t[DST_SIZE];
+                    memcpy(ndata, &mask_dst_data, DST_SIZE);
+                    this->dstWriter->queueData(ndata);
+                    mask_dst_data=0;
+                    if (DST_SIZE==8) {  DPRINTF(VectorLane,"Writting mask Rrgister: %X\n",*(uint64_t*)ndata);  }
+                    if (DST_SIZE==4) {  DPRINTF(VectorLane,"Writting mask Rrgister: %X\n",*(uint32_t*)ndata);  }
+                    if (DST_SIZE==2) {  DPRINTF(VectorLane,"Writting mask Rrgister: %X\n",*(uint16_t*)ndata);  }
+                    if (DST_SIZE==1) {  DPRINTF(VectorLane,"Writting mask Rrgister: %X\n",*(uint8_t*)ndata);  }
+                } else {
+                    this->dstWriter->queueData(data);
+                }
             }
             else
             {
@@ -277,7 +292,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
         if (!vector_to_scalar)
         {
-            dstWriter->initialize(vector_wrapper,dst_count,DST_SIZE,addr_src0,
+            dstWriter->initialize(vector_wrapper,dst_count,DST_SIZE,addr_dst,
                 0,1,location, xc,[done_callback,dst_count,this](bool done)
             {
                 ++Dread;
@@ -383,15 +398,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 (uint8_t*data, uint8_t size, bool done)
             {
                 assert(size == DATA_SIZE);
-                uint8_t *ndata = new uint8_t[DATA_SIZE];
-                memcpy(ndata, data, DATA_SIZE);
+                uint8_t *ndata = new uint8_t;
+                memcpy(ndata, data, 1);
                 this->MdataQ.push_back(ndata);
-                if (DATA_SIZE==8){ DPRINTF(VectorLane,"queue Data MaskReader "
-                    "0x%x , queue_size = %d \n" , *(uint64_t *) ndata ,
-                    this->MdataQ.size());}
-                if (DATA_SIZE==4){ DPRINTF(VectorLane,"queue Data MaskReader "
-                    "0x%x , queue_size = %d \n" , *(uint32_t *) ndata ,
-                    this->MdataQ.size());}
+                DPRINTF(VectorLane,"queue MaskReader 0x%x , queue_size = %d \n" , *(uint8_t *) ndata ,
+                    this->MdataQ.size());
                 ++this->Mread;
                 delete data;
                 assert(!done || (this->Mread == vl_count));

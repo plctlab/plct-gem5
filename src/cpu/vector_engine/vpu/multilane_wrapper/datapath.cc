@@ -249,7 +249,7 @@ Datapath::evaluate()
 
     uint8_t * Adata = (uint8_t *)malloc(simd_size*DATA_SIZE);
     uint8_t * Bdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
-    uint8_t * Mdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
+    uint8_t * Mdata = (uint8_t *)malloc(simd_size);
     uint8_t * Dstdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
 
     for (uint64_t i=0; i<simd_size; ++i) {
@@ -304,7 +304,7 @@ Datapath::evaluate()
         if (vm==0)
         {
             uint8_t *Mitem = vector_lane->MdataQ.front();
-            memcpy(Mdata+(i*DATA_SIZE), Mitem, DATA_SIZE);
+            memcpy(Mdata+(i*1), Mitem, 1);
             vector_lane->MdataQ.pop_front();
             delete[] Mitem;
         }
@@ -360,8 +360,7 @@ Datapath::evaluate()
                 if (vsew == 64)
                 {
                     uint64_t slide_1element = src1;
-                    long int Mitem = (0x0000000000000001) &&
-                        (long int)((long int*)Mdata)[i];
+                    uint8_t Mitem = ((uint8_t*)Mdata)[i];
                     uint64_t Dstitem = ((uint64_t*)Dstdata)[i] ;
                     uint64_t Ditem;
                     if (vslideup | vslide1up)
@@ -411,7 +410,7 @@ Datapath::evaluate()
                 else
                 {
                     uint32_t slide_1element = src1;
-                    int Mitem = (0x00000001) && (int)((int*)Mdata)[i] ;
+                    uint8_t Mitem = ((uint8_t*)Mdata)[i];
                     uint32_t Dstitem = ((uint32_t*)Dstdata)[i] ;
                     uint32_t Ditem;
                     if (vslideup | vslide1up)
@@ -469,15 +468,13 @@ Datapath::evaluate()
                         if (vf_reduction)
                         {
                             double Bitem = (double)((double*)Bdata)[i] ;
-                            long int Mitem = (0x0000000000000001) &&
-                                (long int)((long int*)Mdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumDp = computeDoubleFPReduction(accumDp,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else {
                             double Aitem = (double)((double*)Adata)[i] ;
                             double Bitem = (double)((double*)Bdata)[i] ;
-                            long int Mitem = (0x0000000000000001) &&
-                                (long int)((long int*)Mdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             double Dstitem = (double)((double*)Dstdata)[i];
                             if (is_FP_Comp)
                             {
@@ -498,13 +495,13 @@ Datapath::evaluate()
                         if (vf_reduction)
                         {
                             float Bitem = (float)((float*)Bdata)[i];
-                            int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumSp = computeSingleFPReduction(accumSp,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else {
                             float Aitem = (float)((float*)Adata)[i];
                             float Bitem = (float)((float*)Bdata)[i];
-                            int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             float Dstitem = (float)((float*)Dstdata)[i];
                             if (is_FP_Comp)
                             {
@@ -544,8 +541,7 @@ Datapath::evaluate()
                             {
                                 long int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
-                                long int Mitem = (0x0000000000000001) &&
-                                    (long int)((long int*)Mdata)[i] ;
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accumInt = (vm==1) ? accumInt + Bitem :
                                     (Mitem) ? accumInt + Bitem : accumInt;
                                 red_SrcCount=red_SrcCount + 1;
@@ -554,8 +550,7 @@ Datapath::evaluate()
                             } else if (vmfirst) {
                                 int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
-                                int Mitem = (0x0000000000000001) &&
-                                    (long int)((long int*)Mdata)[i] ;
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0000000000000001);
                                 accumInt = ((vm==1) || ((vm==0) && (Mitem==1)))
@@ -580,8 +575,7 @@ Datapath::evaluate()
                         } else {
                             long int Aitem = (long int)((long int*)Adata)[i];
                             long int Bitem = (long int)((long int*)Bdata)[i];
-                            long int Mitem = (0x0000000000000001) &&
-                                (long int)((long int*)Mdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             long int Dstitem =
                                 (long int)((long int*)Dstdata)[i];
                             long int Ditem = compute_long_int_op(Aitem, Bitem,
@@ -598,8 +592,7 @@ Datapath::evaluate()
                             {
                                 int Bitem = (0x00000001) &&
                                     (int)((int*)Bdata)[i];
-                                int Mitem = (0x00000001) &&
-                                    (int)((int*)Mdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accumInt = (vm==1) ? accumInt + Bitem : (Mitem)
                                      ? accumInt + Bitem : accumInt;
                                 red_SrcCount=red_SrcCount + 1;
@@ -609,8 +602,7 @@ Datapath::evaluate()
                             } else if (vmfirst) {
                                 int Bitem = (0x00000001) &&
                                     (int)((int*)Bdata)[i];
-                                int Mitem = (0x00000001) &&
-                                    (int)((int*)Mdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x00000001);
                                 accumInt = ((vm==1) || ((vm==0) && (Mitem==1)))
@@ -636,7 +628,7 @@ Datapath::evaluate()
                         } else {
                             int Aitem = (int)((int*)Adata)[i] ;
                             int Bitem = (int)((int*)Bdata)[i] ;
-                            int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             int Dstitem = (int)((int*)Dstdata)[i] ;
                             int Ditem = compute_int_op(Aitem, Bitem, Mitem,
                                 Dstitem, insn);
@@ -650,15 +642,14 @@ Datapath::evaluate()
                     if (vsew == 64)
                     {
                         long int Bitem = (long int)((long int*)Bdata)[i];
-                        long int Mitem = (0x0000000000000001) &&
-                            (long int)((long int*)Mdata)[i] ;
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         long int Dstitem = (long int)((long int*)Dstdata)[i];
                         double Ditem = compute_cvt_f_x_64_op(Bitem, Mitem,
                             Dstitem, insn);
                         memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
                     } else {
                         int Bitem = (int)((int*)Bdata)[i] ;
-                        int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         int Dstitem = (int)((int*)Dstdata)[i] ;
                         float Ditem = compute_cvt_f_x_32_op( Bitem, Mitem,
                             Dstitem, insn);
@@ -670,8 +661,7 @@ Datapath::evaluate()
                     if (vsew == 64)
                     {
                         double Bitem = (double)((double*)Bdata)[i] ;
-                        long int Mitem = (0x0000000000000001) &&
-                            (long int)((long int*)Mdata)[i] ;
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         double Dstitem = (double)((double*)Dstdata)[i] ;
                         long int Ditem = compute_cvt_x_f_64_op( Bitem, Mitem,
                             Dstitem, insn);
@@ -679,7 +669,7 @@ Datapath::evaluate()
                             DST_SIZE);
                     } else {
                         float Bitem = (float)((float*)Bdata)[i] ;
-                        int Mitem = (0x00000001) && (int)((int*)Mdata)[i];
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         float Dstitem = (float)((float*)Dstdata)[i] ;
                         int Ditem = compute_cvt_x_f_32_op( Bitem, Mitem,
                             Dstitem, insn);

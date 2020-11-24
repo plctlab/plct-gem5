@@ -116,6 +116,7 @@ static const OpClass VectorNConvertFPToIntOp = Enums::VectorNConvertFPToInt;
 static const OpClass VectorNConvertIntToFPOp = Enums::VectorNConvertIntToFP;
 static const OpClass VectorNConvertFPToFPOp = Enums::VectorNConvertFPToFP;
 static const OpClass VectorFPCompareOp = Enums::VectorFPCompare;
+static const OpClass VectorIntCompareOp = Enums::VectorIntCompare;
 static const OpClass VectorSlideUpOp = Enums::VectorSlideUp;
 static const OpClass VectorSlideDownOp = Enums::VectorSlideDown;
 static const OpClass VectorMemoryLoadOp = Enums::VectorMemoryLoad;

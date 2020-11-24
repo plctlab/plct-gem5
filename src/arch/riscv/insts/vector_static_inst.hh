@@ -99,6 +99,10 @@ public:
 
       /* Vector Floating-Point Compare Instruction */
       virtual bool isFPCompare() const = 0;
+      /* Vector Integer Comparison Instructions */
+      virtual bool isIntCompare() const = 0;
+      /* The instruction create a Mask */
+      virtual bool isMaskDst() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
       virtual bool VectorMaskLogical() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
@@ -198,7 +202,7 @@ class RiscvVectorInsn : public VectorStaticInst
                                                     || isWConvertFPToInt() || isWConvertIntToFP() || isWConvertFPToFP()
                                                     ; }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare(); }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare() || isIntCompare(); }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 
@@ -222,6 +226,9 @@ class RiscvVectorInsn : public VectorStaticInst
   bool is_reduction()        const override { return opClass() == VectorReductionOp; }
 
   bool isFPCompare()         const override { return opClass() == VectorFPCompareOp; }
+  bool isIntCompare()        const override { return opClass() == VectorIntCompareOp; }
+
+  bool isMaskDst()           const override { return isFPCompare() || isIntCompare(); }
 
   bool is_slideup()          const override { return opClass() == VectorSlideUpOp; }
 

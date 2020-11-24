@@ -144,13 +144,13 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
      * to accept the instruction. And finally when LMUL=8, means that the vector engine must have at least 
      * 8 physical registers available in order to accept the instruction.
      */ 
-    bool is_widening = insn->isWConvertFPToInt() || insn->isWConvertIntToFP() || insn->isWConvertFPToFP();
-    uint8_t lmul = vector_config->get_vtype_lmul(last_vtype);
+    bool mask_dst = insn->isMaskDst();
 
-    bool enough_physical_regs = (lmul == 1) ? vector_rename->frl_elements() >= 1 :
-                                (is_widening && (lmul == 2)) ? vector_rename->frl_elements() >= 2 :
-                                (is_widening && (lmul == 4)) ? vector_rename->frl_elements() >= 4 :
-                                (is_widening && (lmul == 8)) ? vector_rename->frl_elements() >= 8 : 0;
+    bool enough_physical_regs = ((last_lmul == 1) || mask_dst) ? vector_rename->frl_elements() >= 1 :
+                                (last_lmul == 2) ? vector_rename->frl_elements() >= 2 :
+                                (last_lmul == 4) ? vector_rename->frl_elements() >= 4 :
+                                (last_lmul == 8) ? vector_rename->frl_elements() >= 8 : 0;
+    DPRINTF(VectorInst,"rob_entry_available %d, queue_slots_available %d, enough_physical_regs %d\n",rob_entry_available,queue_slots_available,enough_physical_regs);
     return  enough_physical_regs && queue_slots_available
         && rob_entry_available;
     //return  !vector_rename->frl_empty() && queue_slots_available
@@ -219,20 +219,20 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
     {
         if (indexed){
             DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
-            DPRINTF(VectorRename,"%s v%d v%d %s  old_dst v%d\n",insn.getName(),PDst,Pvs2,mask_ren.str(),POldDst);
+            DPRINTF(VectorRename,"renamed inst: %s v%d v%d %s  old_dst v%d\n",insn.getName(),PDst,Pvs2,mask_ren.str(),POldDst);
         } else {
             DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc);
-            DPRINTF(VectorRename,"%s v%d %s  old_dst v%d\n",insn.getName(),PDst,mask_ren.str(),POldDst);
+            DPRINTF(VectorRename,"renamed inst: %s v%d %s  old_dst v%d\n",insn.getName(),PDst,mask_ren.str(),POldDst);
         }
     }
     else if (insn.isStore())
     {
          if (indexed){
             DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
-            DPRINTF(VectorRename,"%s v%d v%d %s\n",insn.getName(),PDst,Pvs2,mask_ren.str());
+            DPRINTF(VectorRename,"renamed inst: %s v%d v%d %s\n",insn.getName(),PDst,Pvs2,mask_ren.str());
         } else {
             DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
-            DPRINTF(VectorRename,"%s v%d %s\n",insn.getName(),PDst,mask_ren.str());
+            DPRINTF(VectorRename,"renamed inst: %s v%d %s\n",insn.getName(),PDst,mask_ren.str());
         }
         
     } else {
@@ -294,10 +294,6 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
      * for LMUL=2 it is needed to assign 2 physical registers
      * for LMUL=1 it is needed to assign 1 physical register
      */
-    uint64_t PDst;//[8];
-    uint64_t POldDst;//[8];
-    uint64_t Pvs1,Pvs2;
-    uint64_t PMask;
     uint64_t vd;
     uint64_t vs1,vs2;
     vd = insn.vd();
@@ -313,21 +309,12 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     uint8_t mop = insn.mop();
     bool indexed = (mop ==3);
 
-    bool is_widening = insn.isWConvertFPToInt() || insn.isWConvertIntToFP() || insn.isWConvertFPToFP();
-    //uint8_t lmul = vector_config->get_vtype_lmul(last_vtype);
-    //uint8_t physical_regs_count = lmul;
-
-    if(is_widening) {
-        panic("Widening Instruction insn=%#h is not supported\n", insn.machInst);
-    }
-
     if (insn.isVectorInstMem()) {
         // TODO: maked memory operations are not implemented
         if (insn.isLoad()) {
-            if (indexed) {
-                Pvs2 = vector_rename->get_preg_rat(vs2);
-                vector_dyn_insn->set_PSrc2(Pvs2);
-            }
+            /* Physical  source 2 used to hold the index values */
+            Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            vector_dyn_insn->set_PSrc2(Pvs2);
             /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
@@ -343,11 +330,9 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
         }
         else if (insn.isStore()) {
-            
-            if (indexed) {
-                Pvs2 = vector_rename->get_preg_rat(vs2);
-                vector_dyn_insn->set_PSrc2(Pvs2);
-            }
+            /* Physical  source 2 used to hold the index values */
+            Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            vector_dyn_insn->set_PSrc2(Pvs2);
             /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
             vector_dyn_insn->set_PMask(PMask);
@@ -400,7 +385,17 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         dependencie_callback();
         printConfigInst(insn,src1,src2);
         VectorConfigIns++;
+        DPRINTF(VectorEngine,"Settig vl %d , sew %d , lmul %d\n",last_vl,vector_config->get_vtype_sew(last_vtype),vector_config->get_vtype_lmul(last_vtype));
         return;
+    }
+
+    if(insn.isWidening() || insn.isNarrowing()){
+        panic("Widening/Narrowing vector instructions are not fully suported \n");
+    }
+
+    last_lmul = vector_config->get_vtype_lmul(last_vtype);
+    if(last_lmul>1){
+        panic("LMUL>1 is not suported \n");
     }
 
     DPRINTF(VectorInst,"src1 %d, src2 %d\n",src1,src2);
