@@ -145,17 +145,11 @@ InstQueue::evaluate()
         for (int i=0 ; i< queue_size ; i++)
         {
             Instruction = Instruction_Queue[i];
-            bool working = 0;
-            for (int j=0 ; j< vectorwrapper->num_clusters ; j++)
-            {
-                working = working ||
-                    vectorwrapper->vector_lane[j]->isOccupied();
-            }
 
-            src1 = Instruction->dyn_insn->get_PSrc1();
-            src2 = Instruction->dyn_insn->get_PSrc2();
-            src3 = Instruction->dyn_insn->get_POldDst();
-            mask = Instruction->dyn_insn->get_PMask();
+            src1 = Instruction->dyn_insn->get_renamed_src1();
+            src2 = Instruction->dyn_insn->get_renamed_src2();
+            src3 = Instruction->dyn_insn->get_renamed_old_dst();
+            mask = Instruction->dyn_insn->get_renamed_mask();
 
             masked_op = (Instruction->insn.vm()==0);
 
@@ -218,23 +212,23 @@ InstQueue::evaluate()
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
                 Instruction->xc,Instruction->src1,Instruction->src2,
                  Instruction->rename_vtype,Instruction->rename_vl,
-                [Instruction,masked_op,pc,this](Fault f) {
+                [Instruction,this](Fault f) {
 
                 // Setting the Valid Bit
                 bool wb_enable = !Instruction->insn.VectorToScalar();
-                uint64_t Dst = Instruction->dyn_insn->get_PDst();
+                uint64_t renamed_dst = Instruction->dyn_insn->get_renamed_dst();
                 if (wb_enable)
                 {
                 DPRINTF(VectorValidBit,"Set Valid bit to reg: %lu  with "
-                    "value:%lu\n",Dst,1);
-                vectorwrapper->vector_reg_validbit->set_preg_valid_bit(Dst,1);
+                    "value:%lu\n",renamed_dst,1);
+                vectorwrapper->vector_reg_validbit->set_preg_valid_bit(renamed_dst,1);
                 }
                 //Setting the executed bit in the ROB
                 uint16_t rob_entry = Instruction->dyn_insn->get_rob_entry();
                 vectorwrapper->vector_rob->set_rob_entry_executed(rob_entry);
 
-                DPRINTF(InstQueue,"Executed instruction %s , pc 0x%lx\n",
-                    Instruction->insn.getName() , *(uint64_t*)&pc);
+                DPRINTF(InstQueue,"Executed instruction %s\n",
+                    Instruction->insn.getName());
                 DPRINTF(InstQueue,"Arith Queue Size %d\n",
                     Instruction_Queue.size());
                 
@@ -269,10 +263,10 @@ InstQueue::evaluate()
         uint64_t pc = 0;
         bool isStore = 0;
         bool isLoad = 0;
-        uint64_t Dst=0;
+        uint64_t src3=0;
         uint64_t src2=0;
         uint8_t mop=0;
-        bool gather_op=0;
+        bool indexed_op=0;
         uint64_t src_ready=0;
         bool ambiguous_dependency = 0;
 
@@ -286,13 +280,14 @@ InstQueue::evaluate()
             Mem_Instruction = Memory_Queue[i];
             isLoad = Mem_Instruction->insn.isLoad();
             isStore = Mem_Instruction->insn.isStore();
-            Dst = Mem_Instruction->dyn_insn->get_PDst();
-            src2 = Mem_Instruction->dyn_insn->get_PSrc2();
+            src3 = Mem_Instruction->dyn_insn->get_renamed_src3();
+            src2 = Mem_Instruction->dyn_insn->get_renamed_src2();
             mop = Mem_Instruction->insn.mop();
-            gather_op = (mop ==3);
+            indexed_op = (mop == 3) || (mop == 7);
+
             // If the instruction is indexed we stop looking for the next
             // instructions, check dependencies for indexed is too expensive
-            if ( (gather_op || isStore) && i>0){
+            if ( (indexed_op || isStore) && i>0){
                 src_ready = 0;
                 break;
             }
@@ -310,12 +305,16 @@ InstQueue::evaluate()
                 }
             } */
 
-            src_ready = (isStore) ?
-                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(Dst)
-                :(gather_op) ?
-                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src2)
-                : (isLoad) ?
-                !Mem_Instruction->issued && !ambiguous_dependency : 0;
+            /* TODO : bug aqui ... debo evaluar bien los casos de indexed strided y unitstride ahora soportados*/
+            src_ready = (isStore && !indexed_op) ?
+                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src3) :
+                (isStore && indexed_op) ?
+                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src3) &&
+                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src2) :
+                (isLoad && !indexed_op) ?
+                !Mem_Instruction->issued && !ambiguous_dependency :
+                (isLoad && indexed_op) ?
+                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src2):0;
 
             if (src_ready) {
                 queue_slot = i;
@@ -335,16 +334,16 @@ InstQueue::evaluate()
                 Mem_Instruction->dyn_insn,Mem_Instruction->xc,
                 Mem_Instruction->src1,Mem_Instruction->src2,
                 Mem_Instruction->rename_vtype,Mem_Instruction->rename_vl,
-                [Dst,Mem_Instruction,this](Fault f) {
+                [Mem_Instruction,this](Fault f) {
 
                 bool wb_enable = !Mem_Instruction->insn.isStore();
-
+                uint64_t renamed_dst = Mem_Instruction->dyn_insn->get_renamed_dst();
                 // SETTING VALID BIT
                 if (wb_enable)
                 {
                 DPRINTF(VectorValidBit,"Set Valid bit to reg: %lu "
-                    "with value:%lu\n",Dst,1);
-                vectorwrapper->vector_reg_validbit->set_preg_valid_bit(Dst,1);
+                    "with value:%lu\n",renamed_dst,1);
+                vectorwrapper->vector_reg_validbit->set_preg_valid_bit(renamed_dst,1);
                 }
 
                 //Setting the executed bit in the ROB
@@ -352,8 +351,8 @@ InstQueue::evaluate()
                     Mem_Instruction->dyn_insn->get_rob_entry();
                 vectorwrapper->vector_rob->set_rob_entry_executed(rob_entry);
 
-                DPRINTF(InstQueue,"Executed Mem_Instruction %s, rd %d\n",
-                    Mem_Instruction->insn.getName(),Dst);
+                DPRINTF(InstQueue,"Executed Mem_Instruction %s\n",
+                    Mem_Instruction->insn.getName());
                 DPRINTF(InstQueue,"Mem Queue Size %d\n",Memory_Queue.size());
                 //Memory_Queue.pop_front();
                 //delete Mem_Instruction->xc;

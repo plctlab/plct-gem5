@@ -203,10 +203,11 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
     uint64_t pc = insn.getPC();
     bool indexed = (insn.mop() ==3);
 
-    uint32_t PDst = vector_dyn_insn->get_PDst();
-    uint32_t POldDst = vector_dyn_insn->get_POldDst();
-    uint32_t Pvs2 = vector_dyn_insn->get_PSrc2();
-    uint32_t PMask = vector_dyn_insn->get_PMask();
+    uint32_t PDst = vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+    uint32_t Pvs3 = vector_dyn_insn->get_renamed_src3();
+    uint32_t PMask = vector_dyn_insn->get_renamed_mask();
 
     std::stringstream mask_ren;
     if (masked_op) {
@@ -229,10 +230,10 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
     {
          if (indexed){
             DPRINTF(VectorInst,"%s v%d v%d       PC 0x%X\n",insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
-            DPRINTF(VectorRename,"renamed inst: %s v%d v%d %s\n",insn.getName(),PDst,Pvs2,mask_ren.str());
+            DPRINTF(VectorRename,"renamed inst: %s v%d v%d %s\n",insn.getName(),Pvs3,Pvs2,mask_ren.str());
         } else {
             DPRINTF(VectorInst,"%s v%d       PC 0x%X\n",insn.getName(),insn.vd(),*(uint64_t*)&pc );
-            DPRINTF(VectorRename,"renamed inst: %s v%d %s\n",insn.getName(),PDst,mask_ren.str());
+            DPRINTF(VectorRename,"renamed inst: %s v%d %s\n",insn.getName(),Pvs3,mask_ren.str());
         }
         
     } else {
@@ -254,11 +255,11 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vec
                 (vf_op) ? "f" :
                 (vi_op) ? " " : "v";
 
-    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() : vector_dyn_insn->get_PDst();
-    uint32_t POldDst = vector_dyn_insn->get_POldDst();
-    uint32_t Pvs1 = (vx_op || vf_op || vi_op) ? insn.vs1() : vector_dyn_insn->get_PSrc1();
-    uint32_t Pvs2 = vector_dyn_insn->get_PSrc2();
-    uint32_t PMask = vector_dyn_insn->get_PMask();
+    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() : vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    uint32_t Pvs1 = (vx_op || vf_op || vi_op) ? insn.vs1() : vector_dyn_insn->get_renamed_src1();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+    uint32_t PMask = vector_dyn_insn->get_renamed_mask();
 
     std::stringstream mask_ren;
     if (masked_op) {
@@ -295,10 +296,11 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
      * for LMUL=1 it is needed to assign 1 physical register
      */
     uint64_t vd;
-    uint64_t vs1,vs2;
+    uint64_t vs1,vs2,vs3;
     vd = insn.vd();
     vs1 = insn.vs1();
     vs2 = insn.vs2();
+    vs3 = insn.vs3();
 
     masked_op = (insn.vm()==0);
 
@@ -314,16 +316,16 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
         if (insn.isLoad()) {
             /* Physical  source 2 used to hold the index values */
             Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
-            vector_dyn_insn->set_PSrc2(Pvs2);
+            vector_dyn_insn->set_renamed_src2(Pvs2);
             /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
-            vector_dyn_insn->set_PMask(PMask);
+            vector_dyn_insn->set_renamed_mask(PMask);
             /* Physical Destination */
             PDst = vector_rename->get_frl();
-            vector_dyn_insn->set_PDst(PDst);
+            vector_dyn_insn->set_renamed_dst(PDst);
             /* Physical Old Destination */
             POldDst = vector_rename->get_preg_rat(vd);
-            vector_dyn_insn->set_POldDst(POldDst);
+            vector_dyn_insn->set_renamed_old_dst(POldDst);
             /* Setting the New Destination in the RAT structure */
             vector_rename->set_preg_rat(vd,PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
@@ -332,36 +334,35 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
         else if (insn.isStore()) {
             /* Physical  source 2 used to hold the index values */
             Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
-            vector_dyn_insn->set_PSrc2(Pvs2);
+            vector_dyn_insn->set_renamed_src2(Pvs2);
             /* Physical  Mask */
             PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
-            vector_dyn_insn->set_PMask(PMask);
-            /* Physical Destination corresponds to the source for store operations */
-            PDst = vector_rename->get_preg_rat(vd);
-            /* Physical Destination */
-            vector_dyn_insn->set_PDst(PDst);
+            vector_dyn_insn->set_renamed_mask(PMask);
+            /* Physical  source 3 used to hold the data to store in memory */
+            Pvs3 = vector_rename->get_preg_rat(vs3);
+            vector_dyn_insn->set_renamed_src3(Pvs3);
         }
     }
     else if (insn.isVectorInstArith()) {
         /* Physical  Mask */
         PMask = masked_op ? vector_rename->get_preg_rat(0) :1024;
-        vector_dyn_insn->set_PMask(PMask);
+        vector_dyn_insn->set_renamed_mask(PMask);
         /* Physical Destination */
         PDst = (dst_write_ena) ? vector_rename->get_frl() :1024;
-        vector_dyn_insn->set_PDst(PDst);
+        vector_dyn_insn->set_renamed_dst(PDst);
         /* Physical Old Destination */
         POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
-        vector_dyn_insn->set_POldDst(POldDst);
+        vector_dyn_insn->set_renamed_old_dst(POldDst);
         /* Physical source 2 */
         Pvs2 = vector_rename->get_preg_rat(vs2);
-        vector_dyn_insn->set_PSrc2(Pvs2);
+        vector_dyn_insn->set_renamed_src2(Pvs2);
         /* When the instruction use an scalar value as source 1, the physical source 1 is disable
          * When the instruction uses only 1 source (insn.arith1Src()), the  source 1 is disable
          */
         if( !(vx_op || vf_op || vi_op) && !insn.arith1Src()) {
              /* Physical source 1 */
             Pvs1 = vector_rename->get_preg_rat(vs1);
-            vector_dyn_insn->set_PSrc1(Pvs1);
+            vector_dyn_insn->set_renamed_src1(Pvs1);
         }
         /* dst_write_ena is set when the instruction has a vector destination register */
         if(dst_write_ena) {
@@ -423,7 +424,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
     if (insn.isVectorInstMem()) {
         dependencie_callback();
         uint32_t rob_entry = vector_rob->set_rob_entry(
-            vector_dyn_insn->get_POldDst(), insn.isLoad());
+            vector_dyn_insn->get_renamed_old_dst(), insn.isLoad());
         vector_dyn_insn->set_rob_entry(rob_entry);
         vector_inst_queue->Memory_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
@@ -434,7 +435,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         if (dst_write_ena) {
             dependencie_callback();
             uint32_t rob_entry = vector_rob->set_rob_entry(
-                vector_dyn_insn->get_POldDst() , 1);
+                vector_dyn_insn->get_renamed_old_dst() , 1);
             vector_dyn_insn->set_rob_entry(rob_entry);
             vector_inst_queue->Instruction_Queue.push_back(
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,

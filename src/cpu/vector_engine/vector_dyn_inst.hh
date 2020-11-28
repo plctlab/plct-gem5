@@ -40,29 +40,33 @@ class VectorStaticInst;
 class VectorDynInst
 {
 public:
-VectorDynInst() : vinst(NULL),PSrc1(1024),PSrc2(1024),PSrc3(1024),
-  PDst(1024),POldDst(1024),PMask(1024),rob_entry(1024){
+VectorDynInst() : vinst(NULL),
+  renamed_src1(1024),renamed_src2(1024),renamed_src3(1024),
+  renamed_dst(1024),renamed_old_dst(1024),renamed_mask(1024),
+  rob_entry(1024){
   }
 ~VectorDynInst() {}
 
-  uint16_t get_PSrc1()  { return PSrc1; }
-  void set_PSrc1(uint16_t val)  { PSrc1 = val; }
+/* Renamed registers */
+  uint16_t get_renamed_src1()  { return renamed_src1; }
+  void set_renamed_src1(uint16_t val)  { renamed_src1 = val; }
 
-  uint16_t get_PSrc2() { return PSrc2; }
-  void set_PSrc2(uint16_t val) { PSrc2  = val; }
+  uint16_t get_renamed_src2() { return renamed_src2; }
+  void set_renamed_src2(uint16_t val) { renamed_src2  = val; }
 
-  uint16_t get_PSrc3() { return PSrc3; }
-  void set_PSrc3(uint16_t val) { PSrc3  = val; }
+  uint16_t get_renamed_src3() { return renamed_src3; }
+  void set_renamed_src3(uint16_t val) { renamed_src3  = val; }
 
-  uint16_t get_PDst() { return PDst; }
-  void set_PDst(uint16_t val) { PDst  = val; }
+  uint16_t get_renamed_dst() { return renamed_dst; }
+  void set_renamed_dst(uint16_t val) { renamed_dst  = val; }
 
-  uint16_t get_POldDst() { return POldDst; }
-  void set_POldDst(uint16_t val) { POldDst  = val; }
+  uint16_t get_renamed_old_dst() { return renamed_old_dst; }
+  void set_renamed_old_dst(uint16_t val) { renamed_old_dst  = val; }
 
-  uint16_t get_PMask() { return PMask; }
-  void set_PMask(uint16_t val) { PMask  = val; }
+  uint16_t get_renamed_mask() { return renamed_mask; }
+  void set_renamed_mask(uint16_t val) { renamed_mask  = val; }
 
+/* rob_entry */
   uint16_t get_rob_entry() { return rob_entry; }
   void set_rob_entry(uint16_t val) { rob_entry  = val; }
 
@@ -78,12 +82,12 @@ VectorDynInst() : vinst(NULL),PSrc1(1024),PSrc2(1024),PSrc3(1024),
 
 private:
   RiscvISA::VectorStaticInst *vinst;
-  uint16_t  PSrc1;
-  uint16_t  PSrc2;
-  uint16_t  PSrc3;
-  uint16_t  PDst;
-  uint16_t  POldDst;
-  uint16_t  PMask;
+  uint16_t  renamed_src1;
+  uint16_t  renamed_src2;
+  uint16_t  renamed_src3;
+  uint16_t  renamed_dst;
+  uint16_t  renamed_old_dst;
+  uint16_t  renamed_mask;
   uint16_t  rob_entry;
 };
 

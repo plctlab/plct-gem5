@@ -113,11 +113,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     //uint8_t mask_elements = 0;
     //address in bytes
     uint64_t mvl_bits =vectorwrapper->vector_config->get_max_vector_length_bits(vtype);
-    addr_dst = (uint64_t)dyn_insn->get_PDst() * mvl_bits / 8;
-    addr_src1 = (uint64_t)dyn_insn->get_PSrc1() * mvl_bits / 8;
-    addr_src2 = (uint64_t)dyn_insn->get_PSrc2() * mvl_bits / 8;
-    addr_Mask = (uint64_t)dyn_insn->get_PMask() * mvl_bits / 8;
-    addr_OldDst = (uint64_t)dyn_insn->get_POldDst() * mvl_bits / 8;
+    addr_dst = (uint64_t)dyn_insn->get_renamed_dst() * mvl_bits / 8;
+    addr_src1 = (uint64_t)dyn_insn->get_renamed_src1() * mvl_bits / 8;
+    addr_src2 = (uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8;
+    addr_Mask = (uint64_t)dyn_insn->get_renamed_mask() * mvl_bits / 8;
+    addr_OldDst = (uint64_t)dyn_insn->get_renamed_old_dst() * mvl_bits / 8;
     location = 1;
 
     //Vector operation result is an scalar data.

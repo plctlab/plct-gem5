@@ -265,7 +265,7 @@ private:
     /* Physical registers */
     uint64_t PDst;
     uint64_t POldDst;
-    uint64_t Pvs1,Pvs2;
+    uint64_t Pvs1,Pvs2,Pvs3;
     uint64_t PMask;
 };
 
