@@ -429,7 +429,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->Memory_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 NULL,src1,src2,last_vtype,last_vl));
-        printMemInst(insn,vector_dyn_insn);
+        //printMemInst(insn,vector_dyn_insn);
     }
     else if (insn.isVectorInstArith()) {
         if (dst_write_ena) {
@@ -447,7 +447,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 dependencie_callback,src1,src2,last_vtype,last_vl));
         }
-        printArithInst(insn,vector_dyn_insn,src1);
+        //printArithInst(insn,vector_dyn_insn,src1);
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }
