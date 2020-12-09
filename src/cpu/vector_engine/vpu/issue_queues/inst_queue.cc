@@ -208,7 +208,7 @@ InstQueue::evaluate()
 
         if (srcs_ready)
         {
-            vectorwrapper->printArithInst(Instruction->insn,Instruction->dyn_insn,0);
+            //vectorwrapper->printArithInst(Instruction->insn,Instruction->dyn_insn,0);
 
             Instruction_Queue.erase(Instruction_Queue.begin()+queue_slot);
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
@@ -330,7 +330,7 @@ InstQueue::evaluate()
 
         if (src_ready)
         {
-            vectorwrapper->printMemInst(Mem_Instruction->insn,Mem_Instruction->dyn_insn);
+            //vectorwrapper->printMemInst(Mem_Instruction->insn,Mem_Instruction->dyn_insn);
             //Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
             Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
             vectorwrapper->issue(Mem_Instruction->insn,

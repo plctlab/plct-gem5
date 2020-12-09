@@ -150,7 +150,8 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
                                 (last_lmul == 2) ? vector_rename->frl_elements() >= 2 :
                                 (last_lmul == 4) ? vector_rename->frl_elements() >= 4 :
                                 (last_lmul == 8) ? vector_rename->frl_elements() >= 8 : 0;
-    DPRINTF(VectorInst,"rob_entry_available %d, queue_slots_available %d, enough_physical_regs %d\n",rob_entry_available,queue_slots_available,enough_physical_regs);
+    //DPRINTF(VectorInst,"rob_entry_available %d, queue_slots_available %d, enough_physical_regs %d\n",
+    //                            rob_entry_available,queue_slots_available,enough_physical_regs);
     return  enough_physical_regs && queue_slots_available
         && rob_entry_available;
     //return  !vector_rename->frl_empty() && queue_slots_available
@@ -399,7 +400,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         panic("LMUL>1 is not suported \n");
     }
 
-    DPRINTF(VectorInst,"src1 %d, src2 %d\n",src1,src2);
+    //DPRINTF(VectorInst,"src1 %d, src2 %d\n",src1,src2);
 
     /* Be sure that the instruction was added to some group in base.isa */
     if (insn.isVectorInstArith()) {
@@ -429,7 +430,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->Memory_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 NULL,src1,src2,last_vtype,last_vl));
-        //printMemInst(insn,vector_dyn_insn);
+        printMemInst(insn,vector_dyn_insn);
     }
     else if (insn.isVectorInstArith()) {
         if (dst_write_ena) {
@@ -447,7 +448,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
                 new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
                 dependencie_callback,src1,src2,last_vtype,last_vl));
         }
-        //printArithInst(insn,vector_dyn_insn,src1);
+        printArithInst(insn,vector_dyn_insn,src1);
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }
