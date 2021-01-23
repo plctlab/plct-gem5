@@ -69,7 +69,7 @@ ps.add_option('--cpu_clk',          type="string", default='2GHz',
                                     help="Speed of all CPUs")
 
 # VECTOR REGISTER OPTIONS
-ps.add_option('--VRF_physical_regs',type="int", default=40,
+ps.add_option('--renamed_regs',     type="int", default=40,
                                     help="Number of Vector Physical Registers")
 ps.add_option('--VRF_line_size',    type="int", default=64,
                                     help="Vector Register line size in Bytes")
@@ -114,7 +114,7 @@ ps.add_option('--connect_to_dram',  type="int", default=False,
 # to its own vector cache
 ###############################################################################
 
-connect_to_dram         = options.connect_to_dram
+connect_to_dram   = options.connect_to_dram
 connect_to_l2     = options.connect_to_l2
 connect_to_l1d    = options.connect_to_l1_d
 connect_to_l1V    = options.connect_to_l1_v
@@ -188,8 +188,8 @@ def createbuffer(cpu):
         tgts_per_mshr = 20
     )
 
-#if( (not connect_to_l1d) and (not connect_to_l2) and (not connect_to_dram)):
-#    createVectorCache(system.cpu)
+if( (not connect_to_l1d) and (not connect_to_l2) and (not connect_to_dram)):
+    createVectorCache(system.cpu)
 
 if( (connect_to_l2) or (connect_to_dram)):
     createbuffer(system.cpu)
@@ -205,7 +205,7 @@ system.cpu.ve_interface = VectorEngineInterface(
         ),
         vector_reg = VectorRegister(
             lanes_per_access = options.v_lanes/options.num_clusters,
-            size = (options.VRF_physical_regs * options.max_vl)/8,
+            size = (options.renamed_regs * options.max_vl)/8,
             lineSize =options.VRF_line_size
                         *(options.v_lanes/options.num_clusters),
             numPorts = vector_rf_ports,
@@ -217,13 +217,13 @@ system.cpu.ve_interface = VectorEngineInterface(
             vector_arith_queue_size = options.arith_queue_size
         ),
         vector_rename = VectorRename(
-            PhysicalRegs = options.VRF_physical_regs
+            PhysicalRegs = options.renamed_regs
         ),
         vector_rob = ReorderBuffer(
             ROB_Size = options.rob_size
         ),
         vector_reg_validbit = VectorValidBit(
-            PhysicalRegs = options.VRF_physical_regs
+            PhysicalRegs = options.renamed_regs
         ),
         vector_memory_unit = VectorMemUnit(
             memReader = MemUnitReadTiming(
@@ -320,11 +320,10 @@ system.membus = SystemXBar()
 def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
     cpu.icache.mem_side = l2bus.slave
     cpu.dcache.mem_side = l2bus.slave
-
     cpu.icache_port = cpu.icache.cpu_side
-
     cpu.dcache_port = l1bus.slave
-    cpu.vector_mem_port = l1bus.slave
+
+    vector_engine.vector_mem_port = l1bus.slave
     l1bus.master = cpu.dcache.cpu_side
 
     #connect vector_reg ports for each mem_unit
