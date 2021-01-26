@@ -28,9 +28,9 @@
 
 from m5.params import *
 
-from TickedObject import TickedObject
+from m5.SimObject import SimObject
 
-class VectorValidBit(TickedObject):
+class VectorValidBit(SimObject):
     type = 'VectorValidBit'
     cxx_header = "cpu/vector_engine/vpu/register_file/vector_reg_valid_bit.hh"
 

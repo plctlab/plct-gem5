@@ -40,26 +40,27 @@
 #include "debug/VectorValidBit.hh"
 #include "params/VectorValidBit.hh"
 #include "sim/faults.hh"
-#include "sim/ticked_object.hh"
+//#include "sim/ticked_object.hh"
+#include "sim/sim_object.hh"
 
-class VectorValidBit : public TickedObject
+class VectorValidBit : public SimObject
 {
 public:
     VectorValidBit(VectorValidBitParams *p);
     ~VectorValidBit();
 
-    void startTicking();
-    void stopTicking();
-    bool isOccupied();
+    //void startTicking();
+    //void stopTicking();
+    //bool isOccupied();
 
     //void regStats() override;
-    void evaluate() override;
+    //void evaluate() override;
 
 protected:
-    bool occupied;
+    //bool occupied;
     const uint64_t PhysicalRegs;
 
-    class validbit_queue {
+/*    class validbit_queue {
           public:
             validbit_queue(uint64_t idx, uint64_t val):
             idx(idx),val(val),cyclesLeft(0) {}
@@ -71,7 +72,7 @@ protected:
         };
 
     std::deque<validbit_queue *> Validbit_queue;
-
+*/
     std::vector<int> reg_valid_bit;
 public:
     int get_preg_valid_bit(int idx);

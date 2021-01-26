@@ -30,11 +30,13 @@
 
 #include "cpu/vector_engine/vpu/register_file/vector_reg_valid_bit.hh"
 
+#include "debug/VectorValidBit.hh"
+
 /**
  * Valid bits
  */
 VectorValidBit::VectorValidBit(VectorValidBitParams *p):
-TickedObject(p),occupied(false), PhysicalRegs(p->PhysicalRegs)
+SimObject(p), PhysicalRegs(p->PhysicalRegs)
 {
     for (uint64_t i=0; i<32; i++)
         {
@@ -54,11 +56,15 @@ void
 VectorValidBit::set_preg_valid_bit(int idx , int val)
 {
     assert(idx <= PhysicalRegs);
-    DPRINTF(VectorValidBit,"Setting valid bit %d: %d\n",idx,val);
-    if (Validbit_queue.size()==0) {
-        startTicking();
-    }
-    Validbit_queue.push_back(new validbit_queue(idx,val));
+    //DPRINTF(VectorValidBit,"Setting valid bit %d: %d\n",idx,val);
+    //if (Validbit_queue.size()==0) {
+    //    startTicking();
+    //}
+    //Validbit_queue.push_back(new validbit_queue(idx,val));
+
+    reg_valid_bit[idx] = val;
+    DPRINTF(VectorValidBit, "Setting the validbit reg %d with %d\n"
+            ,idx,val);
 }
 
 int
@@ -68,26 +74,26 @@ VectorValidBit::get_preg_valid_bit(int idx)
     return reg_valid_bit[idx];
 }
 
-bool
-VectorValidBit::isOccupied()
-{
-    return occupied;
-}
+//bool
+//VectorValidBit::isOccupied()
+//{
+//    return occupied;
+//}
 
-void
-VectorValidBit::startTicking()
-{
-    //DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
-    start();
-}
+//void
+//VectorValidBit::startTicking()
+//{
+//    //DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
+//    start();
+//}
 
 
-void
-VectorValidBit::stopTicking()
-{
-    //DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
-    stop();
-}
+//void
+//VectorValidBit::stopTicking()
+//{
+//    //DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
+//    stop();
+//}
 /*
 void
 VectorValidBit::regStats()
@@ -97,27 +103,27 @@ VectorValidBit::regStats()
 }
 */
 
-void
-VectorValidBit::evaluate()
-{
-    assert(running);
-    if ( Validbit_queue.size()==0) {
-        stopTicking();
-        return;
-    }
-
-    validbit_queue * set_new_vb = Validbit_queue.front();
-
-    if (set_new_vb->cyclesLeft == 0) {
-        reg_valid_bit[set_new_vb->idx] = set_new_vb->val;
-        DPRINTF(VectorValidBit, "Setting the validbit reg %d with %d\n"
-            ,set_new_vb->idx,set_new_vb->val);
-        Validbit_queue.pop_front();
-        delete set_new_vb;
-    } else {
-        set_new_vb->cyclesLeft --;
-    }
-}
+//void
+//VectorValidBit::evaluate()
+//{
+//    assert(running);
+//    if ( Validbit_queue.size()==0) {
+//        stopTicking();
+//        return;
+//    }
+//
+//    validbit_queue * set_new_vb = Validbit_queue.front();
+//
+//    if (set_new_vb->cyclesLeft == 0) {
+//        reg_valid_bit[set_new_vb->idx] = set_new_vb->val;
+//        DPRINTF(VectorValidBit, "Setting the validbit reg %d with %d\n"
+//            ,set_new_vb->idx,set_new_vb->val);
+//        Validbit_queue.pop_front();
+//        delete set_new_vb;
+//    } else {
+//        set_new_vb->cyclesLeft --;
+//    }
+//}
 
 void
 VectorValidBit::print_valid_bit() {
