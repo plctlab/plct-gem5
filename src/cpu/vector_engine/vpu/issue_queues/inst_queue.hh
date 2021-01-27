@@ -108,7 +108,6 @@ private:
     //std::function<void(uint8_t*,uint8_t)> dataCallback;
     //std::function<void()> dependencie_callback;
 public:
-    Stats::Scalar idle_count_by_dependency;
     Stats::Scalar VectorMemQueueSlotsUsed;
     Stats::Scalar VectorArithQueueSlotsUsed;
 };

@@ -91,10 +91,6 @@ InstQueue::regStats()
 {
     TickedObject::regStats();
 
-    idle_count_by_dependency
-        .name(name() + ".idle_count_by_dependency")
-        .desc("Class of vector idle time because of memory")
-        ;
     VectorMemQueueSlotsUsed
         .name(name() + ".VectorMemQueueSlotsUsed")
         .desc("Number of mem queue entries used during execution");
@@ -241,7 +237,6 @@ InstQueue::evaluate()
         }
         else
         {
-            idle_count_by_dependency ++;
             //DPRINTF(InstQueue,"Sources not ready\n");
         }
     }
