@@ -196,31 +196,11 @@ public:
     uint64_t src1 , uint64_t src2,uint64_t vtype,uint64_t vl,
         std::function<void(Fault fault)> done_callback);
 
-    /*
-    void set_last_vl_config(uint64_t vl) { last_vl = vl; }
-    void set_last_vtype_config(uint64_t vtype) { last_vtype = vtype; }
-    uint64_t get_last_vl_config() { return last_vl; }
-    uint64_t get_last_vtype_config() { return last_vtype; }
-    */
     void regStats() override;
-
-//    RegisterMAP(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-//        ExecContextPtr& _xc, std::function<void()> dependencie_callback,
-//        uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
-//        dependencie_callback(dependencie_callback),
-//        insn(insn),
-//        dyn_insn(dyn_insn)/*,xc(_xc)*/,src1(src1),src2(src2),
-//        rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
-//        {
-//            xc=_xc;
-//        }
-//    ~RegisterMAP() {}
-//
-//    RegisterMAP * register_mapping;
 
     void printConfigInst(RiscvISA::VectorStaticInst& insn,uint64_t src1,uint64_t src2);
     void printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn,uint64_t src1);
+    void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
 
 public:
     bool masked_op;

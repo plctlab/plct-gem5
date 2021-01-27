@@ -53,6 +53,7 @@ bool
 VectorEngineInterface::requestGrant(RiscvISA::VectorStaticInst* vinst)
 {
     bool grant = vector_engine->requestGrant(vinst);
+    DPRINTF(VectorEngineInterface,"Resquesting a grant with answer : %d\n",grant);
     return grant;
 }
 
@@ -68,7 +69,7 @@ VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContex
 uint64_t
 VectorEngineInterface::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl)
 {
-    DPRINTF(VectorEngineInterface,"resquesting a vector length\n");
+    DPRINTF(VectorEngineInterface,"Resquesting a vector length\n");
      uint64_t gvl = vector_engine->vector_config->
         reqAppVectorLength(rvl,vtype,r_mvl);
     return gvl;

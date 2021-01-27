@@ -36,4 +36,5 @@ SimObject('InstQueue.py')
 Source('inst_queue.cc')
 
 DebugFlag('InstQueue')
-
+DebugFlag('InstQueueInst')
+DebugFlag('InstQueueRenInst')

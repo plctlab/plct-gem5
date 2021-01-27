@@ -37,7 +37,8 @@
 #include <queue>
 
 #include "debug/InstQueue.hh"
-#include "debug/VectorValidBit.hh"
+#include "debug/InstQueueInst.hh"
+#include "debug/InstQueueRenInst.hh"
 
 InstQueue::InstQueue(InstQueueParams *p) :
 TickedObject(p), occupied(false),
@@ -82,7 +83,6 @@ InstQueue::startTicking(
 void
 InstQueue::stopTicking()
 {
-    DPRINTF(InstQueue,"InstQueue StopTicking \n");
     stop();
 }
 
@@ -122,7 +122,6 @@ InstQueue::evaluate()
             VectorArithQueueSlotsUsed = inst_queue_size;
         }
 
-        uint64_t pc = 0;
         uint64_t src1=0;
         uint64_t src2=0;
         uint64_t src3=0;
@@ -197,10 +196,6 @@ InstQueue::evaluate()
 
             if (srcs_ready) {
                 queue_slot = i;
-
-                pc = Instruction->insn.getPC();
-                DPRINTF(InstQueue,"Issuing arith inst %s with pc 0x%lx from queue slot %d\n",
-                    Instruction->insn.getName(),*(uint64_t*)&pc,queue_slot);
                 Instruction->issued = 1;
                 break;
             }
@@ -208,9 +203,11 @@ InstQueue::evaluate()
 
         if (srcs_ready)
         {
-            //vectorwrapper->printArithInst(Instruction->insn,Instruction->dyn_insn,0);
-
+            /*printing the issued instruction*/
+            printArithInst(Instruction->insn,Instruction->dyn_insn);
+            /*removing the instruction from the queue*/
             Instruction_Queue.erase(Instruction_Queue.begin()+queue_slot);
+            /*Issuing the instruction*/
             vectorwrapper->issue(Instruction->insn,Instruction->dyn_insn,
                 Instruction->xc,Instruction->src1,Instruction->src2,
                  Instruction->rename_vtype,Instruction->rename_vl,
@@ -221,8 +218,6 @@ InstQueue::evaluate()
                 uint64_t renamed_dst = Instruction->dyn_insn->get_renamed_dst();
                 if (wb_enable)
                 {
-                DPRINTF(VectorValidBit,"Set Valid bit to reg: %lu  with "
-                    "value:%lu\n",renamed_dst,1);
                 vectorwrapper->vector_reg_validbit->set_preg_valid_bit(renamed_dst,1);
                 }
                 //Setting the executed bit in the ROB
@@ -231,7 +226,7 @@ InstQueue::evaluate()
 
                 DPRINTF(InstQueue,"Executed instruction %s\n",
                     Instruction->insn.getName());
-                DPRINTF(InstQueue,"Arith Queue Size %d\n",
+                DPRINTF(InstQueue,"Arithmetic queue Size %d\n",
                     Instruction_Queue.size());
                 
                 if (Instruction->insn.VectorToScalar()) {
@@ -261,8 +256,6 @@ InstQueue::evaluate()
             VectorMemQueueSlotsUsed = mem_queue_size;
         }
 
-        //occupied = true;
-        uint64_t pc = 0;
         bool isStore = 0;
         bool isLoad = 0;
         uint64_t src3=0;
@@ -320,9 +313,6 @@ InstQueue::evaluate()
 
             if (src_ready) {
                 queue_slot = i;
-                pc = Mem_Instruction->insn.getPC();
-                DPRINTF(InstQueue,"Issuing mem inst %s with pc 0x%lx from queue slot %d\n",
-                    Mem_Instruction->insn.getName(),*(uint64_t*)&pc,queue_slot);
                 Mem_Instruction->issued = 1;
                 break;
             }
@@ -330,9 +320,11 @@ InstQueue::evaluate()
 
         if (src_ready)
         {
-            //vectorwrapper->printMemInst(Mem_Instruction->insn,Mem_Instruction->dyn_insn);
-            //Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
+            /*printing the issued instruction*/
+            printMemInst(Mem_Instruction->insn,Mem_Instruction->dyn_insn);
+            /*removing the instruction from the queue*/
             Memory_Queue.erase(Memory_Queue.begin()+queue_slot);
+            /*Issuing the instruction*/
             vectorwrapper->issue(Mem_Instruction->insn,
                 Mem_Instruction->dyn_insn,Mem_Instruction->xc,
                 Mem_Instruction->src1,Mem_Instruction->src2,
@@ -344,8 +336,6 @@ InstQueue::evaluate()
                 // SETTING VALID BIT
                 if (wb_enable)
                 {
-                DPRINTF(VectorValidBit,"Set Valid bit to reg: %lu "
-                    "with value:%lu\n",renamed_dst,1);
                 vectorwrapper->vector_reg_validbit->set_preg_valid_bit(renamed_dst,1);
                 }
 
@@ -354,9 +344,9 @@ InstQueue::evaluate()
                     Mem_Instruction->dyn_insn->get_rob_entry();
                 vectorwrapper->vector_rob->set_rob_entry_executed(rob_entry);
 
-                DPRINTF(InstQueue,"Executed Mem_Instruction %s\n",
+                DPRINTF(InstQueue,"Executed instruction %s\n",
                     Mem_Instruction->insn.getName());
-                DPRINTF(InstQueue,"Mem Queue Size %d\n",Memory_Queue.size());
+                DPRINTF(InstQueue,"Memory queue Size %d\n",Memory_Queue.size());
                 //Memory_Queue.pop_front();
                 //delete Mem_Instruction->xc;
                 delete Mem_Instruction->dyn_insn;
@@ -371,6 +361,122 @@ InstQueue::evaluate()
         }
     }
 }
+
+void
+InstQueue::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
+{
+    uint64_t pc = insn.getPC();
+    bool indexed = (insn.mop() ==3);
+    bool masked_op = (insn.vm()==0);
+
+    uint32_t PDst = vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+    uint32_t Pvs3 = vector_dyn_insn->get_renamed_src3();
+    uint32_t PMask = vector_dyn_insn->get_renamed_mask();
+
+    std::stringstream mask_ren;
+    if (masked_op) {
+        mask_ren << "v" << PMask << ".m";
+    } else {
+        mask_ren << "";
+    }
+
+    if (insn.isLoad())
+    {
+        if (indexed){
+            DPRINTF(InstQueueInst,"issuing inst: %s v%d v%d       PC 0x%X\n",
+                insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
+            DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d v%d %s  old_dst v%d"
+                "      PC 0x%X\n",insn.getName(),PDst,Pvs2,mask_ren.str(),POldDst,
+                *(uint64_t*)&pc);
+        } else {
+            DPRINTF(InstQueueInst,"issuing inst: %s v%d       PC 0x%X\n"
+                ,insn.getName(),insn.vd(),*(uint64_t*)&pc);
+            DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d %s  old_dst v%d     "
+                " PC 0x%X\n",insn.getName(),PDst,mask_ren.str(),POldDst,*(uint64_t*)&pc);
+        }
+    }
+    else if (insn.isStore())
+    {
+         if (indexed){
+            DPRINTF(InstQueueInst,"issuing inst: %s v%d v%d       PC 0x%X\n",
+                insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc);
+            DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d v%d %s     PC 0x%X\n",
+                insn.getName(),Pvs3,Pvs2,mask_ren.str(),*(uint64_t*)&pc);
+        } else {
+            DPRINTF(InstQueueInst,"issuing inst: %s v%d       PC 0x%X\n",
+                insn.getName(),insn.vd(),*(uint64_t*)&pc );
+            DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d %s       PC 0x%X\n",
+                insn.getName(),Pvs3,mask_ren.str(),*(uint64_t*)&pc);
+        }
+        
+    } else {
+        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
+void
+InstQueue::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
+{
+    uint64_t pc = insn.getPC();
+    bool masked_op = (insn.vm()==0);
+    bool vx_op = (insn.func3()==4) || (insn.func3()==6);
+    bool vf_op = (insn.func3()==5);
+    bool vi_op = (insn.func3()==3);
+
+    std::string masked;
+    if(masked_op) {masked = "v0.m";} else {masked = "   ";}
+    std::string reg_type;
+    if(insn.VectorToScalar()==1) {reg_type = "x";} else {reg_type = "v";}
+
+    std::string scr1_type;
+    scr1_type = (vx_op) ? "x" :
+                (vf_op) ? "f" :
+                (vi_op) ? " " : "v";
+
+    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() :
+                    vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    uint32_t Pvs1 = (vx_op || vf_op || vi_op) ? insn.vs1() :
+                    vector_dyn_insn->get_renamed_src1();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+    uint32_t PMask = vector_dyn_insn->get_renamed_mask();
+
+    std::stringstream mask_ren;
+    if (masked_op) {
+        mask_ren << "v" << PMask << ".m";
+    } else {
+        mask_ren << "";
+    }
+
+    if (insn.arith1Src()) {
+        DPRINTF(InstQueueInst,"issuing inst: %s %s%d v%d %s           PC 0x%X\n",
+            insn.getName(),reg_type,insn.vd(),insn.vs2(),masked,*(uint64_t*)&pc );
+        DPRINTF(InstQueueRenInst,"issuing renamed inst: %s %s%d v%d %s  old_dst v%d     "
+            "    PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,mask_ren.str(),
+            POldDst,*(uint64_t*)&pc);
+    }
+    else if (insn.arith2Srcs()) {
+        DPRINTF(InstQueueInst,"issuing inst: %s %s%d v%d %s%d %s       PC 0x%X\n",
+            insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),
+            masked,*(uint64_t*)&pc );
+        DPRINTF(InstQueueRenInst,"issuing renamed inst: %s %s%d v%d %s%d %s  old_dst v%d"
+            "        PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,scr1_type,Pvs1,
+            mask_ren.str(),POldDst,*(uint64_t*)&pc);
+    }
+    else if (insn.arith3Srcs()) {
+        DPRINTF(InstQueueInst,"issuing inst: %s %s%d v%d %s%d %s       PC 0x%X\n",
+            insn.getName(),reg_type,insn.vd(),insn.vs2(),scr1_type,insn.vs1(),
+            masked,*(uint64_t*)&pc );
+        DPRINTF(InstQueueRenInst,"issuing renamed inst: %s %s%d v%d %s%d v%d %s "
+            "old_dst v%d         PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,scr1_type,
+            Pvs1,POldDst,mask_ren.str(),POldDst,*(uint64_t*)&pc);
+    } else {
+        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
 
 InstQueue *
 InstQueueParams::create()
