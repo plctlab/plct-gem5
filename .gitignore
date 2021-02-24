@@ -1,3 +1,9 @@
+build_epi01
+build_epi02
+build_epi03
+build_test_lmul
+build_rva
+build_develop
 build
 parser.out
 parsetab.py
