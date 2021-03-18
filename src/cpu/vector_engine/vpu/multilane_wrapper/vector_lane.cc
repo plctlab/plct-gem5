@@ -83,7 +83,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     /* destination data type size in bytes */
     uint8_t SIZE = sew/8;
     assert(SIZE != 0);
-    assert((sew == 64) || (sew == 32)); // Only 64-bit and 32-bit Operations are supported
+    //assert((sew == 64) || (sew == 32)); // Only 64-bit and 32-bit Operations are supported
 
     //In this moment there are not implemented widening and narrowing,
     //then dst and src are similar sizes
@@ -98,7 +98,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     bool location;
 
     bool move_to_core;
-    move_to_core = (insn.getName() =="vfmv_fs");
+    move_to_core = (insn.getName() == "vfmv_fs") || (insn.getName() == "vext_xv");
 
     uint64_t i;
     // OPIVI, OPIVX , OPFVF and OPMVX formats
@@ -177,6 +177,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
          * element of some vector register and send immediately to
          * the scalar reg,such as vfmv_fs and vmv_xs
          */
+        //bool rf_int = 0;
+        if (insn.getName() == "vext_xv") {
+            addr_src2 = ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8) + (src1 * DATA_SIZE);
+            //rf_int = 1;
+
+        }
         srcBReader->initialize(vector_wrapper,1,DATA_SIZE,addr_src2,0,1,location,
             xc, [dyn_insn,done_callback,xc,DATA_SIZE,vl_count,this]
             (uint8_t*data, uint8_t size, bool done)

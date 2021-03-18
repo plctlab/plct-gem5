@@ -99,7 +99,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 {
     assert(!running && !done);
     assert(count > 0);
-    assert(!dataQ.size());
+    //assert(!dataQ.size());
     assert(!AddrsQ.size());
 
     vectorwrapper = &vector_wrapper;

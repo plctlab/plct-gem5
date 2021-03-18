@@ -1835,6 +1835,7 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x0C: decode FUNCT3 {
                 0x1: VectorToScalarOp::vfmv_fs();
+                0x2: VectorToScalarOp::vext_xv();
                 }
             0x0E: decode FUNCT3 {
                 0x3: VectorSlideUpOp::vslideup_vi();

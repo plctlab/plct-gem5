@@ -83,8 +83,7 @@ Datapath::startTicking(
     srcB_data_slide_count = 0;
     DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
     DST_SIZE = vsew/8;  // Esto cambiará para widening y narrowing
-    assert((DATA_SIZE == 8) || (DATA_SIZE == 4));   // Only supported 64-bit and 32-bit operations
-    assert((DST_SIZE == 8) || (DST_SIZE == 4));     // Only supported 64-bit and 32-bit operations
+   // assert((DATA_SIZE == 8) || (DATA_SIZE == 4));   // Only supported 64-bit and 32-bit operations
     //reset config
     is_FP           =0;
     is_INT          =0;
@@ -584,7 +583,7 @@ Datapath::evaluate()
                                 DST_SIZE);
                         }
                     }
-                    else
+                    else if (vsew == 32)
                     {
                         if (vmpopc | vmfirst)
                         {
@@ -635,6 +634,114 @@ Datapath::evaluate()
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         }
+                    }
+                    if (vsew == 16)
+                    {
+                        if (vmpopc | vmfirst)
+                        {
+                            if (vmpopc)
+                            {
+                                uint16_t Bitem = (0x0001) &&
+                                    (uint16_t)((uint16_t*)Bdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                                accumInt = (vm == 1) ? accumInt + Bitem :
+                                    (Mitem) ? accumInt + Bitem : accumInt;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath, " vmpopc: Source "
+                                    "%ld  Acc= %ld  \n", Bitem, accumInt);
+                            }
+                            else if (vmfirst) {
+                                int Bitem = (0x0001) &&
+                                    (uint16_t)((uint16_t*)Bdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
+
+                                first_elem = (Bitem == 0x0001);
+                                accumInt = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                    ? (first_elem) ? red_SrcCount :
+                                    accumInt : accumInt;
+
+                                if (first_elem)
+                                {
+                                    DPRINTF(Datapath, " vmfirst: "
+                                        "first active element found at %ld"
+                                        " position \n", accumInt);
+                                    break;
+                                }
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        }
+                        else if (is_mask_logical) {
+                            bool Aitem = (bool)((bool*)Adata)[i];
+                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            uint16_t Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
+                        }
+                        else {
+                            uint16_t Aitem = (uint16_t)((uint16_t*)Adata)[i];
+                            uint16_t Bitem = (uint16_t)((uint16_t*)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            uint16_t Dstitem =
+                                (uint16_t)((uint16_t*)Dstdata)[i];
+                            uint16_t Ditem = compute_long_int_op(Aitem, Bitem,
+                                Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
+                        }
+                    }
+                }
+                if (vsew == 8)
+                {
+                    if (vmpopc | vmfirst)
+                    {
+                        if (vmpopc)
+                        {
+                            int8_t Bitem = (0x01) &&
+                                (int8_t)((int8_t*)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            accumInt = (vm == 1) ? accumInt + Bitem :
+                                (Mitem) ? accumInt + Bitem : accumInt;
+                            red_SrcCount = red_SrcCount + 1;
+                            DPRINTF(Datapath, " vmpopc: Source "
+                                "%ld  Acc= %ld  \n", Bitem, accumInt);
+                        }
+                        else if (vmfirst) {
+                            int Bitem = (0x01) &&
+                                (int8_t)((int8_t*)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+
+                            first_elem = (Bitem == 0x01);
+                            accumInt = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                ? (first_elem) ? red_SrcCount :
+                                accumInt : accumInt;
+
+                            if (first_elem)
+                            {
+                                DPRINTF(Datapath, " vmfirst: "
+                                    "first active element found at %ld"
+                                    " position \n", accumInt);
+                                break;
+                            }
+                            red_SrcCount = red_SrcCount + 1;
+                        }
+                    }
+                    else if (is_mask_logical) {
+                        bool Aitem = (bool)((bool*)Adata)[i];
+                        bool Bitem = (bool)((bool*)Bdata)[i];
+                        long int Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                            DST_SIZE);
+                    }
+                    else {
+                        int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
+                        int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                        int8_t Dstitem =
+                            (int8_t)((int8_t*)Dstdata)[i];
+                        int8_t Ditem = compute_long_int_op(Aitem, Bitem,
+                            Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                            DST_SIZE);
                     }
                 }
                 else if (is_INT_to_FP)

@@ -83,6 +83,10 @@ public:
         uint8_t Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
     int compute_int_op(int Aitem, int Bitem,  uint8_t Mitem, int Dstitem,
         RiscvISA::VectorStaticInst* insn);
+    int compute_int16_op(int Aitem, int Bitem, uint8_t Mitem, int Dstitem,
+        RiscvISA::VectorStaticInst* insn);
+    int compute_int8_op(int Aitem, int Bitem, uint8_t Mitem, int Dstitem,
+        RiscvISA::VectorStaticInst* insn);
 
     long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
         RiscvISA::VectorStaticInst* insn);
