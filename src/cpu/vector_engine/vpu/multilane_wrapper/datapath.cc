@@ -683,7 +683,7 @@ Datapath::evaluate()
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             uint16_t Dstitem =
                                 (uint16_t)((uint16_t*)Dstdata)[i];
-                            uint16_t Ditem = compute_long_int_op(Aitem, Bitem,
+                            uint16_t Ditem = compute_int16_op(Aitem, Bitem,
                                 Mitem, Dstitem, insn);
                             memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
@@ -738,7 +738,7 @@ Datapath::evaluate()
                         uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         int8_t Dstitem =
                             (int8_t)((int8_t*)Dstdata)[i];
-                        int8_t Ditem = compute_long_int_op(Aitem, Bitem,
+                        int8_t Ditem = compute_int8_op(Aitem, Bitem,
                             Mitem, Dstitem, insn);
                         memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
                             DST_SIZE);

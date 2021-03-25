@@ -83,9 +83,9 @@ public:
         uint8_t Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
     int compute_int_op(int Aitem, int Bitem,  uint8_t Mitem, int Dstitem,
         RiscvISA::VectorStaticInst* insn);
-    int compute_int16_op(int Aitem, int Bitem, uint8_t Mitem, int Dstitem,
+    int16_t compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem, int16_t Dstitem,
         RiscvISA::VectorStaticInst* insn);
-    int compute_int8_op(int Aitem, int Bitem, uint8_t Mitem, int Dstitem,
+    int8_t compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem, int8_t Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
     long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
@@ -107,6 +107,10 @@ public:
         RiscvISA::VectorStaticInst& insn, uint64_t src_count,
         uint64_t dst_count, uint64_t vsew, uint64_t slide_count,uint64_t src1,
         std::function<void(uint8_t*,uint8_t,bool)> data_callback);
+
+    template <typename data_type>
+    data_type compute_integer_op(data_type Aitem, data_type Bitem,
+        uint8_t Mitem, data_type Dstitem, RiscvISA::VectorStaticInst* insn);
 
     void stopTicking();
 

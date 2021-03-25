@@ -731,11 +731,11 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     return Ditem;
 }
 
-int
-Datapath::compute_int16_op(int Aitem, int Bitem, uint8_t Mitem,
-    int Dstitem, RiscvISA::VectorStaticInst* insn)
+int16_t
+Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
+    int16_t Dstitem, RiscvISA::VectorStaticInst* insn)
 {
-    int Ditem = 0;
+    int16_t Ditem = 0;
     std::string operation = insn->getName();
 
 
@@ -897,11 +897,11 @@ Datapath::compute_int16_op(int Aitem, int Bitem, uint8_t Mitem,
     return Ditem;
 }
 
-int
-Datapath::compute_int8_op(int Aitem, int Bitem, uint8_t Mitem,
-    int Dstitem, RiscvISA::VectorStaticInst* insn)
+int8_t
+Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
+    int8_t Dstitem, RiscvISA::VectorStaticInst* insn)
 {
-    int Ditem = 0;
+    int8_t Ditem = 0;
     std::string operation = insn->getName();
 
 
@@ -1062,6 +1062,7 @@ Datapath::compute_int8_op(int Aitem, int Bitem, uint8_t Mitem,
     }
     return Ditem;
 }
+
 /*
  * Mask Operations
  */

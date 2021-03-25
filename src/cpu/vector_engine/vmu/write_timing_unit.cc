@@ -99,7 +99,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 {
     assert(!running && !done);
     assert(count > 0);
-    //assert(!dataQ.size());
+    assert(!dataQ.size());
     assert(!AddrsQ.size());
 
     vectorwrapper = &vector_wrapper;
@@ -113,9 +113,9 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     // if fn() is successfull, try_write deletes the data therefore, fn()
     // or some downstream function needs to memcpy it!
 
-    // NOTE: be careful with uint8_t overflow here
+    // NOTE: be careful with uint16_t overflow here (incase super large vectors)
     auto try_write = [SIZE,this](uint32_t get_up_to,
-        std::function<uint8_t(uint8_t *, uint32_t)> fn)
+        std::function<uint16_t(uint8_t *, uint32_t)> fn)
     {
         uint64_t can_get = this->dataQ.size();
         if (!can_get) {
@@ -217,9 +217,9 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             } else if (SIZE == 4) {
                 index_addr = (uint64_t)((uint32_t*)buf)[0];
             } else if (SIZE == 2) {
-                index_addr = (uint16_t)((uint16_t*)buf)[0];
+                index_addr = (uint64_t)((uint16_t*)buf)[0];
             } else if (SIZE == 1) {
-                index_addr = (uint8_t)((uint8_t*)buf)[0];
+                index_addr = (uint64_t)((uint8_t*)buf)[0];
             } else{
                 panic("invalid mem req SIZE");
             }
@@ -234,7 +234,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             consec_items, addr);
 
         return try_write(consec_items, [fin,location,xc,addr,SIZE,vindexed,
-            count,i,this](uint8_t * data, uint32_t items_ready) -> uint8_t
+            count,i,this](uint8_t * data, uint32_t items_ready) -> uint16_t
         {
             DPRINTF(MemUnitWriteTiming, "got %d items to write at %#x\n",
                 items_ready, addr);
@@ -254,7 +254,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
             if (success) {
                 if (vindexed) {
-                    for (uint8_t j=0; j<items_ready; j++) {
+                    for (uint16_t j=0; j<items_ready; j++) {
                         this->AddrsQ.pop_front();
                         }
                 }
