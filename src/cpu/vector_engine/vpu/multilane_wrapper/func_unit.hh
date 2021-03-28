@@ -1084,10 +1084,40 @@ Datapath::computeIntReduction(int accumInt,int Bitem,uint8_t Mitem)
          DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
     }
 
+    if (operation == "vredmaxu_vs") {
+         reduction = (vm==1) ? (((uint32_t)accumInt > (uint32_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint32_t)accumInt > (uint32_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Maxu= %d\n" ,Bitem, reduction);
+    }
+
     if (operation == "vredmin_vs") {
          reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
                      (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
          DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredminu_vs") {
+         reduction = (vm==1) ? (((uint32_t)accumInt < (uint32_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint32_t)accumInt < (uint32_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredand_vs") {
+         reduction = (vm==1) ? (accumInt & Bitem):
+                     (Mitem) ? (accumInt & Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  and= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredor_vs") {
+         reduction = (vm==1) ? (accumInt | Bitem):
+                     (Mitem) ? (accumInt | Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  or= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredxor_vs") {
+         reduction = (vm==1) ? (accumInt ^ Bitem):
+                     (Mitem) ? (accumInt ^ Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  xor= %d\n" ,Bitem, reduction);
     }
 
     return reduction;
@@ -1113,10 +1143,40 @@ Datapath::computeInt8Reduction(int8_t accumInt,int8_t Bitem,uint8_t Mitem)
          DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
     }
 
+    if (operation == "vredmaxu_vs") {
+         reduction = (vm==1) ? (((uint8_t)accumInt > (uint8_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint8_t)accumInt > (uint8_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Maxu= %d\n" ,Bitem, reduction);
+    }
+
     if (operation == "vredmin_vs") {
          reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
                      (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
          DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredminu_vs") {
+         reduction = (vm==1) ? (((uint8_t)accumInt < (uint8_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint8_t)accumInt < (uint8_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredand_vs") {
+         reduction = (vm==1) ? (accumInt & Bitem):
+                     (Mitem) ? (accumInt & Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  and= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredor_vs") {
+         reduction = (vm==1) ? (accumInt | Bitem):
+                     (Mitem) ? (accumInt | Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  or= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredxor_vs") {
+         reduction = (vm==1) ? (accumInt ^ Bitem):
+                     (Mitem) ? (accumInt ^ Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  xor= %d\n" ,Bitem, reduction);
     }
 
     return reduction;
@@ -1142,10 +1202,40 @@ Datapath::computeInt16Reduction(int16_t accumInt,int16_t Bitem,uint8_t Mitem)
          DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
     }
 
+    if (operation == "vredmaxu_vs") {
+         reduction = (vm==1) ? (((uint16_t)accumInt > (uint16_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint16_t)accumInt > (uint16_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Maxu= %d\n" ,Bitem, reduction);
+    }
+
     if (operation == "vredmin_vs") {
          reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
                      (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
          DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredminu_vs") {
+         reduction = (vm==1) ? (((uint16_t)accumInt < (uint16_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint16_t)accumInt < (uint16_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredand_vs") {
+         reduction = (vm==1) ? (accumInt & Bitem):
+                     (Mitem) ? (accumInt & Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  and= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredor_vs") {
+         reduction = (vm==1) ? (accumInt | Bitem):
+                     (Mitem) ? (accumInt | Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  or= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredxor_vs") {
+         reduction = (vm==1) ? (accumInt ^ Bitem):
+                     (Mitem) ? (accumInt ^ Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  xor= %d\n" ,Bitem, reduction);
     }
 
     return reduction;
@@ -1172,10 +1262,40 @@ Datapath::computeLongIntReduction(long int accumInt,long int Bitem,uint8_t Mitem
          DPRINTF(Datapath," Reduction: Source %ld  Max= %ld\n" ,Bitem, reduction);
     }
 
+    if (operation == "vredmaxu_vs") {
+         reduction = (vm==1) ? (((uint64_t)accumInt > (uint64_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint64_t)accumInt > (uint64_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  Maxu= %ld\n" ,Bitem, reduction);
+    }
+
     if (operation == "vredmin_vs") {
          reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
                      (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
          DPRINTF(Datapath," Reduction: Source %ld  Min= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredminu_vs") {
+         reduction = (vm==1) ? (((uint64_t)accumInt < (uint64_t)Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? (((uint64_t)accumInt < (uint64_t)Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  Min= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredand_vs") {
+         reduction = (vm==1) ? (accumInt & Bitem):
+                     (Mitem) ? (accumInt & Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  and= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredor_vs") {
+         reduction = (vm==1) ? (accumInt | Bitem):
+                     (Mitem) ? (accumInt | Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  or= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredxor_vs") {
+         reduction = (vm==1) ? (accumInt ^ Bitem):
+                     (Mitem) ? (accumInt ^ Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  xor= %ld\n" ,Bitem, reduction);
     }
 
     return reduction;
