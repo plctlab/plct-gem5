@@ -1770,13 +1770,14 @@ decode QUADRANT default Unknown::unknown() {
             0x00: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vadd_vv();
                 0x1: VectorData2SrcOp::vfadd_vv();
+                0x2: VectorReductionOp::vredsum_vs(); // implementar todo el grupo y crear la unidad funcional
                 0x3: VectorData2SrcOp::vadd_vi();
                 0x4: VectorData2SrcOp::vadd_vx();
                 0x5: VectorData2SrcOp::vfadd_vf();
                 0x7: VectorConfigOp::vsetvli();
             }
             0x01: decode FUNCT3 {
-                0x1: VectorReductionOp::vfredsum_vs();
+                0x1: VectorReductionOp::vfredsum_vs(); // implementar la unidad funcional
                 }
             0x02: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsub_vv();

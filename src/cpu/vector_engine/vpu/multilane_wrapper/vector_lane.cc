@@ -122,7 +122,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     location = 1;
 
     //Vector operation result is an scalar data.
-    bool reduction = (insn.getName() == "vfredsum_vs");
+    //bool reduction = (insn.getName() == "vfredsum_vs");
+    bool reduction = is_reduction();
+    
     //how many items will get written to dst by the end of the operation
     uint64_t dst_count;
     uint64_t src1_count;
