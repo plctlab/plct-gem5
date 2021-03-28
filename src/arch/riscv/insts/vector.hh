@@ -158,8 +158,12 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
                 _destRegIdx[0] = RegId(FloatRegClass, vd());
             } else if ((func3()==2)) {
                 _numSrcRegs = 0;
+                if ((func6()==12)) {
+                  _numSrcRegs = 1;
+                  _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                }
                 _numDestRegs = 1;
-                _srcRegIdx[0] = RegId(IntRegClass, vd());
+                _destRegIdx[0] = RegId(IntRegClass, vd());
             }
         }
 

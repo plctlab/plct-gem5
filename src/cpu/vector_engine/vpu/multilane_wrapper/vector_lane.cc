@@ -179,43 +179,50 @@ VectorLane::issue(VectorEngine& vector_wrapper,
          * element of some vector register and send immediately to
          * the scalar reg,such as vfmv_fs and vmv_xs
          */
-         //bool rf_int = 0;
         if (insn.getName() == "vext_xv") {
             addr_src2 = ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8) + (src1 * DATA_SIZE);
-            printf(" addr_src2 = %lu, src1 = %lu \n", addr_src2, src1);
-            //rf_int = 1;
+            DPRINTF(VectorLane, "vext_xv: base addrs 0x%x , element addrs 0x%x, src1 %d\n",
+                        ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8), addr_src2,src1);
         }
+
         srcBReader->initialize(vector_wrapper, 1, DATA_SIZE, addr_src2, 0, 1, location,
             xc, [dyn_insn, done_callback, xc, DATA_SIZE, vl_count, move_to_core_int, move_to_core_float, this]
             (uint8_t* data, uint8_t size, bool done)
             {
                 assert(size == DATA_SIZE);
                 uint8_t* ndata = new uint8_t[DATA_SIZE];
-                for (unsigned i = 0; i < DATA_SIZE; i++) printf("data[%u] = %lu \n", i, (uint64_t)data[i]);
                 memcpy(ndata, data, DATA_SIZE);
-                if (DATA_SIZE == 8)
-                {
+                if (DATA_SIZE == 8) {
                     scalar_data = (uint64_t)((uint64_t*)ndata)[0];
                 }
                 else if (DATA_SIZE == 4)
                 {
                     scalar_data = (uint64_t)((uint32_t*)ndata)[0];
-                    printf("scalar data is %lu \n", scalar_data);
                 }
+                else if (DATA_SIZE == 2)
+                {
+                    scalar_data = (uint64_t)((uint16_t*)ndata)[0];
+                }
+                else if (DATA_SIZE == 1)
+                {
+                    scalar_data = (uint64_t)((uint8_t*)ndata)[0];
+                } else {
+                    panic("Invalid option\n");
+                }
+
                 if (move_to_core_float) {
                     xc->setFloatRegOperandBits(
                         dyn_insn->get_VectorStaticInst(), 0, scalar_data);
-                    DPRINTF(VectorLane, "VMove to Float Register: %d ,data: 0x%x \n",
-                        scalar_reg, scalar_data);
+                    DPRINTF(VectorLane, "Writting Float Register: %d ,data: 0x%x \n"
+                        , scalar_reg, scalar_data);
                 }
                 else if (move_to_core_int) {
                     xc->setIntRegOperand(
                         dyn_insn->get_VectorStaticInst(), 0, scalar_data);
-                    DPRINTF(VectorLane, "VMove to Int Register: %d ,data: 0x%x \n",
-                        scalar_reg, scalar_data);
+                    DPRINTF(VectorLane, "Writting Int Register: %d ,data: 0x%x \n"
+                        , scalar_reg, scalar_data);
                 }
                 ++this->Bread;
-
 
                 delete data;
                 //assert(!done || (this->Bread == count));
