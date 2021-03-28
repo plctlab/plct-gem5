@@ -292,9 +292,15 @@ Datapath::evaluate()
                     if (vsew == 64) {
                         uint64_t Accitem = (long int)((long int*)Adata)[i] ;
                         accumLongInt = Accitem;
-                    } else {
+                    } else if (vsew == 32) {
                         uint32_t Accitem = (int)((int*)Adata)[i] ;
                         accumInt = Accitem;
+                    } else if (vsew == 16) {
+                        int16_t Accitem = (int16_t)((int16_t*)Adata)[i] ;
+                        accumInt16 = Accitem;
+                    } else if (vsew == 8) {
+                        int8_t Accitem = (int8_t)((int8_t*)Adata)[i] ;
+                        accumInt8 = Accitem;
                     }
                     reduction_first_done=1;
                 }
