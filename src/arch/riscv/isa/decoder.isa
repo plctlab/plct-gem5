@@ -1770,45 +1770,52 @@ decode QUADRANT default Unknown::unknown() {
             0x00: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vadd_vv();
                 0x1: VectorData2SrcOp::vfadd_vv();
-                0x2: VectorReductionOp::vredsum_vs(); // implementar todo el grupo y crear la unidad funcional
+                0x2: VectorReductionOp::vredsum_vs();
                 0x3: VectorData2SrcOp::vadd_vi();
                 0x4: VectorData2SrcOp::vadd_vx();
                 0x5: VectorData2SrcOp::vfadd_vf();
                 0x7: VectorConfigOp::vsetvli();
             }
             0x01: decode FUNCT3 {
-                0x1: VectorReductionOp::vfredsum_vs(); // implementar la unidad funcional
+                0x1: VectorReductionOp::vfredsum_vs();
+                0x2: VectorReductionOp::vredand_vs();
                 }
             0x02: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsub_vv();
                 0x1: VectorData2SrcOp::vfsub_vv();
+                0x2: VectorReductionOp::vredor_vs();
                 0x3: VectorData2SrcOp::vsub_vi();
                 0x4: VectorData2SrcOp::vsub_vx();
                 0x5: VectorData2SrcOp::vfsub_vf();
                 }
              0x03: decode FUNCT3 {
                 0x1: VectorReductionOp::vfredosum_vs();
+                0x2: VectorReductionOp::vredxor_vs();
                 }
             0x04: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vminu_vv();
                 0x1: VectorData2SrcOp::vfmin_vv();
+                0x2: VectorReductionOp::vredminu_vs();
                 0x4: VectorData2SrcOp::vminu_vx();
                 0x5: VectorData2SrcOp::vfmin_vf();
                 }
             0x05: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmin_vv();
                 0x1: VectorReductionOp::vfredmin_vs();
+                0x2: VectorReductionOp::vredmin_vs();
                 0x4: VectorData2SrcOp::vmin_vx();
                 }
             0x06: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmaxu_vv();
                 0x1: VectorData2SrcOp::vfmax_vv();
+                0x2: VectorReductionOp::vredmaxu_vs();
                 0x4: VectorData2SrcOp::vmaxu_vx();
                 0x5: VectorData2SrcOp::vfmax_vf();
                 }
             0x07: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmax_vv();
                 0x1: VectorReductionOp::vfredmax_vs();
+                0x2: VectorReductionOp::vredmax_vs();
                 0x4: VectorData2SrcOp::vmax_vx();
                 }
             0x08: decode FUNCT3 {
