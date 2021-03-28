@@ -103,7 +103,7 @@ VectorRegister::VectorRegister(const VectorRegisterParams* p) :
     assert(lineSize % sizeof(float) == 0);
 
     //in this moment 4-byte word is smallest addressable unit
-    bytesPerBankAccess = sizeof(float);
+    bytesPerBankAccess = sizeof(uint8_t);
     data = new uint8_t[size];
 
     for (uint8_t i=0; i<numPorts; ++i) {
