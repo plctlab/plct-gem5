@@ -75,9 +75,13 @@ Datapath::startTicking(
     curSrcCount = 0;
     curDstCount = 0;
     first_elem = 0;
-    accumInt = 0;
+    accum_mask = 0;
     accumDp = 0.0;
     accumSp = 0.0;
+    accumLongInt = 0;
+    accumInt = 0;
+    accumInt16 = 0;
+    accumInt8 = 0;
     red_SrcCount = 0;
     slide_SrcCount = 0;
     srcB_data_slide_count = 0;
@@ -94,7 +98,7 @@ Datapath::startTicking(
     is_FP_Comp      =0;
     is_INT_to_FP    =0;
     is_FP_to_INT    =0;
-    vf_reduction_first_done =0;
+    reduction_first_done =0;
     slide_infligh   =0;
 
 
@@ -131,8 +135,12 @@ Datapath::startTicking(
     is_FP_Comp  = this->insn->isFPCompare();
     /* INT operation with an immediate */
     op_imm = (this->insn->func3()==3);
+    /*reduction*/
+    reduction = this->insn->is_reduction();
     /* Floating point reductions */
-    vf_reduction = this->insn->is_reduction();
+    fp_reduction = this->insn->is_reduction() && this->insn->isFP();
+    /* Int reductions */
+    int_reduction = this->insn->is_reduction() && this->insn->isInt();
     /* Vector Slides */
     vslideup =  this->insn->is_slideup();
     vslide1up = (operation == "vslide1up_vx");
@@ -144,7 +152,7 @@ Datapath::startTicking(
     is_mask_logical = this->insn->VectorMaskLogical();
 
     //Accumulator for reductions, vmpopc and vmfirst
-    accumInt =-1;
+    accum_mask =-1;
 
     
 
@@ -189,7 +197,7 @@ Datapath::evaluate()
 
     if ((vm==0)) // Masked Operations uses
     {
-        if (vf_reduction)
+        if (reduction)
         {
             if ((vector_lane->MdataQ.size() < simd_size))
             {
@@ -212,10 +220,10 @@ Datapath::evaluate()
            return;
         }
     }
-    else if (vf_reduction)   // Reduction Operation
+    else if (reduction)   // Reduction Operation
     {
         if ( (vector_lane->BdataQ.size() < simd_size) ||
-            ((vector_lane->AdataQ.size() < 1) && !vf_reduction_first_done))
+            ((vector_lane->AdataQ.size() < 1) && !reduction))
         {
             return;
         }
@@ -256,17 +264,17 @@ Datapath::evaluate()
         /*
          * Reduction instruction
          */
-        if (vf_reduction)
+        if (reduction)
         {
             if (vector_lane->AdataQ.size() > 0)
             {
-                uint8_t *Aitem = vector_lane->AdataQ.front();
-                memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
-                vector_lane->AdataQ.pop_front();
-                delete[] Aitem;
+                if (fp_reduction)
+                {
+                    uint8_t *Aitem = vector_lane->AdataQ.front();
+                    memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
+                    vector_lane->AdataQ.pop_front();
+                    delete[] Aitem;
 
-                //if(!vf_reduction_first_done)
-                //{
                     if (vsew == 64) {
                         double Accitem = (double)((double*)Adata)[i] ;
                         accumDp = Accitem;
@@ -274,9 +282,22 @@ Datapath::evaluate()
                         float Accitem = (float)((float*)Adata)[i] ;
                         accumSp = Accitem;
                     }
-                    vf_reduction_first_done=1;
-                //}
-                
+                    reduction_first_done=1;
+                } else if (int_reduction) {
+                    uint8_t *Aitem = vector_lane->AdataQ.front();
+                    memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
+                    vector_lane->AdataQ.pop_front();
+                    delete[] Aitem;
+
+                    if (vsew == 64) {
+                        uint64_t Accitem = (long int)((long int*)Adata)[i] ;
+                        accumLongInt = Accitem;
+                    } else {
+                        uint32_t Accitem = (int)((int*)Adata)[i] ;
+                        accumInt = Accitem;
+                    }
+                    reduction_first_done=1;
+                }
             }
         /*
          * If aritmetic instruction with only 1 source means that src1 is not used
@@ -315,9 +336,9 @@ Datapath::evaluate()
          *       -the instruction uses 3 sources
          *       -the instruction is slide, the shifted position should be filled by the old
          *        destination
-         * When vf_reduction is enable, masked Op does not read old destination
+         * When reduction is enable, masked Op does not read old destination
          */
-        if (((vm==0) & !vf_reduction) | arith3Srcs | is_slide)
+        if (((vm==0) & !reduction) | arith3Srcs | is_slide)
         {
             uint8_t *Dstitem = vector_lane->DstdataQ.front();
             memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
@@ -464,7 +485,7 @@ Datapath::evaluate()
                 {
                     if (vsew == 64)
                     {
-                        if (vf_reduction)
+                        if (fp_reduction)
                         {
                             double Bitem = (double)((double*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
@@ -491,7 +512,7 @@ Datapath::evaluate()
                     }
                     else
                     {
-                        if (vf_reduction)
+                        if (fp_reduction)
                         {
                             float Bitem = (float)((float*)Bdata)[i];
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
@@ -517,7 +538,7 @@ Datapath::evaluate()
                         }
                     }
 
-                    if (vf_reduction && (red_SrcCount==srcCount))
+                    if (fp_reduction && (red_SrcCount==srcCount))
                     {
                         uint8_t *ndata = new uint8_t[DST_SIZE];
                         if (vsew == 64)
@@ -541,26 +562,26 @@ Datapath::evaluate()
                                 long int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accumInt = (vm==1) ? accumInt + Bitem :
-                                    (Mitem) ? accumInt + Bitem : accumInt;
+                                accum_mask = (vm==1) ? accum_mask + Bitem :
+                                    (Mitem) ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount=red_SrcCount + 1;
                                 DPRINTF(Datapath," vmpopc: Source "
-                                    "%ld  Acc= %ld  \n" ,Bitem, accumInt);
+                                    "%ld  Acc= %ld  \n" ,Bitem, accum_mask);
                             } else if (vmfirst) {
                                 int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0000000000000001);
-                                accumInt = ((vm==1) || ((vm==0) && (Mitem==1)))
+                                accum_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
                                         ? (first_elem) ? red_SrcCount :
-                                        accumInt : accumInt;
+                                        accum_mask : accum_mask;
 
                                 if (first_elem)
                                 {
                                     DPRINTF(Datapath," vmfirst: "
                                         "first active element found at %ld"
-                                        " position \n" ,accumInt);
+                                        " position \n" ,accum_mask);
                                     break;
                                 }
                                 red_SrcCount=red_SrcCount + 1;
@@ -571,6 +592,11 @@ Datapath::evaluate()
                             long int Ditem = computeLongMaskLogicalOp(Aitem,Bitem,insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
+                        } else if (int_reduction) {
+                            long int Bitem = (long int)((long int*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            accumLongInt = computeLongIntReduction(accumLongInt,Bitem,Mitem);
+                            red_SrcCount=red_SrcCount + 1;
                         } else {
                             long int Aitem = (long int)((long int*)Adata)[i];
                             long int Bitem = (long int)((long int*)Bdata)[i];
@@ -592,11 +618,11 @@ Datapath::evaluate()
                                 int Bitem = (0x00000001) &&
                                     (int)((int*)Bdata)[i];
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accumInt = (vm==1) ? accumInt + Bitem : (Mitem)
-                                     ? accumInt + Bitem : accumInt;
+                                accum_mask = (vm==1) ? accum_mask + Bitem : (Mitem)
+                                     ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount=red_SrcCount + 1;
                                 DPRINTF(Datapath," vmpopc: Source %d"
-                                    " Acc= %d  \n" ,Bitem, accumInt);
+                                    " Acc= %d  \n" ,Bitem, accum_mask);
 
                             } else if (vmfirst) {
                                 int Bitem = (0x00000001) &&
@@ -604,15 +630,15 @@ Datapath::evaluate()
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x00000001);
-                                accumInt = ((vm==1) || ((vm==0) && (Mitem==1)))
+                                accum_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
                                     ? (first_elem) ? red_SrcCount :
-                                    accumInt : accumInt;
+                                    accum_mask : accum_mask;
 
                                 if (first_elem)
                                 {
                                     DPRINTF(Datapath," vmfirst: "
                                         "first active element found at %d "
-                                        "position \n" ,accumInt);
+                                        "position \n" ,accum_mask);
                                     break;
                                 }
 
@@ -624,6 +650,11 @@ Datapath::evaluate()
                             int Ditem = computeIntMaskLogicalOp(Aitem,Bitem,insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
+                        } else if (int_reduction) {
+                            int Bitem = (int)((int*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            accumInt = computeIntReduction(accumInt,Bitem,Mitem);
+                            red_SrcCount=red_SrcCount + 1;
                         } else {
                             int Aitem = (int)((int*)Adata)[i] ;
                             int Bitem = (int)((int*)Bdata)[i] ;
@@ -635,7 +666,7 @@ Datapath::evaluate()
                                 DST_SIZE);
                         }
                     }
-                    if (vsew == 16)
+                    else if (vsew == 16)
                     {
                         if (vmpopc | vmfirst)
                         {
@@ -644,11 +675,11 @@ Datapath::evaluate()
                                 uint16_t Bitem = (0x0001) &&
                                     (uint16_t)((uint16_t*)Bdata)[i];
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accumInt = (vm == 1) ? accumInt + Bitem :
-                                    (Mitem) ? accumInt + Bitem : accumInt;
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                    (Mitem) ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount = red_SrcCount + 1;
                                 DPRINTF(Datapath, " vmpopc: Source "
-                                    "%ld  Acc= %ld  \n", Bitem, accumInt);
+                                    "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
                             else if (vmfirst) {
                                 int Bitem = (0x0001) &&
@@ -656,15 +687,15 @@ Datapath::evaluate()
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0001);
-                                accumInt = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                accum_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
                                     ? (first_elem) ? red_SrcCount :
-                                    accumInt : accumInt;
+                                    accum_mask : accum_mask;
 
                                 if (first_elem)
                                 {
                                     DPRINTF(Datapath, " vmfirst: "
                                         "first active element found at %ld"
-                                        " position \n", accumInt);
+                                        " position \n", accum_mask);
                                     break;
                                 }
                                 red_SrcCount = red_SrcCount + 1;
@@ -676,8 +707,12 @@ Datapath::evaluate()
                             uint16_t Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
                             memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
-                        }
-                        else {
+                        } else if (int_reduction) {
+                            int16_t Bitem = (int16_t)((int16_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            accumInt16 = computeInt16Reduction(accumInt16,Bitem,Mitem);
+                            red_SrcCount=red_SrcCount + 1;
+                        } else {
                             uint16_t Aitem = (uint16_t)((uint16_t*)Adata)[i];
                             uint16_t Bitem = (uint16_t)((uint16_t*)Bdata)[i];
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
@@ -689,59 +724,81 @@ Datapath::evaluate()
                                 DST_SIZE);
                         }
                     }
-                }
-                if (vsew == 8)
-                {
-                    if (vmpopc | vmfirst)
+                    else if (vsew == 8)
                     {
-                        if (vmpopc)
+                        if (vmpopc | vmfirst)
                         {
-                            int8_t Bitem = (0x01) &&
-                                (int8_t)((int8_t*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumInt = (vm == 1) ? accumInt + Bitem :
-                                (Mitem) ? accumInt + Bitem : accumInt;
-                            red_SrcCount = red_SrcCount + 1;
-                            DPRINTF(Datapath, " vmpopc: Source "
-                                "%ld  Acc= %ld  \n", Bitem, accumInt);
-                        }
-                        else if (vmfirst) {
-                            int Bitem = (0x01) &&
-                                (int8_t)((int8_t*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-
-                            first_elem = (Bitem == 0x01);
-                            accumInt = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
-                                ? (first_elem) ? red_SrcCount :
-                                accumInt : accumInt;
-
-                            if (first_elem)
+                            if (vmpopc)
                             {
-                                DPRINTF(Datapath, " vmfirst: "
-                                    "first active element found at %ld"
-                                    " position \n", accumInt);
-                                break;
+                                int8_t Bitem = (0x01) &&
+                                    (int8_t)((int8_t*)Bdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                    (Mitem) ? accum_mask + Bitem : accum_mask;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath, " vmpopc: Source "
+                                    "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
-                            red_SrcCount = red_SrcCount + 1;
+                            else if (vmfirst) {
+                                int Bitem = (0x01) &&
+                                    (int8_t)((int8_t*)Bdata)[i];
+                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
+
+                                first_elem = (Bitem == 0x01);
+                                accum_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                    ? (first_elem) ? red_SrcCount :
+                                    accum_mask : accum_mask;
+
+                                if (first_elem)
+                                {
+                                    DPRINTF(Datapath, " vmfirst: "
+                                        "first active element found at %ld"
+                                        " position \n", accum_mask);
+                                    break;
+                                }
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        }
+                        else if (is_mask_logical) {
+                            bool Aitem = (bool)((bool*)Adata)[i];
+                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            long int Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
+                        } else if (int_reduction) {
+                            int8_t Bitem = (int8_t)((int8_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            accumInt8 = computeInt8Reduction(accumInt8,Bitem,Mitem);
+                            red_SrcCount=red_SrcCount + 1;
+                        } else {
+                            int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
+                            int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            int8_t Dstitem =
+                                (int8_t)((int8_t*)Dstdata)[i];
+                            int8_t Ditem = compute_int8_op(Aitem, Bitem,
+                                Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         }
                     }
-                    else if (is_mask_logical) {
-                        bool Aitem = (bool)((bool*)Adata)[i];
-                        bool Bitem = (bool)((bool*)Bdata)[i];
-                        long int Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
-                        memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                            DST_SIZE);
-                    }
-                    else {
-                        int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
-                        int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        int8_t Dstitem =
-                            (int8_t)((int8_t*)Dstdata)[i];
-                        int8_t Ditem = compute_int8_op(Aitem, Bitem,
-                            Mitem, Dstitem, insn);
-                        memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                            DST_SIZE);
+
+                    if (int_reduction && (red_SrcCount==srcCount))
+                    {
+                        uint8_t *ndata = new uint8_t[DST_SIZE];
+                        if (vsew == 64) {
+                            memcpy(ndata, (uint8_t*)&accumLongInt, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE , 0);
+                        } else if (vsew == 32) {
+                            memcpy(ndata, (uint8_t*)&accumInt, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE , 0);
+                        } else if (vsew == 16) {
+                            memcpy(ndata, (uint8_t*)&accumInt16, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE , 0);
+                        } else if (vsew == 8) {
+                            memcpy(ndata, (uint8_t*)&accumInt8, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE , 0);
+                        }
                     }
                 }
                 else if (is_INT_to_FP)
@@ -782,7 +839,6 @@ Datapath::evaluate()
                             Dstitem, insn);
                         memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
                     }
-
                 }
             }
         }
@@ -793,15 +849,15 @@ Datapath::evaluate()
     delete[] Dstdata;
 
 
-    if (!vf_reduction)
+    if (!reduction)
     {
         if ( (vmpopc && (red_SrcCount==srcCount)) | (vmfirst & first_elem) |
             (vmfirst & (red_SrcCount==srcCount)) )
         {
-            DPRINTF(Datapath," Elements= %d  \n" , accumInt);
+            DPRINTF(Datapath," Elements= %d  \n" , accum_mask);
             //WB Data to Int Register  File
             uint8_t *ndata = new uint8_t[DST_SIZE];
-            memcpy(ndata, (uint8_t*)&accumInt, DST_SIZE);
+            memcpy(ndata, (uint8_t*)&accum_mask, DST_SIZE);
             dataCallback(ndata, DST_SIZE , 0);
         }
         else if (!vmpopc & !vmfirst)

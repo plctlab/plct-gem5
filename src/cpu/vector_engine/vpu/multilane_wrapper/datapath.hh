@@ -79,6 +79,11 @@ public:
     int compute_float_fp_comp_op(float Aitem, float Bitem ,
         RiscvISA::VectorStaticInst* insn);
 
+    long int computeLongIntReduction(long int accumDp,long int Bitem,uint8_t Mitem);
+    int computeIntReduction(int accumDp,int Bitem,uint8_t Mitem);
+    int16_t computeInt16Reduction(int16_t accumDp,int16_t Bitem,uint8_t Mitem);
+    int8_t computeInt8Reduction(int8_t accumDp,int8_t Bitem,uint8_t Mitem);
+
     long int compute_long_int_op(long int Aitem, long int Bitem,
         uint8_t Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
     int compute_int_op(int Aitem, int Bitem,  uint8_t Mitem, int Dstitem,
@@ -123,12 +128,14 @@ private:
     const uint64_t VectorLanes;
 
     bool slide_infligh;
-    bool vf_reduction_first_done;
+    bool reduction_first_done;
 
     /*********************************
-     * Floating point reductions
+     * reductions
      */
-    bool vf_reduction;
+    bool reduction;
+    bool int_reduction;
+    bool fp_reduction;
     /*********************************
      * Slide Operations
      */
@@ -180,9 +187,13 @@ private:
     uint64_t curDstCount;
 
     bool first_elem;
-    long int accumInt;
+    long int accum_mask;
     double accumDp;
     float  accumSp;
+    long int accumLongInt;
+    int accumInt;
+    int16_t accumInt16;
+    int8_t accumInt8;
     int red_SrcCount;
     int slide_SrcCount;
     int srcB_data_slide_count;

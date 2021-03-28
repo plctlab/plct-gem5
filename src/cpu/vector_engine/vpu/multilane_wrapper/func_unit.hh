@@ -309,6 +309,7 @@ Datapath::computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem)
     return reduction;
 }
 
+
 int
 Datapath::compute_float_fp_comp_op(float Aitem, float Bitem,
     RiscvISA::VectorStaticInst* insn)
@@ -1061,6 +1062,123 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
             "\n", Mitem, Dstitem);
     }
     return Ditem;
+}
+
+/*
+ * Integer Reductions :Missing cases
+ */
+int
+Datapath::computeIntReduction(int accumInt,int Bitem,uint8_t Mitem)
+{
+    int reduction;
+    std::string operation = insn->getName();
+
+    if (operation == "vredsum_vs") {
+         reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Acc= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmax_vs") {
+         reduction = (vm==1) ? ((accumInt > Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt > Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmin_vs") {
+         reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    return reduction;
+}
+
+/*
+ * Integer Reductions :Missing cases
+ */
+int8_t
+Datapath::computeInt8Reduction(int8_t accumInt,int8_t Bitem,uint8_t Mitem)
+{
+    int8_t reduction;
+    std::string operation = insn->getName();
+
+    if (operation == "vredsum_vs") {
+         reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Acc= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmax_vs") {
+         reduction = (vm==1) ? ((accumInt > Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt > Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmin_vs") {
+         reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    return reduction;
+}
+
+/*
+ * Integer Reductions :Missing cases
+ */
+int16_t
+Datapath::computeInt16Reduction(int16_t accumInt,int16_t Bitem,uint8_t Mitem)
+{
+    int16_t reduction;
+    std::string operation = insn->getName();
+
+    if (operation == "vredsum_vs") {
+         reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Acc= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmax_vs") {
+         reduction = (vm==1) ? ((accumInt > Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt > Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Max= %d\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmin_vs") {
+         reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %d  Min= %d\n" ,Bitem, reduction);
+    }
+
+    return reduction;
+}
+
+
+/*
+ * Integer Reductions :Missing cases
+ */
+long int
+Datapath::computeLongIntReduction(long int accumInt,long int Bitem,uint8_t Mitem)
+{
+    long int reduction;
+    std::string operation = insn->getName();
+
+    if (operation == "vredsum_vs") {
+         reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  Acc= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmax_vs") {
+         reduction = (vm==1) ? ((accumInt > Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt > Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  Max= %ld\n" ,Bitem, reduction);
+    }
+
+    if (operation == "vredmin_vs") {
+         reduction = (vm==1) ? ((accumInt < Bitem) ? accumInt:Bitem) :
+                     (Mitem) ? ((accumInt < Bitem) ? accumInt:Bitem) : accumInt;
+         DPRINTF(Datapath," Reduction: Source %ld  Min= %ld\n" ,Bitem, reduction);
+    }
+
+    return reduction;
 }
 
 /*
