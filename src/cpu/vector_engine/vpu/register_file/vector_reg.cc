@@ -82,10 +82,10 @@ VectorRegister::regStats()
 
     Reads
         .name(name() + ".Reads")
-        .desc("Number of reads to the vrf");
+        .desc("Number of reads to the vrf, 64-bit elements");
     Writes
         .name(name() + ".Writes")
-        .desc("Number of writes to the vrf");
+        .desc("Number of writes to the vrf, 64-bit elements");
 }
 
 uint64_t
@@ -136,12 +136,14 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
 
     if (pkt->isRead())
     {
-        Reads++;
+        Reads = Reads.value() + pkt->getSize() / 8; // 64-bit elements
+        DPRINTF(VectorRegister, "Reading %d elements\n", pkt->getSize() / 8);
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
         //DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx\n"
         //    ,pkt->getSize(), pkt->getAddr());
     } else {
-        Writes++;
+        Writes = Writes.value() + pkt->getSize() / 8; // 64-bit elements
+        DPRINTF(VectorRegister, "Writing %d elements\n", pkt->getSize() / 8);
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
         //DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx\n"
         //    ,pkt->getSize(), pkt->getAddr());

@@ -97,9 +97,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t addr_OldDst;
     bool location;
 
-    bool  move_to_core = (insn.getName() == "vfmv_fs") || (insn.getName() == "vext_xv");
-    bool  move_to_core_int = (insn.getName() == "vext_xv");
-    bool  move_to_core_float = (insn.getName() == "vfmv_fs");
+    std::string operation = insn.getName();
+
+    bool  move_to_core = (operation == "vfmv_fs") || (operation == "vext_xv");
+    bool  move_to_core_int = (operation == "vext_xv");
+    bool  move_to_core_float = (operation == "vfmv_fs");
 
     uint64_t i;
     // OPIVI, OPIVX , OPFVF and OPMVX formats
@@ -108,6 +110,8 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     vi_op = (insn.func3() == 3);
     // Masked operation
     masked_op = (insn.vm() == 0);
+    // Set scalar in a vector
+    bool vector_set =  ((operation == "vmerge_vx") || (operation == "vmerge_vi") || (operation == "vfmerge_vf")) && (insn.vm() == 1);
     /*Mask destination. Two instructions types creates a mask: isFPCompare()  isIntCompare()*/
     bool mask_dst = insn.isMaskDst();
     uint64_t mask_dst_data = 0;
@@ -313,11 +317,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         if (DST_SIZE == 8) {
                             DPRINTF(VectorLane, "queue Data 0x%x \n",
                                 *(uint64_t*)ndata);                        
-}
+                        }
                         if (DST_SIZE == 4) {
                             DPRINTF(VectorLane, "queue Data 0x%x \n",
                                 *(uint32_t*)ndata);                        
-}
+                        }
                     }
                     delete[] ZeroData;
                 }
@@ -340,6 +344,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
         if (vi_op | vx_op | vf_op)
         {
+            DPRINTF(VectorLane,"No reading because Reading vi_op | vx_op | vf_op \n" );
             bool imm_unsigned = (insn.getName() == "vsll_vi") || (insn.getName() == "vsrl_vi") || (insn.getName() == "vsra_vi");
 
             uint64_t immediate;
@@ -366,7 +371,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                     DPRINTF(VectorLane, "queue Data srcAReader "
                         "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
                         this->AdataQ.size());                
-}
+                }
                 if (DATA_SIZE == 4) {
                     DPRINTF(VectorLane, "queue Data srcAReader "
                         "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
@@ -377,6 +382,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         }
         else if (!insn.arith1Src())
         {
+            DPRINTF(VectorLane,"Reading srcAReader \n" );
             srcAReader->initialize(vector_wrapper, src1_count, DATA_SIZE,
                 addr_src1, 0, 1, location, xc, [DATA_SIZE, src1_count, this]
                 (uint8_t* data, uint8_t size, bool done)
@@ -394,7 +400,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         DPRINTF(VectorLane, "queue Data srcAReader "
                             "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
                             this->AdataQ.size());                    
-}
+                    }
                     ++this->Aread;
                     delete data;
                     assert(!done || (this->Aread == src1_count));
@@ -412,31 +418,36 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 addr_src2;
         }
 
-        srcBReader->initialize(vector_wrapper, vl_count, DATA_SIZE, addr_src2, 0, 1,
-            location, xc, [DATA_SIZE, vl_count, this]
-            (uint8_t* data, uint8_t size, bool done)
-            {
-                assert(size == DATA_SIZE);
-                uint8_t* ndata = new uint8_t[DATA_SIZE];
-                memcpy(ndata, data, DATA_SIZE);
-                this->BdataQ.push_back(ndata);
-                if (DATA_SIZE == 8) {
-                    DPRINTF(VectorLane, "queue Data srcBReader "
-                        "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
-                        this->BdataQ.size());                
-}
-                if (DATA_SIZE == 4) {
-                    DPRINTF(VectorLane, "queue Data srcBReader "
-                        "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
-                        this->BdataQ.size());                
-}
-                ++this->Bread;
-                delete data;
-                assert(!done || (this->Bread == vl_count));
-            });
-
+        if (!vector_set)
+        {
+            DPRINTF(VectorLane,"Reading srcBReader \n" );
+            srcBReader->initialize(vector_wrapper, vl_count, DATA_SIZE, addr_src2, 0, 1,
+                location, xc, [DATA_SIZE, vl_count, this]
+                (uint8_t* data, uint8_t size, bool done)
+                {
+                    assert(size == DATA_SIZE);
+                    uint8_t* ndata = new uint8_t[DATA_SIZE];
+                    memcpy(ndata, data, DATA_SIZE);
+                    this->BdataQ.push_back(ndata);
+                    if (DATA_SIZE == 8) {
+                        DPRINTF(VectorLane, "queue Data srcBReader "
+                            "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
+                            this->BdataQ.size());                
+                    }
+                    if (DATA_SIZE == 4) {
+                        DPRINTF(VectorLane, "queue Data srcBReader "
+                            "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
+                            this->BdataQ.size());                
+                    }
+                    ++this->Bread;
+                    delete data;
+                    assert(!done || (this->Bread == vl_count));
+                });
+        }
+        
         if (masked_op)
         {
+            DPRINTF(VectorLane,"Reading srcMReader \n" );
             //DPRINTF(VectorLane,"Reading Source M \n" );
             srcMReader->initialize(vector_wrapper, vl_count, DATA_SIZE, addr_Mask,
                 0, 1, location, xc, [addr_Mask, DATA_SIZE, vl_count, this]
@@ -456,7 +467,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
         if ((!reduction & (masked_op)) | arith3Srcs | is_slide)
         {
-            //DPRINTF(VectorLane,"Reading Source DstOld \n" );
+            DPRINTF(VectorLane,"Reading dstReader \n" );
             //Leemos el old detination para el caso de mask Op
             dstReader->initialize(vector_wrapper, vl_count, DATA_SIZE,
                 addr_OldDst, 0, 1, location, xc, [addr_OldDst, DATA_SIZE, vl_count, this]
@@ -470,12 +481,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         DPRINTF(VectorLane, "queue Data dstReader "
                             "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
                             this->DstdataQ.size());                    
-}
+                    }
                     if (DATA_SIZE == 4) {
                         DPRINTF(VectorLane, "queue Data dstReader "
                             "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
                             this->DstdataQ.size());                    
-}
+                    }
                     ++this->Dstread;
                     delete data;
                     assert(!done || (this->Dstread == vl_count));

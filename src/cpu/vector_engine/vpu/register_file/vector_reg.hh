@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "base/statistics.hh"
 #include "base/types.hh"
@@ -41,7 +42,9 @@
 #include "mem/packet.hh"
 #include "mem/qport.hh"
 #include "params/VectorRegister.hh"
-#include "sim/ticked_object.hh"
+#include "debug/VectorRegister.hh"
+#include "sim/faults.hh"
+#include "sim/sim_object.hh"
 
 class VectorRegister : public ClockedObject
 {

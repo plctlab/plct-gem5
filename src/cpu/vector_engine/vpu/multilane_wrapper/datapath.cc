@@ -94,6 +94,8 @@ Datapath::startTicking(
     is_convert      =0;
     is_slide        =0;
 
+    vector_set      =0;
+
     is_mask_logical =0;
     is_FP_Comp      =0;
     is_INT_to_FP    =0;
@@ -150,6 +152,8 @@ Datapath::startTicking(
     vmpopc = (operation == "vmpopc_m");
     vmfirst = (operation == "vmfirst_m");
     is_mask_logical = this->insn->VectorMaskLogical();
+
+    vector_set = ((operation == "vmerge_vx") || (operation == "vmerge_vi") || (operation == "vfmerge_vf")) && (vm==1);
 
     //Accumulator for reductions, vmpopc and vmfirst
     accum_mask =-1;
@@ -230,9 +234,10 @@ Datapath::evaluate()
     }
     else if (arith2Srcs)  // 2 sources operation
     {
-        //DPRINTF(VectorEngine," arith2Srcs \n" );
-        if ( (vector_lane->AdataQ.size() < simd_size) |
-            (vector_lane->BdataQ.size() < simd_size) )
+        if((vector_lane->AdataQ.size() < simd_size) && vector_set) {
+            return;
+        } else if (((vector_lane->AdataQ.size() < simd_size) |
+            (vector_lane->BdataQ.size() < simd_size) ) && !vector_set )
         {
             return;
         }
@@ -319,11 +324,13 @@ Datapath::evaluate()
         /*
          * Src2 is always ised by the arithmetic instructions
          */
-        uint8_t *Bitem = vector_lane->BdataQ.front();
-        memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
-        vector_lane->BdataQ.pop_front();
-        delete[] Bitem;
-
+        if(!vector_set)
+        {
+            uint8_t *Bitem = vector_lane->BdataQ.front();
+            memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
+            vector_lane->BdataQ.pop_front();
+            delete[] Bitem;
+        }
         /*
          * Mask register used by the instruction
          */

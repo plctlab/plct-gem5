@@ -501,8 +501,8 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
         for (int i=0 ; i< num_clusters ; i++) {
             if (!vector_lane[i]->isOccupied()) { lane_id_available = i; }
         }
-        DPRINTF(VectorEngine,"Sending instruction %s to cluster %d, pc 0x%lx\n",
-            insn.getName(), lane_id_available , *(uint64_t*)&pc);
+        DPRINTF(VectorEngine,"Sending instruction %s to Lanes, pc 0x%lx\n",
+            insn.getName(), *(uint64_t*)&pc);
         vector_lane[lane_id_available]->issue(*this,insn,dyn_insn, xc, src1,
             vtype, vl,done_callback);
     } else {

@@ -159,6 +159,10 @@ private:
     /*********************************
      * Sources used  by the operation
      */
+    bool vector_set;
+    /*********************************
+     * Sources used  by the operation
+     */
     bool arith1Src;
     bool arith2Srcs;
     bool arith3Srcs;
