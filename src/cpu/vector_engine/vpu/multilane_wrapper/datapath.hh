@@ -39,6 +39,7 @@
 #include "base/statistics.hh"
 #include "cpu/vector_engine/vpu/multilane_wrapper/vector_lane.hh"
 #include "params/Datapath.hh"
+#include "sim/faults.hh"
 #include "sim/ticked_object.hh"
 
 class VectorLane;
@@ -118,8 +119,8 @@ public:
         uint8_t Mitem, data_type Dstitem, RiscvISA::VectorStaticInst* insn);
 
     void stopTicking();
-
     void evaluate() override;
+    void regStats() override;
 
 private:
     //Operation Latency
@@ -210,6 +211,18 @@ private:
     // TODO: Pass the MVL parameter to initialize the size of these vectors
     uint64_t srcB_data_slide_64[256];
     uint32_t srcB_data_slide_32[256];
+public:
+    // Stats for McPAT
+    Stats::Scalar numFP64_operations;
+    Stats::Scalar numFP32_operations;
+    Stats::Scalar numALU64_operations;
+    Stats::Scalar numALU32_operations;
+    Stats::Scalar numALU16_operations;
+    Stats::Scalar numALU8_operations;
+    Stats::Scalar numMUL64_operations;
+    Stats::Scalar numMUL32_operations;
+    Stats::Scalar numMUL16_operations;
+    Stats::Scalar numMUL8_operations;
 };
 
 #endif //__CPU_VECTOR_LANE_DATAPATH_HH__

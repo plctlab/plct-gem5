@@ -175,6 +175,43 @@ Datapath::stopTicking()
 }
 
 void
+Datapath::regStats()
+{
+    TickedObject::regStats();
+
+    numFP64_operations
+        .name(name() + ".numFP64_operations")
+        .desc("Number of 64-bit Floating-point operations");
+    numFP32_operations
+        .name(name() + ".numFP32_operations")
+        .desc("Number of 32-bit Floating-point operations");
+    numALU64_operations
+        .name(name() + ".numALU64_operations")
+        .desc("Number of 64-bit ALU operations");
+    numALU32_operations
+        .name(name() + ".numALU32_operations")
+        .desc("Number of 32-bit ALU operations");
+    numALU16_operations
+        .name(name() + ".numALU16_operations")
+        .desc("Number of 16-bit ALU operations");
+    numALU8_operations
+        .name(name() + ".numALU8_operations")
+        .desc("Number of 8-bit ALU operations");
+    numMUL64_operations
+        .name(name() + ".numMUL64_operations")
+        .desc("Number of 64-bit Integer Multiplication operations");
+    numMUL32_operations
+        .name(name() + ".numMUL32_operations")
+        .desc("Number of 32-bit Integer Multiplication operations");
+    numMUL16_operations
+        .name(name() + ".numMUL16_operations")
+        .desc("Number of 16-bit Integer Multiplication operations");
+    numMUL8_operations
+        .name(name() + ".numMUL8_operations")
+        .desc("Number of 8-bit Integer Multiplication operations");
+}
+
+void
 Datapath::evaluate()
 {
     assert(running);

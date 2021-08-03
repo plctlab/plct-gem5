@@ -36,6 +36,7 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
 {
     float Ditem=0;
     std::string operation = insn->getName();
+    numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vfadd_vv") | (operation == "vfadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
@@ -150,6 +151,7 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
 {
     float Ditem=0;
     std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
     if ((operation == "vfadd_vv") | (operation == "vfadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
@@ -262,6 +264,7 @@ Datapath::computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem)
 {
     double reduction;
     std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
     if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
          reduction = (vm==1) ? accumDp + Bitem : (Mitem) ? accumDp + Bitem : accumDp;
@@ -288,6 +291,7 @@ Datapath::computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem)
 {
     float reduction;
     std::string operation = insn->getName();
+    numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
          reduction = (vm==1) ? accumSp + Bitem : (Mitem) ? accumSp + Bitem : accumSp;
@@ -316,6 +320,7 @@ Datapath::compute_float_fp_comp_op(float Aitem, float Bitem,
 {
     int Ditem=0;
     std::string operation = insn->getName();
+    numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vmfeq_vv") || (operation == "vmfeq_vf")) {
         Ditem = (Bitem == Aitem) ? 1 : 0;
@@ -362,6 +367,7 @@ Datapath::compute_double_fp_comp_op(double Aitem, double Bitem,
 {
     long int Ditem=0;
     std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
     if ((operation == "vmfeq_vv") || (operation == "vmfeq_vf")) {
         Ditem = (Bitem == Aitem) ? 1 : 0;
@@ -402,13 +408,13 @@ Datapath::compute_double_fp_comp_op(double Aitem, double Bitem,
     return Ditem;
 }
 
-
 long int
 Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     uint8_t Mitem, long int Dstitem,  RiscvISA::VectorStaticInst* insn)
 {
     long int Ditem=0;
     std::string operation = insn->getName();
+    numALU64_operations = numALU64_operations.value() + 1; // number of 64-bit ALU operations
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
@@ -426,6 +432,8 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
             ,Aitem,Bitem, Ditem);
+        numMUL64_operations = numMUL64_operations.value() + 1; // number of 64-bit MUL operations
+        numALU64_operations = numALU64_operations.value() - 1; // number of 64-bit ALU operations
     }
 
     if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
@@ -573,7 +581,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
 {
     int Ditem=0;
     std::string operation = insn->getName();
-
+    numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
@@ -591,6 +599,8 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d * %d  = %d\n",
             Aitem,Bitem, Ditem);
+        numMUL32_operations = numMUL32_operations.value() + 1; // number of 32-bit MUL operations
+        numALU32_operations = numALU32_operations.value() - 1; // number of 32-bit ALU operations
     }
 
     if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
@@ -738,7 +748,7 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
 {
     int16_t Ditem = 0;
     std::string operation = insn->getName();
-
+    numALU16_operations = numALU16_operations.value() + 1; // number of 16-bit ALU operations
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem + Bitem : Dstitem;
@@ -756,6 +766,8 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d * %d  = %d\n",
             Aitem, Bitem, Ditem);
+        numMUL16_operations = numMUL16_operations.value() + 1; // number of 16-bit MUL operations
+        numALU16_operations = numALU16_operations.value() - 1; // number of 16-bit ALU operations
     }
 
     if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
@@ -904,7 +916,7 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
 {
     int8_t Ditem = 0;
     std::string operation = insn->getName();
-
+    numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem + Bitem : Dstitem;
@@ -922,6 +934,8 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d * %d  = %d\n",
             Aitem, Bitem, Ditem);
+        numMUL8_operations = numMUL8_operations.value() + 1; // number of 8-bit MUL operations
+        numALU8_operations = numALU8_operations.value() - 1; // number of 8-bit ALU operations
     }
 
     if ((operation == "vdiv_vv") || (operation == "vdiv_vx")) {
@@ -1072,6 +1086,7 @@ Datapath::computeIntReduction(int accumInt,int Bitem,uint8_t Mitem)
 {
     int reduction;
     std::string operation = insn->getName();
+    numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
     if (operation == "vredsum_vs") {
          reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
@@ -1131,6 +1146,7 @@ Datapath::computeInt8Reduction(int8_t accumInt,int8_t Bitem,uint8_t Mitem)
 {
     int8_t reduction;
     std::string operation = insn->getName();
+    numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
 
     if (operation == "vredsum_vs") {
          reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
@@ -1190,6 +1206,7 @@ Datapath::computeInt16Reduction(int16_t accumInt,int16_t Bitem,uint8_t Mitem)
 {
     int16_t reduction;
     std::string operation = insn->getName();
+    numALU16_operations = numALU16_operations.value() + 1; // number of 316bit ALU operations
 
     if (operation == "vredsum_vs") {
          reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
@@ -1250,6 +1267,7 @@ Datapath::computeLongIntReduction(long int accumInt,long int Bitem,uint8_t Mitem
 {
     long int reduction;
     std::string operation = insn->getName();
+    numALU64_operations = numALU64_operations.value() + 1; // number of 64-bit ALU operations
 
     if (operation == "vredsum_vs") {
          reduction = (vm==1) ? accumInt + Bitem : (Mitem) ? accumInt + Bitem : accumInt;
@@ -1431,6 +1449,7 @@ Datapath::compute_cvt_f_x_64_op( long int Bitem, uint8_t Mitem,
 {
     double Ditem=0;
     std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
     if ((operation == "vfcvt_f_x_v")) {
         Ditem = (double)Bitem;
@@ -1453,6 +1472,7 @@ Datapath::compute_cvt_f_x_32_op( int Bitem, uint8_t Mitem, int Dstitem,
 {
     float Ditem=0;
     std::string operation = insn->getName();
+    numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vfcvt_f_x_v")) {
         Ditem = (float)Bitem;
@@ -1475,6 +1495,7 @@ Datapath::compute_cvt_x_f_64_op( double Bitem, uint8_t Mitem,
 {
     long int Ditem=0;
     std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vfcvt_x_f_v")) {
         Ditem = (long int)Bitem;
@@ -1497,6 +1518,7 @@ Datapath::compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem,
 {
     int Ditem=0;
     std::string operation = insn->getName();
+    numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
     if ((operation == "vfcvt_x_f_v")) {
         Ditem = (unsigned int)Bitem;
