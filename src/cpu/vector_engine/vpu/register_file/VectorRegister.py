@@ -34,7 +34,9 @@ class VectorRegister(ClockedObject):
     type = 'VectorRegister'
     cxx_header = "cpu/vector_engine/vpu/register_file/vector_reg.hh"
 
-    lanes_per_access = Param.Unsigned("how many lanes are requesting a r/w")
+    num_lanes = Param.Unsigned("Number of vector lanes")
+    num_regs = Param.Unsigned("Number of vector registers")
+    mvl = Param.Unsigned("Maximum Vector Length - MVL")
     size = Param.Unsigned("Size of vector_reg in Bytes")
     lineSize = Param.Unsigned("how many bytes accessed per cycle")
     numPorts = Param.Unsigned("Independent Ports per vector_reg")

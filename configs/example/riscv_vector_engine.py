@@ -71,8 +71,8 @@ ps.add_option('--cpu_clk',          type="string", default='2GHz',
 # VECTOR REGISTER OPTIONS
 ps.add_option('--renamed_regs',     type="int", default=40,
                                     help="Number of Vector Physical Registers")
-ps.add_option('--VRF_line_size',    type="int", default=64,
-                                    help="Vector Register line size in Bytes")
+ps.add_option('--VRF_line_size',    type="int", default=8,
+                                    help="Vector Register Slice line size in Bytes (per lane)")
 # VECTOR QUEUES OPTIONS
 ps.add_option('--OoO_queues',       type="int", default=True,
                                     help="Out-of-Order/In-Order Queues")
@@ -204,7 +204,9 @@ system.cpu.ve_interface = VectorEngineInterface(
             max_vl = options.max_vl
         ),
         vector_reg = VectorRegister(
-            lanes_per_access = options.v_lanes/options.num_clusters,
+            num_lanes = options.v_lanes/options.num_clusters,
+            num_regs = options.renamed_regs,
+            mvl = options.max_vl,
             size = (options.renamed_regs * options.max_vl)/8,
             lineSize =options.VRF_line_size
                         *(options.v_lanes/options.num_clusters),

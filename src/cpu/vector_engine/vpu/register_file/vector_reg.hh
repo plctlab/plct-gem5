@@ -81,7 +81,9 @@ public:
 private:
 
     //python configuration
-    const uint64_t lanes_per_access;
+    const uint64_t num_lanes;
+    const uint64_t num_regs;
+    const uint64_t mvl;
     const uint64_t size;
     const uint64_t lineSize;
     const uint64_t numPorts;
@@ -97,8 +99,10 @@ private:
     //the physical vector_reg storage
     uint8_t * data;
 public:
-    Stats::Scalar Reads;
-    Stats::Scalar Writes;
+    Stats::Scalar numReads_64bit_elements;
+    Stats::Scalar numWritess_64bit_elements;
+    Stats::Scalar numReads_perLane_64bit_elements;
+    Stats::Scalar numWritess_perLane_64bit_elements;
 };
 
 #endif //__CPU_VECTOR_REG_HH__

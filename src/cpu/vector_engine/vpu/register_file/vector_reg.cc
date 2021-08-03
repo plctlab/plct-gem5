@@ -80,12 +80,18 @@ VectorRegister::regStats()
 {
     ClockedObject::regStats();
 
-    Reads
-        .name(name() + ".Reads")
+    numReads_64bit_elements
+        .name(name() + ".numReads_64bit_elements")
         .desc("Number of reads to the vrf, 64-bit elements");
-    Writes
-        .name(name() + ".Writes")
+    numWritess_64bit_elements
+        .name(name() + ".numWritess_64bit_elements")
         .desc("Number of writes to the vrf, 64-bit elements");
+    numReads_perLane_64bit_elements
+        .name(name() + ".numReads_perLane_64bit_elements")
+        .desc("Number of reads to the vrf per lane, 64-bit elements");
+    numWritess_perLane_64bit_elements
+        .name(name() + ".numWritess_perLane_64bit_elements")
+        .desc("Number of writes to the vrf per lane, 64-bit elements");
 }
 
 uint64_t
@@ -95,7 +101,8 @@ VectorRegister::get_size()
 }
 
 VectorRegister::VectorRegister(const VectorRegisterParams* p) :
-    ClockedObject(p),lanes_per_access(p->lanes_per_access),
+    ClockedObject(p),num_lanes(p->num_lanes),
+    num_regs(p->num_regs),mvl(p->mvl),
     size(p->size), lineSize(p->lineSize),
     numPorts(p->numPorts), accessLatency(p->accessLatency)
 {
@@ -134,19 +141,28 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
     assert(start_addr % bytesPerBankAccess == 0);
     assert((end_addr+1) % bytesPerBankAccess == 0);
 
+    // The memories for the VRF can be seen as num_entries*WORD_WIDTH.
+    //The read/write accesses are counted for each 64-bit read/write operation.
+    uint64_t WORD_WIDTH = 8;
+
+    // Physical register size in bytes
+    uint64_t phys_reg_size = mvl/8 ;
+    // Corresponding physical register
+    uint64_t phys_reg = pkt->getAddr() / phys_reg_size;
+
     if (pkt->isRead())
     {
-        Reads = Reads.value() + pkt->getSize() / 8; // 64-bit elements
-        DPRINTF(VectorRegister, "Reading %d elements\n", pkt->getSize() / 8);
+        numReads_64bit_elements = numReads_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
+        numReads_perLane_64bit_elements = numReads_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
-        //DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx\n"
-        //    ,pkt->getSize(), pkt->getAddr());
+        DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n"
+            ,pkt->getSize(), pkt->getAddr(),phys_reg);
     } else {
-        Writes = Writes.value() + pkt->getSize() / 8; // 64-bit elements
-        DPRINTF(VectorRegister, "Writing %d elements\n", pkt->getSize() / 8);
+        numWritess_64bit_elements = numWritess_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
+        numWritess_perLane_64bit_elements = numWritess_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
-        //DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx\n"
-        //    ,pkt->getSize(), pkt->getAddr());
+        DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n"
+            ,pkt->getSize(), pkt->getAddr(),phys_reg);
     }
 
     pkt->makeTimingResponse();
