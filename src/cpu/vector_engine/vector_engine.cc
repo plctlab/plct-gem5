@@ -413,9 +413,9 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         return;
     }
 
-    if(insn.isWidening() || insn.isNarrowing()){
-        panic("Widening/Narrowing vector instructions are not fully suported \n");
-    }
+    //if(insn.isWidening() || insn.isNarrowing()){
+    //    panic("Widening/Narrowing vector instructions are not fully suported \n");
+    //}
 
     last_lmul = vector_config->get_vtype_lmul(last_vtype);
     if(last_lmul>1){

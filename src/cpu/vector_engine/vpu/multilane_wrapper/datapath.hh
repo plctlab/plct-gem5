@@ -109,6 +109,10 @@ public:
     int compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem, float Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
+    double compute_cvt_f64_x32_op( int Bitem, uint8_t Mitem, int Dstitem,
+        RiscvISA::VectorStaticInst* insn);
+
+
     void startTicking(VectorLane& data_op_unit,
         RiscvISA::VectorStaticInst& insn, uint64_t src_count,
         uint64_t dst_count, uint64_t vsew, uint64_t slide_count,uint64_t src1,
@@ -157,6 +161,8 @@ private:
     bool is_FP_to_INT;
     bool is_convert;
     bool is_FP_Comp;
+    bool isWidening;
+    bool isNarrowing;
     /*********************************
      * Sources used  by the operation
      */

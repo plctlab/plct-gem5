@@ -87,8 +87,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     //In this moment there are not implemented widening and narrowing,
     //then dst and src are similar sizes
+    bool isWidening = insn.isWidening();
     uint64_t DATA_SIZE = SIZE;
-    uint64_t DST_SIZE = SIZE;
+    uint64_t DST_SIZE = (isWidening) ? SIZE*2 : SIZE;
 
     uint64_t addr_dst;
     uint64_t addr_src1;
@@ -133,17 +134,25 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t dst_count;
     uint64_t src1_count;
     uint64_t vl_count = vl;
-    uint64_t mvl_element =
+    // In case of Widening we limit the execution to MVL/2 vector lenghs
+    uint64_t mvl_element = (isWidening) ? vectorwrapper->vector_config->get_max_vector_length_elem(vtype)/2:
         vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
 
-    DPRINTF(VectorLane, "Executing instruction %s in cluster %d, , vl = %d , mvl =  %d\n",
-        insn.getName(), lane_id, vl_count, mvl_element);
+    DPRINTF(VectorLane, "Executing instruction %s in cluster %d, , vl = %d , mvl =  %d, isWidening %d\n",
+        insn.getName(), lane_id, vl_count, mvl_element, isWidening);
 
     /* mvl_element is used to write with "0" the tail elements */
     if (reduction)
     {
         dst_count = 1;
         src1_count = 1;
+    }
+    // Since we not support LMUL, we can not group registers, then we are
+    // limited widening operations to vectors MVL/2 maximum size
+    else if(isWidening) { 
+        dst_count = mvl_element;
+        src1_count = vl_count;
+        assert(vl_count<=dst_count);
     }
     else {
         dst_count = mvl_element;

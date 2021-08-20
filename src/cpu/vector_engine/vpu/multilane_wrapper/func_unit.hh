@@ -1534,3 +1534,20 @@ Datapath::compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem,
 
     return Ditem;
 }
+
+double
+Datapath::compute_cvt_f64_x32_op( int Bitem, uint8_t Mitem, int Dstitem,
+    RiscvISA::VectorStaticInst* insn)
+{
+    double Ditem=0.0;
+    std::string operation = insn->getName();
+    numFP64_operations = numFP64_operations.value() + 1; // number of 32-bit FP operations
+
+    if ((operation == "vfwcvt_f_x_v")) {
+        Ditem = (double)Bitem;
+        DPRINTF(Datapath,"WB Instruction =  cast (%d)  = %0.2f\n",
+            Bitem, Ditem);
+    }
+
+    return Ditem;
+}

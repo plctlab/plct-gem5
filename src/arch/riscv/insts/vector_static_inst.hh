@@ -210,7 +210,7 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isStore()             const override { return opClass() == VectorMemoryStoreOp; }
 
-  bool isConvertIntToFP()    const override { return opClass() == VectorConvertIntToFPOp; }
+  bool isConvertIntToFP()    const override { return (opClass() == VectorConvertIntToFPOp) || (opClass() == VectorWConvertIntToFPOp) || (opClass() == VectorNConvertIntToFPOp); }
   bool isConvertFPToInt()    const override { return opClass() == VectorConvertFPToIntOp; }
 
   bool isWConvertFPToInt()    const override { return opClass() == VectorWConvertFPToIntOp; }

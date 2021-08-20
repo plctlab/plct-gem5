@@ -85,9 +85,6 @@ Datapath::startTicking(
     red_SrcCount = 0;
     slide_SrcCount = 0;
     srcB_data_slide_count = 0;
-    DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
-    DST_SIZE = vsew/8;  // Esto cambiará para widening y narrowing
-   // assert((DATA_SIZE == 8) || (DATA_SIZE == 4));   // Only supported 64-bit and 32-bit operations
     //reset config
     is_FP           =0;
     is_INT          =0;
@@ -130,6 +127,8 @@ Datapath::startTicking(
     arith2Srcs    = this->insn->arith2Srcs();
     arith3Srcs    = this->insn->arith3Srcs();
     /* Conversion between Int<->FP */
+    isWidening    = this->insn->isWidening(); // Limited Widening support only for conversions
+    isNarrowing   = this->insn->isNarrowing(); // Limited Widening support only for conversions
     is_INT_to_FP    = this->insn->isConvertIntToFP();
     is_FP_to_INT    = this->insn->isConvertFPToInt();
 
@@ -154,6 +153,9 @@ Datapath::startTicking(
     is_mask_logical = this->insn->VectorMaskLogical();
 
     vector_set = ((operation == "vmerge_vx") || (operation == "vmerge_vi") || (operation == "vfmerge_vf")) && (vm==1);
+
+    DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
+    DST_SIZE = (isWidening && (vsew == 32)) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing
 
     //Accumulator for reductions, vmpopc and vmfirst
     accum_mask =-1;
@@ -853,12 +855,22 @@ Datapath::evaluate()
                 }
                 else if (is_INT_to_FP)
                 {
-                    if (vsew == 64)
+                    
+                    if (isNarrowing && (vsew == 64))
                     {
+                        assert(isNarrowing);
+                    } else if (vsew == 64) {
                         long int Bitem = (long int)((long int*)Bdata)[i];
                         uint8_t Mitem = ((uint8_t*)Mdata)[i];
                         long int Dstitem = (long int)((long int*)Dstdata)[i];
                         double Ditem = compute_cvt_f_x_64_op(Bitem, Mitem,
+                            Dstitem, insn);
+                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
+                    } else if(isWidening && (vsew == 32)){
+                        int Bitem = (int)((int*)Bdata)[i] ;
+                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                        int Dstitem = (int)((int*)Dstdata)[i] ;
+                        double Ditem = compute_cvt_f64_x32_op( Bitem, Mitem,
                             Dstitem, insn);
                         memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
                     } else {
@@ -868,7 +880,7 @@ Datapath::evaluate()
                         float Ditem = compute_cvt_f_x_32_op( Bitem, Mitem,
                             Dstitem, insn);
                         memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
-                    }
+                    } 
                 }
                 else if (is_FP_to_INT)
                 {
