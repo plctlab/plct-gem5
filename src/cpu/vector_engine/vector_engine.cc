@@ -413,9 +413,13 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         return;
     }
 
-    //if(insn.isWidening() || insn.isNarrowing()){
-    //    panic("Widening/Narrowing vector instructions are not fully suported \n");
-    //}
+    // There is a very initial support for widening convert from int32 to fp64
+    // Basic support for all widening and narrowing conversions will be addded,
+    // but limiting to MVL/2 in case of widining, ince we are not implementing register grouping.
+    // This will allow to convert between int32,int64,fp32 and fp64.
+    if(/*insn.isWidening() ||*/ insn.isNarrowing()){
+        panic("Widening/Narrowing vector instructions are not fully suported \n");
+    }
 
     last_lmul = vector_config->get_vtype_lmul(last_vtype);
     if(last_lmul>1){
