@@ -130,7 +130,7 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
             Aitem,Bitem,Dstitem, Ditem);
     }
 
-    if ((operation == "vfmadd_vv")) {
+    if ((operation == "vfmadd_vv") || (operation == "vfmadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
             (Aitem * Dstitem) + Bitem  : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f * %f + %f  = %f\n",
@@ -244,7 +244,7 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
             Aitem,Bitem,Dstitem, Ditem);
     }
 
-    if ((operation == "vfmadd_vv")) {
+    if ((operation == "vfmadd_vv") || (operation == "vfmadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
             (Aitem * Dstitem) + Bitem  : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lf * %lf + %lf  = %lf\n",

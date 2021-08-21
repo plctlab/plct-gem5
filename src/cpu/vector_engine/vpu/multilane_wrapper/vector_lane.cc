@@ -138,8 +138,8 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     uint64_t mvl_element = (isWidening) ? vectorwrapper->vector_config->get_max_vector_length_elem(vtype)/2:
         vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
 
-    DPRINTF(VectorLane, "Executing instruction %s in cluster %d, , vl = %d , mvl =  %d, isWidening %d\n",
-        insn.getName(), lane_id, vl_count, mvl_element, isWidening);
+    DPRINTF(VectorLane, "Executing instruction %s , vl = %d , mvl =  %d\n",
+        insn.getName(), vl_count, mvl_element);
 
     /* mvl_element is used to write with "0" the tail elements */
     if (reduction)
