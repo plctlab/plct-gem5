@@ -1855,12 +1855,30 @@ decode QUADRANT default Unknown::unknown() {
                 0x4: VectorSlideDownOp::vslidedown_vx();
                 0x6: VectorSlideDownOp::vslide1down_vx();
                 }
-            0x14: decode FUNCT3 {
-                0x2: VectorToScalarOp::vmpopc_m();
+            0x10: decode FUNCT3 {
+                //////////////////////////////
+                // TODO:
+                // 0x0: Vector???Op::vadc_vv();
+                // 0x1: VFUNARY0
+                //
+                // 0x3: Vector???Op::vadc_vi();
+                // 0x4: Vector???Op::vadc_vx();
+                // 0x5: VRFUNARY0
+                // 0x6: VRXUNARY0
+
+                0x2: decode VS1 {// VWXUNARY0
+                        // 0x0: Vector???Op::vmv_sx*();
+                        0x10: VectorToScalarOp::vpopc_m();
+                        0x11: VectorToScalarOp::vfirst_m();
+                    }
                 }
-            0x15: decode FUNCT3 {
-                0x2: VectorToScalarOp::vmfirst_m();
-                }
+            ////////////////////////
+            // 0x14: decode FUNCT3 {
+            //     0x2: decode VS1{
+            //         TODO: VMUNARY0
+            //         }
+            //     }
+            //
             0x17: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vmerge_vv();
                 0x3: VectorData2SrcOp::vmerge_vi();

@@ -149,7 +149,7 @@ private:
     /*********************************
      * Operations with mask
      */
-    bool vmpopc,vmfirst;
+    bool vpopc,vfirst;
     /*********************************
      * Operation type
      */
