@@ -86,7 +86,7 @@ Datapath::get_instruction_latency()
      * Floating point reductions
      *************************************************************************/
 
-    if (   (operation == "vfredsum_vs") || (operation == "vfredosum_vs") 
+    if (   (operation == "vfredusum_vs") || (operation == "vfredosum_vs") 
         || (operation == "vfredmax_vs") || (operation == "vfredmin_vs")) {
         Oplatency           = 4;
     }

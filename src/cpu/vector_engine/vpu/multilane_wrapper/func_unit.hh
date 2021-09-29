@@ -111,7 +111,7 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
      * 
      *************************************************************************/
 
-    if ((operation == "vfmerge_vf")) {
+    if ((operation == "vfmerge_vfm")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
         if(vm==0) {
             DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
@@ -226,7 +226,7 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
      * 
      *************************************************************************/
 
-    if ((operation == "vfmerge_vf")) {
+    if ((operation == "vfmerge_vfm")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
         if(vm==0) {
             DPRINTF(Datapath,"WB Instruction = %lf : %lf  = %f\n",
@@ -266,7 +266,7 @@ Datapath::computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem)
     std::string operation = insn->getName();
     numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
-    if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
+    if ((operation == "vfredusum_vs") || (operation == "vfredosum_vs")) {
          reduction = (vm==1) ? accumDp + Bitem : (Mitem) ? accumDp + Bitem : accumDp;
          DPRINTF(Datapath," Reduction: Source %lf  Acc= %lf\n" ,Bitem, reduction);
     }
@@ -293,7 +293,7 @@ Datapath::computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem)
     std::string operation = insn->getName();
     numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
-    if ((operation == "vfredsum_vs") || (operation == "vfredosum_vs")) {
+    if ((operation == "vfredusum_vs") || (operation == "vfredosum_vs")) {
          reduction = (vm==1) ? accumSp + Bitem : (Mitem) ? accumSp + Bitem : accumSp;
          DPRINTF(Datapath," Reduction: Source %f  Acc= %f\n" ,Bitem, reduction);
     }
@@ -477,7 +477,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
+    if ((operation == "vmerge_vvm")  | (operation == "vmerge_vxm")  | (operation == "vmerge_vim")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
         if(vm==0) {
             DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
@@ -645,7 +645,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
+    if ((operation == "vmerge_vvm")  | (operation == "vmerge_vxm")  | (operation == "vmerge_vim")) {
         Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
         if(vm==0) {
             DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
@@ -812,7 +812,7 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
             Bitem, Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
+    if ((operation == "vmerge_vvm") | (operation == "vmerge_vxm") | (operation == "vmerge_vim")) {
         Ditem = (vm == 0) ? ((Mitem == 1) ? Aitem : Bitem) : Aitem;
         if (vm == 0) {
             DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
@@ -980,7 +980,7 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
             Bitem, Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
+    if ((operation == "vmerge_vvm") | (operation == "vmerge_vxm") | (operation == "vmerge_vim")) {
         Ditem = (vm == 0) ? ((Mitem == 1) ? Aitem : Bitem) : Aitem;
         if (vm == 0) {
             DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",

@@ -112,7 +112,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     // Masked operation
     masked_op = (insn.vm() == 0);
     // Set scalar in a vector
-    bool vector_set =  ((operation == "vmerge_vx") || (operation == "vmerge_vi") || (operation == "vfmerge_vf")) && (insn.vm() == 1);
+    bool vector_set =  ((operation == "vmerge_vxm") || (operation == "vmerge_vim") || (operation == "vfmerge_vfm")) && (insn.vm() == 1);
     /*Mask destination. Two instructions types creates a mask: isFPCompare()  isIntCompare()*/
     bool mask_dst = insn.isMaskDst();
     uint64_t mask_dst_data = 0;
