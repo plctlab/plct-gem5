@@ -417,24 +417,24 @@ decode QUADRANT default Unknown::unknown() {
                 }}, inst_flags=FloatMemReadOp);
             }
             0x0: decode MOP {
-                0x0:VectorMemLoadOp::vlb_v();
-                0x2:VectorMemLoadOp::vlsb_v();
-                0x3:VectorMemLoadOp::vlxb_v();
+                0x0:VectorMemLoadOp::vle8_v();
+                0x2:VectorMemLoadOp::vlse8_v();
+                0x3:VectorMemLoadOp::vloxei8_v();
             }
             0x5: decode MOP {
-                0x0:VectorMemLoadOp::vlh_v();
-                0x2:VectorMemLoadOp::vlsh_v();
-                0x3:VectorMemLoadOp::vlxh_v();
+                0x0:VectorMemLoadOp::vle16_v();
+                0x2:VectorMemLoadOp::vlse16_v();
+                0x3:VectorMemLoadOp::vloxei16_v();
             }
             0x6: decode MOP {
-                0x0:VectorMemLoadOp::vlw_v();
-                0x2:VectorMemLoadOp::vlsw_v();
-                0x3:VectorMemLoadOp::vlxw_v();
+                0x0:VectorMemLoadOp::vle32_v();
+                0x2:VectorMemLoadOp::vlse32_v();
+                0x3:VectorMemLoadOp::vloxei32_v();
             }
             0x7: decode MOP {
-                0x0:VectorMemLoadOp::vle_v();
-                0x2:VectorMemLoadOp::vlse_v();
-                0x3:VectorMemLoadOp::vlxe_v();
+                0x0:VectorMemLoadOp::vle64_v();
+                0x2:VectorMemLoadOp::vlse64_v();
+                0x3:VectorMemLoadOp::vloxei64_v();
             }
         }
 
@@ -541,24 +541,24 @@ decode QUADRANT default Unknown::unknown() {
                 }}, inst_flags=FloatMemWriteOp);
             }
             0x0: decode MOP {
-                0x0:VectorMemStoreOp::vsb_v();
-                0x2:VectorMemStoreOp::vssb_v();
-                0x3:VectorMemStoreOp::vsxb_v();
+                0x0:VectorMemLoadOp::vse8_v();
+                0x2:VectorMemLoadOp::vsse8_v();
+                0x3:VectorMemLoadOp::vsoxei8_v();
             }
             0x5: decode MOP {
-                0x0:VectorMemStoreOp::vsh_v();
-                0x2:VectorMemStoreOp::vssh_v();
-                0x3:VectorMemStoreOp::vsxh_v();
+                0x0:VectorMemLoadOp::vse16_v();
+                0x2:VectorMemLoadOp::vsse16_v();
+                0x3:VectorMemLoadOp::vsoxei16_v();
             }
             0x6: decode MOP {
-                0x0:VectorMemStoreOp::vsw_v();
-                0x2:VectorMemStoreOp::vssw_v();
-                0x3:VectorMemStoreOp::vsxw_v();
+                0x0:VectorMemLoadOp::vse32_v();
+                0x2:VectorMemLoadOp::vsse32_v();
+                0x3:VectorMemLoadOp::vsoxei32_v();
             }
             0x7: decode MOP {
-                0x0:VectorMemStoreOp::vse_v();
-                0x2:VectorMemStoreOp::vsse_v();
-                0x3:VectorMemStoreOp::vsxe_v();
+                0x0:VectorMemLoadOp::vse64_v();
+                0x2:VectorMemLoadOp::vsse64_v();
+                0x3:VectorMemLoadOp::vsoxei64_v();
             }
         }
 
