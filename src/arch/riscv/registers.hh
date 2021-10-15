@@ -259,8 +259,13 @@ enum MiscRegIndex {
     MISCREG_FFLAGS,
     MISCREG_FRM,
 
+    MISCREG_VSTART,
+    MISCREG_VXSAT,
+    MISCREG_VXRM,
+    MISCREG_VCSR,
     MISCREG_VL,
     MISCREG_VTYPE,
+    MISCREG_VLENB,
 
     NUM_MISCREGS
 };
@@ -431,8 +436,14 @@ enum CSRIndex {
     CSR_DPC = 0x7B1,
     CSR_DSCRATCH = 0x7B2,
 
+    // CSR for risc-v vector extension
+    CSR_VSTART       = 0x008,
+    CSR_VXSAT        = 0x009,
+    CSR_VXRM         = 0x00A,
+    CSR_VCSR         = 0x00F,
     CSR_VL           = 0xC20,
-    CSR_VTYPE        = 0xC21
+    CSR_VTYPE        = 0xC21,
+    CSR_VLENB        = 0xC22
 };
 
 struct CSRMetadata
@@ -604,8 +615,13 @@ const std::map<int, CSRMetadata> CSRData = {
     {CSR_DPC, {"dpc", MISCREG_DPC}},
     {CSR_DSCRATCH, {"dscratch", MISCREG_DSCRATCH}},
 
+    {CSR_VSTART,       {"vstart", MISCREG_VSTART}},
+    {CSR_VXSAT,        {"vxsat" , MISCREG_VXSAT}},
+    {CSR_VXRM,         {"vxrm"  , MISCREG_VXRM}},
+    {CSR_VCSR,         {"vcsr"  , MISCREG_VCSR}},
     {CSR_VL,           {"vl"    , MISCREG_VL}},
-    {CSR_VTYPE,        {"vtype" , MISCREG_VTYPE}}
+    {CSR_VTYPE,        {"vtype" , MISCREG_VTYPE}},
+    {CSR_VLENB,        {"vlenb" , MISCREG_VLENB}}
 };
 
 /**
