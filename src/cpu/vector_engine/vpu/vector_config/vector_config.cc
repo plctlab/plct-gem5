@@ -97,7 +97,7 @@ VectorConfig::get_mvl_lmul1_bits() {
 
 uint64_t
 VectorConfig::get_vtype_lmul(uint64_t vtype) {
-    uint8_t vlmul = vt(vtype,0,2);
+    uint8_t vlmul = vt(vtype,0,3);
     uint64_t LMUL;
 
     switch (vlmul){
@@ -116,7 +116,7 @@ VectorConfig::get_vtype_lmul(uint64_t vtype) {
 
 uint64_t
 VectorConfig::get_vtype_sew(uint64_t vtype) {
-    uint8_t vsew = vt(vtype,2,3);
+    uint8_t vsew = vt(vtype,3,3);
     uint64_t SEW;
     switch (vsew){
         case 0:
