@@ -1970,7 +1970,7 @@ decode QUADRANT default Unknown::unknown() {
                 0x6: VectorData2SrcOp::vmul_vx();
                 }
             0x27: decode FUNCT3 {
-                0x3: VectorData2SrcOp::vmv1r_v();
+                0x3: VectorData1SrcOp::vmv1r_v();
                 }
             0x28: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsrl_vv();
