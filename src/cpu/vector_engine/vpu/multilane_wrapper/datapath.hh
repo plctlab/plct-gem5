@@ -147,6 +147,10 @@ private:
     bool vslideup,vslidedown;
     bool vslide1up,vslide1down;
     /*********************************
+     * Move Operations
+     */
+    bool vmv1r;
+    /*********************************
      * Operations with mask
      */
     bool vpopc,vfirst;

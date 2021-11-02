@@ -456,7 +456,7 @@ Datapath::evaluate()
                                 "masked vm(%d), old(0x%x)  \n",Mitem,Dstitem);
                         }
                     }
-                   else if (vslidedown | vslide1down)
+                    else if (vslidedown | vslide1down)
                     {
                         if (vslide1down && (slide_SrcCount+1 == srcCount))
                             Ditem = slide_1element;

@@ -633,6 +633,15 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             "\n",Mitem,Dstitem);
     }
 
+    /**************************************************************************
+     * Vector Integer Move Instructions
+     *************************************************************************/
+    if ((operation == "vmv1r_v")) {
+        Ditem = Bitem;
+        DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
@@ -851,6 +860,16 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
         DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d)"
             "\n",Mitem,Dstitem);
     }
+
+    /**************************************************************************
+     * Vector Integer Move Instructions
+     *************************************************************************/
+    if ((operation == "vmv1r_v")) {
+        Ditem = Bitem;
+        DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
@@ -1070,6 +1089,16 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
         DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d)"
             "\n", Mitem, Dstitem);
     }
+
+    /**************************************************************************
+     * Vector Integer Move Instructions
+     *************************************************************************/
+    if ((operation == "vmv1r_v")) {
+        Ditem = Bitem;
+        DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
@@ -1289,6 +1318,16 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d)"
             "\n", Mitem, Dstitem);
     }
+
+    /**************************************************************************
+     * Vector Integer Move Instructions
+     *************************************************************************/
+    if ((operation == "vmv1r_v")) {
+        Ditem = Bitem;
+        DPRINTF(Datapath,"WB Instruction = %d = %d\n",
+            Bitem, Ditem);
+    }
+
     return Ditem;
 }
 
