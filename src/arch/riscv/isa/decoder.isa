@@ -541,24 +541,24 @@ decode QUADRANT default Unknown::unknown() {
                 }}, inst_flags=FloatMemWriteOp);
             }
             0x0: decode MOP {
-                0x0:VectorMemLoadOp::vse8_v();
-                0x2:VectorMemLoadOp::vsse8_v();
-                0x3:VectorMemLoadOp::vsoxei8_v();
+                0x0:VectorMemStoreOp::vse8_v();
+                0x2:VectorMemStoreOp::vsse8_v();
+                0x3:VectorMemStoreOp::vsoxei8_v();
             }
             0x5: decode MOP {
-                0x0:VectorMemLoadOp::vse16_v();
-                0x2:VectorMemLoadOp::vsse16_v();
-                0x3:VectorMemLoadOp::vsoxei16_v();
+                0x0:VectorMemStoreOp::vse16_v();
+                0x2:VectorMemStoreOp::vsse16_v();
+                0x3:VectorMemStoreOp::vsoxei16_v();
             }
             0x6: decode MOP {
-                0x0:VectorMemLoadOp::vse32_v();
-                0x2:VectorMemLoadOp::vsse32_v();
-                0x3:VectorMemLoadOp::vsoxei32_v();
+                0x0:VectorMemStoreOp::vse32_v();
+                0x2:VectorMemStoreOp::vsse32_v();
+                0x3:VectorMemStoreOp::vsoxei32_v();
             }
             0x7: decode MOP {
-                0x0:VectorMemLoadOp::vse64_v();
-                0x2:VectorMemLoadOp::vsse64_v();
-                0x3:VectorMemLoadOp::vsoxei64_v();
+                0x0:VectorMemStoreOp::vse64_v();
+                0x2:VectorMemStoreOp::vsse64_v();
+                0x3:VectorMemStoreOp::vsoxei64_v();
             }
         }
 
