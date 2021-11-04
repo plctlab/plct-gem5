@@ -417,7 +417,10 @@ decode QUADRANT default Unknown::unknown() {
                 }}, inst_flags=FloatMemReadOp);
             }
             0x0: decode MOP {
-                0x0:VectorMemLoadOp::vle8_v();
+                0x0: decode VS2 {
+                    0x0: VectorMemLoadOp::vle8_v();
+                    0x8: VectorMemLoadOp::vl1r_v();
+                }
                 0x2:VectorMemLoadOp::vlse8_v();
                 0x3:VectorMemLoadOp::vloxei8_v();
             }
@@ -541,7 +544,10 @@ decode QUADRANT default Unknown::unknown() {
                 }}, inst_flags=FloatMemWriteOp);
             }
             0x0: decode MOP {
-                0x0:VectorMemStoreOp::vse8_v();
+                0x0: decode VS2 {
+                    0x0: VectorMemStoreOp::vse8_v();
+                    0x8: VectorMemStoreOp::vs1r_v();
+                }
                 0x2:VectorMemStoreOp::vsse8_v();
                 0x3:VectorMemStoreOp::vsoxei8_v();
             }
