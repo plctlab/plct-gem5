@@ -137,6 +137,12 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
             Aitem,Dstitem,Bitem, Ditem);
     }
 
+    if (operation == "vfmv_v_f") {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
+    }
+
     if (vm==0){
         DPRINTF(Datapath,"WB Instruction is masked vm(%d),"
             " old(%f)  \n",Mitem,Dstitem);
@@ -249,6 +255,12 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
             (Aitem * Dstitem) + Bitem  : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %lf * %lf + %lf  = %lf\n",
             Aitem,Dstitem,Bitem, Ditem);
+    }
+
+    if (operation == "vfmv_v_f") {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
     }
 
     if (vm==0){
@@ -636,6 +648,12 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     /**************************************************************************
      * Vector Integer Move Instructions
      *************************************************************************/
+    if ((operation == "vmv_v_v") || (operation == "vmv_v_x")) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
+    }
+
     if ((operation == "vmv1r_v")) {
         Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d = %d\n",
@@ -864,6 +882,12 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     /**************************************************************************
      * Vector Integer Move Instructions
      *************************************************************************/
+    if ((operation == "vmv_v_v") || (operation == "vmv_v_x")) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
+    }
+
     if ((operation == "vmv1r_v")) {
         Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d = %d\n",
@@ -1093,6 +1117,12 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     /**************************************************************************
      * Vector Integer Move Instructions
      *************************************************************************/
+    if ((operation == "vmv_v_v") || (operation == "vmv_v_x")) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
+    }
+
     if ((operation == "vmv1r_v")) {
         Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d = %d\n",
@@ -1322,6 +1352,12 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     /**************************************************************************
      * Vector Integer Move Instructions
      *************************************************************************/
+    if ((operation == "vmv_v_v") || (operation == "vmv_v_x")) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
+            Aitem, Ditem);
+    }
+
     if ((operation == "vmv1r_v")) {
         Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d = %d\n",
