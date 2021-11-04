@@ -1885,12 +1885,20 @@ decode QUADRANT default Unknown::unknown() {
             		0x0: VectorData1SrcOp::vfsqrt_v();
             		}
             	}
-            0x17: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmerge_vvm();
-                0x3: VectorData2SrcOp::vmerge_vim();
-                0x4: VectorData2SrcOp::vmerge_vxm();
-                0x5: VectorData2SrcOp::vfmerge_vfm();
+            0x17: decode VM {
+                0x0: decode FUNCT3 {
+                    0x0: VectorData2SrcOp::vmerge_vvm();
+                    0x3: VectorData2SrcOp::vmerge_vim();
+                    0x4: VectorData2SrcOp::vmerge_vxm();
+                    0x5: VectorData2SrcOp::vfmerge_vfm();
                 }
+                0x1: decode FUNCT3 {
+                    0x0: VectorData2SrcOp::vmv_v_v();
+                    0x3: VectorData2SrcOp::vmv_v_i();
+                    0x4: VectorData2SrcOp::vmv_v_x();
+                    0x5: VectorData2SrcOp::vfmv_v_f();
+                }
+            }
             0x18: decode FUNCT3 {
                 0x0: VectorIntCompareOp::vmseq_vv();
                 0x1: VectorFPCompareOp::vmfeq_vv();

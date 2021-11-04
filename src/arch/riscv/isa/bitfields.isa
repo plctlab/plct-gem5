@@ -136,3 +136,4 @@ def bitfield VS1           <19:15>;
 def bitfield VD            <11:7>;
 
 def bitfield MOP           <28:26>;
+def bitfield VM            <25>;
