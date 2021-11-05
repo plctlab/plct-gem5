@@ -101,7 +101,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
     vectorwrapper = &vector_wrapper;
 
-    uint64_t vl_count = vl ;
+    uint64_t vl_count = vl;
     uint64_t vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
 
     /* destination data type size in bytes */
@@ -109,14 +109,30 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     assert(DST_SIZE != 0);
 
     uint8_t mop = insn.mop();
-    bool indexed = (mop == 3);
-    bool strided = (mop == 2);
-    uint64_t stride =  (strided) ? src2:1;
+    bool indexed = (mop == MopType::indexed_unordered ||
+                    mop == MopType::indexed_ordered );
+    bool strided = (mop == MopType::strided);
+    bool ordered = (mop == MopType::indexed_ordered);
+    uint64_t stride =  (strided) ? src2 : 1;
 
     std::stringstream mem_mop;
-    if (indexed) { mem_mop << "indexed"; } 
-    else if (strided) { mem_mop << "strided (" << stride <<")"; }
-    else { mem_mop << " "; }
+    switch (mop)
+    {
+    case MopType::unit_stride:
+        mem_mop << "unit_stride";
+        break;
+    case MopType::indexed-unordered:
+        mem_mop << "indexed-unordered";
+        break;
+    case MopType::strided:
+        mem_mop << "strided(" << stride << ")";
+        break;
+    case MopType::indexed_ordered:
+        mem_mop << "indexed_ordered";
+        break;
+    default:
+        panic("not supported mop");
+    }
 
     //If vl_count == 0 then callback, means that the VL = 0
     if (vl_count == 0) {

@@ -47,6 +47,22 @@ class VectorEngine;
 
 class VectorMemUnit : public SimObject
 {
+  enum MopType {
+    unit_stride = 0,
+    indexed_unordered = 1,
+    strided = 2,
+    indexed_ordered = 3
+  };
+
+  enum LumopType {
+    default = 0,
+    whole_reg = 0x8,
+    mask = 0xb,
+    fault_only_first = 0x10
+  };
+
+  using SumopType = LumopType;
+
   public:
     VectorMemUnit(const VectorMemUnitParams *p);
     ~VectorMemUnit();
@@ -54,7 +70,7 @@ class VectorMemUnit : public SimObject
     bool isOccupied();
     void issue(VectorEngine& vector_wrapper,RiscvISA::VectorStaticInst& insn,
       VectorDynInst *dyn_insn, ExecContextPtr& xc, uint64_t src1, uint64_t src2,
-      uint64_t vtype,uint64_t vl,
+      uint64_t vtype, uint64_t vl,
       std::function<void(Fault fault)> done_callback);
 
   private:
