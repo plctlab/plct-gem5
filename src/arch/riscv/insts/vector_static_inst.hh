@@ -256,7 +256,7 @@ class RiscvVectorInsn : public VectorStaticInst
   bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
 
   uint32_t width() const override {
-    return x(12, 3) | static_cast<uint32_t>(mew());
+    return x(12, 3) | (static_cast<uint32_t>(mew()) << 3);
   }
 
 private:

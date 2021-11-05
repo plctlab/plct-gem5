@@ -101,8 +101,6 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
     vectorwrapper = &vector_wrapper;
 
-
-
     uint8_t mop = insn.mop();
     uint8_t lumop = insn.lumop();
     uint8_t sumop = insn.sumop();
@@ -168,7 +166,16 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         }
     }
 
-    uint64_t vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
+    auto width = insn.width();
+    uint64_t vsew = 0;
+    switch (width) {
+        case 0x0: vsew = 8;  break;
+        case 0x5: vsew = 16; break;
+        case 0x6: vsew = 32; break;
+        case 0x7: vsew = 64; break;
+        default: panic("not supported width/mew specified in insn");
+    }
+
     /* destination data type size in bytes */
     uint8_t DST_SIZE = vsew/8;
     assert(DST_SIZE != 0);
