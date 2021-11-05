@@ -125,15 +125,20 @@ def bitfield CIMM1 <12>;
 def bitfield M5FUNC <31:25>;
 
 // Vector instructions
-def bitfield VFUNC_6       <31:26>;
-def bitfield VFUNC_5       <31:27>;
-def bitfield VFUNC_3       <27:25>;
-def bitfield VFUNC_2       <26:25>;
+def bitfield VFUNC_6    <31:26>;
+def bitfield VFUNC_5    <31:27>;
+def bitfield VFUNC_3    <27:25>;
+def bitfield VFUNC_2    <26:25>;
 
-def bitfield VS3           <31:27>;
-def bitfield VS2           <24:20>;
-def bitfield VS1           <19:15>;
-def bitfield VD            <11:7>;
+def bitfield VS3        <31:27>;
+def bitfield VS2        <24:20>;
+def bitfield VS1        <19:15>;
+def bitfield VD         <11:7>;
 
-def bitfield MOP           <28:26>;
-def bitfield VM            <25>;
+def bitfield NF         <31:29>;
+def bitfield MEW        <28:28>;
+def bitfield MOP        <27:26>;
+def bitfield VM         <25>;
+def bitfield LUMOP      <24:20>;
+def bitfield SUMOP      <24:20>;
+def bitfield WIDTH      <14:12>;
