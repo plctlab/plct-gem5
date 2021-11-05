@@ -168,21 +168,26 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         }
     }
 
-    uint64_t vl_count = vl;
-    if (insn.isLoad() &&
-        static_cast<LumopType>(lumop) == LumopType::whole_reg) {
-        vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits() / 8;
-        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
-    }
-    else if (insn.isStore() &&
-        static_cast<SumopType>(sumop) == SumopType::whole_reg) {
-        vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits() / 8;
-        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
-    }
     uint64_t vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
     /* destination data type size in bytes */
     uint8_t DST_SIZE = vsew/8;
     assert(DST_SIZE != 0);
+    DPRINTF(VectorMemUnit, "DST_SIZE=%d ", DST_SIZE);
+
+    uint64_t vl_count = vl;
+    if (insn.isLoad() &&
+        static_cast<LumopType>(lumop) == LumopType::whole_reg) {
+        vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
+            / 8 / DST_SIZE;
+        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
+    }
+    else if (insn.isStore() &&
+        static_cast<SumopType>(sumop) == SumopType::whole_reg) {
+        vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
+            / 8 / DST_SIZE;
+        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
+    }
+
     //If vl_count == 0 then callback, means that the VL = 0
     if (vl_count == 0) {
         occupied = false;
