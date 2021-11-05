@@ -55,7 +55,7 @@ class VectorMemUnit : public SimObject
   };
 
   enum LumopType {
-    default = 0,
+    unit_stride_load = 0,
     whole_reg = 0x8,
     mask = 0xb,
     fault_only_first = 0x10
