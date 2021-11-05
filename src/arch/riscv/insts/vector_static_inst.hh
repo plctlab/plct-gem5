@@ -180,12 +180,17 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool vm()                  const  override   { return x(25, 1); }
 
-  uint8_t mop()              const override { return x(26, 3); }
+  uint8_t mop()              const override { return x(26, 2); }
+
+  RegIndex rs1()             const { return (RegIndex)x(15 ,5); }
+  RegIndex rs2()             const { return (RegIndex)x(10, 5); }
 
   RegIndex vs1()             const override { return (RegIndex)x(15, 5); }
   RegIndex vs2()             const override { return (RegIndex)x(20, 5); }
   RegIndex vs3()             const override { return (RegIndex)x(7, 5); }
   RegIndex vd()              const override { return (RegIndex)x(7, 5); }
+
+  RegIndex mew()             const { return (RegIndex)x(28, 1); }
 
   bool isFP()                const  override   { return ((func3()==1) || (func3()==5)) && !isConvert(); }
   bool isInt()               const  override   { return ((func3()==0) || (func3()==2) || (func3()==3) || (func3()==4) || (func3()==6)) && !is_slide(); }
@@ -243,7 +248,9 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
 
-  uint32_t width()           const override { return x(12, 3); }
+  uint32_t width() const override {
+    return x(12, 3) | static_cast<uint32_t>(mew());
+  }
 
 private:
   const uint32_t b;
