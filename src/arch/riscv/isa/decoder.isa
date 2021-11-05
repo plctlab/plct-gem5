@@ -419,7 +419,12 @@ decode QUADRANT default Unknown::unknown() {
             0x0: decode MOP {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle8_v();
-                    0x8: VectorMemLoadOp::vl1re8_v();
+                    0x8: decode NF {
+                        0x0: VectorMemStoreOp::vl1re8_v();
+                        0x1: VectorMemStoreOp::vl2re8_v();
+                        0x3: VectorMemStoreOp::vl4re8_v();
+                        0x7: VectorMemStoreOp::vl8re8_v();
+                    }
                 }
                 0x2:VectorMemLoadOp::vlse8_v();
                 0x3:VectorMemLoadOp::vloxei8_v();
@@ -552,7 +557,12 @@ decode QUADRANT default Unknown::unknown() {
             0x0: decode MOP {
                 0x0: decode SUMOP {
                     0x0: VectorMemStoreOp::vse8_v();
-                    0x8: VectorMemStoreOp::vs1re8_v();
+                    0x8: decode NF {
+                        0x0: VectorMemStoreOp::vs1re8_v();
+                        0x1: VectorMemStoreOp::vs2re8_v();
+                        0x3: VectorMemStoreOp::vs4re8_v();
+                        0x7: VectorMemStoreOp::vs8re8_v();
+                    }
                 }
                 0x2:VectorMemStoreOp::vsse8_v();
                 0x3:VectorMemStoreOp::vsoxei8_v();
