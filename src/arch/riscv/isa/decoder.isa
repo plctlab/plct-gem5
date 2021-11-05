@@ -397,7 +397,7 @@ decode QUADRANT default Unknown::unknown() {
             }
         }
 
-        0x01: decode FUNCT3 {
+        0x01: decode WIDTH {
             format Load {
                 0x2: flw({{
                     STATUS status = xc->readMiscReg(MISCREG_STATUS);
@@ -424,21 +424,21 @@ decode QUADRANT default Unknown::unknown() {
                 0x2:VectorMemLoadOp::vlse8_v();
                 0x3:VectorMemLoadOp::vloxei8_v();
             }
-            0x1: decode MOP {
+            0x5: decode MOP {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle16_v();
                 }
                 0x2:VectorMemLoadOp::vlse16_v();
                 0x3:VectorMemLoadOp::vloxei16_v();
             }
-            0x2: decode MOP {
+            0x6: decode MOP {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle32_v();
                 }
                 0x2:VectorMemLoadOp::vlse32_v();
                 0x3:VectorMemLoadOp::vloxei32_v();
             }
-            0x3: decode MOP {
+            0x7: decode MOP {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle64_v();
                 }
@@ -557,21 +557,21 @@ decode QUADRANT default Unknown::unknown() {
                 0x2:VectorMemStoreOp::vsse8_v();
                 0x3:VectorMemStoreOp::vsoxei8_v();
             }
-            0x1: decode MOP {
+            0x5: decode MOP {
                 0x0: decode SUMOP {
                     0x0: VectorMemStoreOp::vse16_v();
                 }
                 0x2:VectorMemStoreOp::vsse16_v();
                 0x3:VectorMemStoreOp::vsoxei16_v();
             }
-            0x2: decode MOP {
+            0x6: decode MOP {
                 0x0: decode SUMOP {
                     0x0: VectorMemStoreOp::vse32_v();
                 }
                 0x2:VectorMemStoreOp::vsse32_v();
                 0x3:VectorMemStoreOp::vsoxei32_v();
             }
-            0x3: decode MOP {
+            0x7: decode MOP {
                 0x0: decode SUMOP {
                     0x0: VectorMemStoreOp::vse64_v();
                 }
