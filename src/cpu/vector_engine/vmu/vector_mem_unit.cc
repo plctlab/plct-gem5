@@ -112,7 +112,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     bool indexed = (mop == MopType::indexed_unordered ||
                     mop == MopType::indexed_ordered );
     bool strided = (mop == MopType::strided);
-    bool ordered = (mop == MopType::indexed_ordered);
+    // bool ordered = (mop == MopType::indexed_ordered);
     uint64_t stride =  (strided) ? src2 : 1;
 
     std::stringstream mem_mop;
@@ -121,7 +121,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     case MopType::unit_stride:
         mem_mop << "unit_stride";
         break;
-    case MopType::indexed-unordered:
+    case MopType::indexed_unordered:
         mem_mop << "indexed-unordered";
         break;
     case MopType::strided:
