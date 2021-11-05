@@ -54,14 +54,18 @@ class VectorMemUnit : public SimObject
     indexed_ordered = 3
   };
 
-  enum LumopType {
+  enum class LumopType {
     unit_stride_load = 0,
     whole_reg = 0x8,
     mask = 0xb,
     fault_only_first = 0x10
   };
 
-  using SumopType = LumopType;
+  enum class SumopType {
+    unit_stride_load = 0,
+    whole_reg = 0x8,
+    mask = 0xb
+  };
 
   public:
     VectorMemUnit(const VectorMemUnitParams *p);

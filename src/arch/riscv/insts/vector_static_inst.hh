@@ -135,6 +135,10 @@ public:
       virtual bool vm() const = 0;
       /* mop field - indicates the memory addressing mode*/
       virtual uint8_t mop() const = 0;
+      /* lumop field - indicates the memory addressing mode for load*/
+      virtual uint8_t lumop() const = 0;
+      /* sumop field - indicates the memory addressing mode for load*/
+      virtual uint8_t sumop() const = 0;
       /* width field - specifies size of memory elements,
       and distinguishes from FP scalar*/
       virtual uint32_t width() const = 0;
@@ -191,6 +195,9 @@ class RiscvVectorInsn : public VectorStaticInst
   RegIndex vd()              const override { return (RegIndex)x(7, 5); }
 
   RegIndex mew()             const { return (RegIndex)x(28, 1); }
+
+  uint8_t lumop()           const override { return (RegIndex)x(20, 5); }
+  uint8_t sumop()           const override { return (RegIndex)x(20, 5); }
 
   bool isFP()                const  override   { return ((func3()==1) || (func3()==5)) && !isConvert(); }
   bool isInt()               const  override   { return ((func3()==0) || (func3()==2) || (func3()==3) || (func3()==4) || (func3()==6)) && !is_slide(); }

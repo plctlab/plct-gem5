@@ -109,6 +109,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     assert(DST_SIZE != 0);
 
     uint8_t mop = insn.mop();
+    uint8_t lumop = insn.lumop();
+    uint8_t sumop = insn.sumop();
+
     bool indexed = (mop == MopType::indexed_unordered ||
                     mop == MopType::indexed_ordered );
     bool strided = (mop == MopType::strided);
@@ -119,19 +122,55 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     switch (mop)
     {
     case MopType::unit_stride:
-        mem_mop << "unit_stride";
+        mem_mop << "unit_stride ";
         break;
     case MopType::indexed_unordered:
-        mem_mop << "indexed-unordered";
+        mem_mop << "indexed-unordered ";
         break;
     case MopType::strided:
-        mem_mop << "strided(" << stride << ")";
+        mem_mop << "strided(" << stride << ") ";
         break;
     case MopType::indexed_ordered:
-        mem_mop << "indexed_ordered";
+        mem_mop << "indexed_ordered ";
         break;
     default:
         panic("not supported mop");
+    }
+    if (insn.isLoad()) {
+        switch (static_cast<LumopType>(lumop))
+        {
+        case LumopType::unit_stride_load:
+            mem_mop << "";
+            /* code */
+            break;
+        case LumopType::whole_reg:
+            mem_mop << "whole register ";
+            break;
+        case LumopType::mask:
+            mem_mop << "mask ";
+            break;
+        case LumopType::fault_only_first:
+            mem_mop << "fault only first ";
+            break;
+        default:
+            break;
+        }
+    } else if (insn.isStore()) {
+        switch (static_cast<SumopType>(sumop))
+        {
+        case SumopType::unit_stride_load:
+            mem_mop << "";
+            /* code */
+            break;
+        case SumopType::whole_reg:
+            mem_mop << "whole register ";
+            break;
+        case SumopType::mask:
+            mem_mop << "mask ";
+            break;
+        default:
+            break;
+        }
     }
 
     //If vl_count == 0 then callback, means that the VL = 0
