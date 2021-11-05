@@ -64,29 +64,36 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     ExecContextPtr& xc, uint64_t src1,uint64_t src2,uint64_t vtype,
     uint64_t vl,std::function<void(Fault fault)> done_callback)
 {
-    /* Note:
-     * Masked memory operations are not supported (WIP)
+    /**
      * ========================================================
-     *  Vector Load/Store Addressing Modes   - version 0.7
+     *  Vector Load/Store Addressing Modes   - version 1.0
      * ========================================================
-     *  mop [2:0] encoding for loads
-     *     0 0 0  zero-extended unit-stride  VLxU,VLE        - VLxU not implemented
-     *     0 0 1  reserved
-     *     0 1 0  zero-extended strided      VLSxU, VLSE     - VLSxU not implemented
-     *     0 1 1  zero-extended indexed      VLXxU, VLXE     - VLXxU not implemented
-     *     1 0 0  sign-extended unit-stride  VLx  (x!=E)     - not implemented
-     *     1 0 1  reserved
-     *     1 1 0  sign-extended strided      VLSx (x!=E)     - not implemented
-     *     1 1 1  sign-extended indexed      VLXx (x!=E)     - not implemented
-     *  mop [2:0] encoding for stores
-     *     0 0 0  unit-stride                VSx
-     *     0 0 1  reserved
-     *     0 1 0  strided                    VSSx
-     *     0 1 1  indexed-ordered            VSXx
-     *     1 0 0  reserved
-     *     1 0 1  reserved
-     *     1 1 0  reserved
-     *     1 1 1  indexed-unordered          VSUXx            - not implemented
+     * mop [1:0] encoding for loads
+     *      0 0 unit-stride                 VLE<EEW>
+     *      0 1 indexed-unordered           VLUXEI<EEW>
+     *      1 0 strided                     VLSE<EEW>
+     *      1 1 indexed-ordered             VLOXEI<EEW>
+     *
+     * mop [1:0] encoding for stores
+     *      0 0 unit-stride                 VSE<EEW>
+     *      0 1 indexed-unordered           VSUXEI<EEW>
+     *      1 0 strided                     VSSE<EEW>
+     *      1 1 indexed-ordered             VSOXEI<EEW>
+     */
+
+    /**
+     * lumop [4:0]
+     * 0 0 0 0 0 unit-stride load
+     * 0 1 0 0 0 unit-stride, whole register load
+     * 0 1 0 1 1 unit-stride, mask load, EEW=8
+     * 1 0 0 0 0 unit-stride fault-only-first
+     * x x x x x reserved
+     *
+     * sumop [4:0]
+     * 0 0 0 0 0 unit-stride store
+     * 0 1 0 0 0 unit-stride, whole register store
+     * 0 1 0 1 1 unit-stride, mask store, EEW=8
+     * x x x x x reserved
      */
 
     assert(!occupied);
