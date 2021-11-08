@@ -146,6 +146,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             mem_mop << "fault only first ";
             break;
         default:
+            panic("not supported lumop");
             break;
         }
     } else if (insn.isStore()) {
@@ -162,6 +163,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             mem_mop << "mask ";
             break;
         default:
+            panic("not supported sumop");
             break;
         }
     }
@@ -329,8 +331,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         mem_addr0 = src1;
         location0 = 0; // 0 = Memoria
 
-        DPRINTF(VectorMemUnit,"Vector Store %s to Memory Addrs: 0x%lx\n",
-             mem_mop.str(),mem_addr0 );
+        DPRINTF(VectorMemUnit,"Vector Store %s to Memory Addrs: 0x%lx "
+            "with vl: 0x%x\n",
+            mem_mop.str(), mem_addr0, vl_count);
 
         //NOTE: need to initialize the writer BEFORE the reader!
         memWriter->initialize(vector_wrapper,vl_count,DST_SIZE,mem_addr0,

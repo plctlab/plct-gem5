@@ -29,7 +29,7 @@
  */
 
 #include "cpu/vector_engine/vmu/write_timing_unit.hh"
-
+#include "cpu/vector_engine/vmu/vector_mem_unit.hh"
 #include <algorithm>
 #include <bitset>
 #include <cassert>
@@ -102,11 +102,14 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(!dataQ.size());
     assert(!AddrsQ.size());
 
+    using VectorMemUnit::MopType;
+
     vectorwrapper = &vector_wrapper;
 
     uint64_t SIZE = DST_SIZE;
 
-    bool vindexed = (mop == 3);
+    bool vindexed = (mop == MopType::indexed_unordered
+        || mop == MopType::indexed_ordered);
 
     // This function tries to get up to 'get_up_to' elements from the front of
     // the input queue. if there are less elements, it returns all of them

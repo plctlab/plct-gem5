@@ -40,8 +40,11 @@
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
 
-VectorEngineInterface::VectorEngineInterface(VectorEngineInterfaceParams *p) :
-SimObject(p),vector_engine(p->vector_engine)
+VectorEngineInterface::VectorEngineInterface(
+    VectorEngineInterfaceParams *p
+):
+SimObject(p),
+vector_engine(p->vector_engine)
 {
 }
 

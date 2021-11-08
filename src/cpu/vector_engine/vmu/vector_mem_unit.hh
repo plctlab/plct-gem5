@@ -47,6 +47,7 @@ class VectorEngine;
 
 class VectorMemUnit : public SimObject
 {
+public:
   enum MopType {
     unit_stride = 0,
     indexed_unordered = 1,
