@@ -95,6 +95,8 @@ last_vl(0)
     DPRINTF(VectorEngineInfo,"Number of Clusters: %d\n",num_clusters);
     DPRINTF(VectorEngineInfo,"Lanes per Cluster: %d\n",num_lanes/num_clusters);
     DPRINTF(VectorEngineInfo,"Vector Memory Unit Port connected to l2 bus\n");
+
+    VectorEngine::s_VLENB = p->vector_config->get_mvl_lmul1_bits() / 8;
 }
 
 VectorEngine::~VectorEngine()
@@ -840,6 +842,11 @@ VectorEngine::readVectorReg(Addr addr, uint32_t size,
         return false;
     }
     return true;
+}
+
+int VectorEngine::s_VLENB = 0;
+int VectorEngine::getVlenb() {
+    return VectorEngine::s_VLENB;
 }
 
 VectorEngine *

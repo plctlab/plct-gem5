@@ -45,6 +45,7 @@
 #include "params/RiscvISA.hh"
 #include "sim/core.hh"
 #include "sim/pseudo_inst.hh"
+#include "cpu/vector_engine/vector_engine.hh"
 
 namespace RiscvISA
 {
@@ -306,6 +307,10 @@ ISA::readMiscReg(int misc_reg)
             // epc[0] is always 0
             else
                 return mbits(val, 63, 1);
+        }
+      case MISCREG_VLENB:
+        {
+            return VectorEngine::getVlenb();
         }
       default:
         // Try reading HPM counters

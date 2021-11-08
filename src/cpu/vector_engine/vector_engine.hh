@@ -171,7 +171,7 @@ public:
         uint8_t channel,
         std::function<void(uint8_t*,uint8_t)> callback);
 
-   bool writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
+    bool writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
         ThreadContext *tc, uint8_t channel,
         std::function<void(void)> callback);
     bool readVectorMem(Addr addr, uint32_t size, ThreadContext *tc,
@@ -247,6 +247,10 @@ private:
     uint64_t POldDst;
     uint64_t Pvs1,Pvs2,Pvs3;
     uint64_t PMask;
+private:
+    static int s_VLENB;
+public:
+    static int getVlenb();
 };
 
 #endif // __CPU_VECTOR_ENGINE_HH__

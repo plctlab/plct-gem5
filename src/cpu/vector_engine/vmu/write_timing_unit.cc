@@ -102,7 +102,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(!dataQ.size());
     assert(!AddrsQ.size());
 
-    using VectorMemUnit::MopType;
+    using Moptype = VectorMemUnit::MopType;
 
     vectorwrapper = &vector_wrapper;
 
