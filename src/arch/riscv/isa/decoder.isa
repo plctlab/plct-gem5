@@ -1872,11 +1872,13 @@ decode QUADRANT default Unknown::unknown() {
             0x0E: decode FUNCT3 {
                 0x3: VectorSlideUpOp::vslideup_vi();
                 0x4: VectorSlideUpOp::vslideup_vx();
+                0x5: VectorSlideUpOp::vfslide1up_vf();
                 0x6: VectorSlideUpOp::vslide1up_vx();
                 }
             0x0F: decode FUNCT3 {
                 0x3: VectorSlideDownOp::vslidedown_vi();
                 0x4: VectorSlideDownOp::vslidedown_vx();
+                0x5: VectorSlideDownOp::vfslide1down_vf();
                 0x6: VectorSlideDownOp::vslide1down_vx();
                 }
             0x10: decode FUNCT3 {
