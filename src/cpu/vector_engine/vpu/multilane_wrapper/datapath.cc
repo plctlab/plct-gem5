@@ -144,9 +144,9 @@ Datapath::startTicking(
     int_reduction = this->insn->is_reduction() && this->insn->isInt();
     /* Vector Slides */
     vslideup =  this->insn->is_slideup();
-    vslide1up = (operation == "vslide1up_vx");
+    vslide1up = ((operation == "vslide1up_vx") || (operation == "vfslide1up_vf"));
     vslidedown = this->insn->is_slidedown();
-    vslide1down = (operation == "vslide1down_vx");
+    vslide1down = ((operation == "vslide1down_vx") || (operation == "vfslide1down_vf"));
     /* Vector Mask-Register Logical Instructions */
     vpopc = (operation == "vpopc_m");
     vfirst = (operation == "vfirst_m");
