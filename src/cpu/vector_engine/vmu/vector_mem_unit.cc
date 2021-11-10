@@ -105,6 +105,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     uint8_t lumop = insn.lumop();
     uint8_t sumop = insn.sumop();
 
+    bool unit = (mop == MopType::unit_stride);
     bool indexed = (mop == MopType::indexed_unordered ||
                     mop == MopType::indexed_ordered );
     bool strided = (mop == MopType::strided);
@@ -129,7 +130,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     default:
         panic("not supported mop");
     }
-    if (insn.isLoad()) {
+    if (insn.isLoad() && unit) {
         switch (static_cast<LumopType>(lumop))
         {
         case LumopType::unit_stride_load:
@@ -149,7 +150,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             panic("not supported lumop");
             break;
         }
-    } else if (insn.isStore()) {
+    } else if (insn.isStore() && unit) {
         switch (static_cast<SumopType>(sumop))
         {
         case SumopType::unit_stride_load:
