@@ -420,10 +420,10 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle8_v();
                     0x8: decode NF {
-                        0x0: VectorMemStoreOp::vl1re8_v();
-                        0x1: VectorMemStoreOp::vl2re8_v();
-                        0x3: VectorMemStoreOp::vl4re8_v();
-                        0x7: VectorMemStoreOp::vl8re8_v();
+                        0x0: VectorMemLoadOp::vl1re8_v();
+                        0x1: VectorMemLoadOp::vl2re8_v();
+                        0x3: VectorMemLoadOp::vl4re8_v();
+                        0x7: VectorMemLoadOp::vl8re8_v();
                     }
                 }
                 0x2:VectorMemLoadOp::vlse8_v();

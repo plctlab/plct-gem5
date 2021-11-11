@@ -182,20 +182,20 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     /* destination data type size in bytes */
     uint8_t DST_SIZE = vsew/8;
     assert(DST_SIZE != 0);
-    DPRINTF(VectorMemUnit, "DST_SIZE=%d ", DST_SIZE);
+    DPRINTF(VectorMemUnit, "DST_SIZE=%d \n", DST_SIZE);
 
     uint64_t vl_count = vl;
     if (insn.isLoad() &&
         static_cast<LumopType>(lumop) == LumopType::whole_reg) {
         vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
             / 8 / DST_SIZE;
-        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
+        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d\n", vl, vl_count);
     }
     else if (insn.isStore() &&
         static_cast<SumopType>(sumop) == SumopType::whole_reg) {
         vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
             / 8 / DST_SIZE;
-        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d", vl, vl_count);
+        DPRINTF(VectorMemUnit, "vl: %d, mvl: %d\n", vl, vl_count);
     }
 
     //If vl_count == 0 then callback, means that the VL = 0
@@ -333,7 +333,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         location0 = 0; // 0 = Memoria
 
         DPRINTF(VectorMemUnit,"Vector Store %s to Memory Addrs: 0x%lx "
-            "with vl: 0x%x\n",
+            "with vl: %lu\n",
             mem_mop.str(), mem_addr0, vl_count);
 
         //NOTE: need to initialize the writer BEFORE the reader!
