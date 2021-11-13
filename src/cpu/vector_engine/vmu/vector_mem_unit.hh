@@ -36,38 +36,17 @@
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
-#include "cpu/vector_engine/vector_engine.hh"
 #include "cpu/vector_engine/vmu/read_timing_unit.hh"
 #include "cpu/vector_engine/vmu/write_timing_unit.hh"
 #include "params/VectorMemUnit.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+#include "cpu/vector_engine/defines.hh"
 
 class VectorEngine;
 
 class VectorMemUnit : public SimObject
 {
-public:
-  enum MopType {
-    unit_stride = 0,
-    indexed_unordered = 1,
-    strided = 2,
-    indexed_ordered = 3
-  };
-
-  enum class LumopType {
-    unit_stride_load = 0,
-    whole_reg = 0x8,
-    mask = 0xb,
-    fault_only_first = 0x10
-  };
-
-  enum class SumopType {
-    unit_stride_load = 0,
-    whole_reg = 0x8,
-    mask = 0xb
-  };
-
   public:
     VectorMemUnit(const VectorMemUnitParams *p);
     ~VectorMemUnit();

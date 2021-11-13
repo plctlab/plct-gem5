@@ -41,6 +41,7 @@
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitWriteTiming.hh"
 #include "sim/ticked_object.hh"
+#include "cpu/vector_engine/defines.hh"
 
 class VectorEngine;
 //class ExecContextPtr;
@@ -60,7 +61,7 @@ public:
     void queueAddrs(uint8_t *data);
     void initialize(VectorEngine& vector_wrapper, uint64_t count,
         uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop,uint64_t stride,
-        bool location,ExecContextPtr& xc,
+        Location data_to,ExecContextPtr& xc,
         std::function<void(bool)> on_item_store);
 
 private:
@@ -78,6 +79,7 @@ private:
     //modified by writeFunction closure over time
     uint64_t vecIndex;
     VectorEngine* vectorwrapper;
+
 public:
     // Stat for number of cache lines write requested
     Stats::Scalar Cache_line_w_req;

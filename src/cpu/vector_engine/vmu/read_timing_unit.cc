@@ -81,7 +81,7 @@ MemUnitReadTiming::queueData(uint8_t *data)
 
 void
 MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
-    uint64_t DST_SIZE,uint64_t mem_addr, uint8_t mop,uint64_t stride, bool location,
+    uint64_t DST_SIZE,uint64_t mem_addr, uint8_t mop,uint64_t stride, Location data_from,
     ExecContextPtr& xc, std::function<void(uint8_t*,
     uint8_t,bool)> on_item_load) {
 
@@ -92,6 +92,9 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     vectorwrapper = &vector_wrapper;
 
     uint64_t SIZE = DST_SIZE;
+
+    bool vindexed = (static_cast<MopType>(mop) == MopType::indexed_ordered
+        || static_cast<MopType>(mop) == MopType::indexed_unordered);
 
     uint64_t    vaddr       = mem_addr;
     int32_t     vstride     = stride;
@@ -117,17 +120,17 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         };
     };
 
-    readFunction = [location,vaddr,vstride,SIZE,mop,
+    readFunction = [data_from,vaddr,vstride,SIZE,vindexed,
         count,on_item_load,xc,fin,this]()
     {
         std::vector<uint64_t> line_offsets;
 
         //scratch and cache could use different line sizes
         uint64_t line_size;
-        switch ((int)location) {
-            case 0: line_size = cacheLineSize; break;
-            case 1: line_size = VRF_LineSize; break;
-            default: panic("invalid location"); break;
+        switch (data_from) {
+            case Location::mem      : line_size = cacheLineSize; break;
+            case Location::vector_rf: line_size = VRF_LineSize; break;
+            default: panic("invalid data from"); break;
         }
 
         uint64_t line_addr;
@@ -135,7 +138,7 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         uint64_t addr;
         uint64_t i = this->vecIndex;
 
-        if (mop != 3) //no indexed operation
+        if (!vindexed) //no indexed operation
         {
             //we can always read the first item
             addr = vaddr + SIZE*(i*vstride);
@@ -227,7 +230,7 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             "addr %#x\n",line_addr, items_in_line, addr);
 
         bool success;
-        if (location == 0) { // location = 0 = MEMORY
+        if (data_from == Location::mem) {
             Cache_line_r_req++;
             success = vectorwrapper->readVectorMem(line_addr, line_size,
                  xc->tcBase(),this->channel, fin(i, line_offsets));
@@ -236,7 +239,7 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                 this->channel, fin(i, line_offsets));
         }
         if (success) {
-            if (mop == 3) {
+            if (vindexed) {
                 for (uint8_t j=0; j<items_in_line; j++) {
                     this->dataQ.pop_front();
                     }

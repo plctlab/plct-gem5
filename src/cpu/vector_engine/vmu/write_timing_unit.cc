@@ -94,7 +94,7 @@ MemUnitWriteTiming::queueAddrs(uint8_t *data)
 void
 MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop,uint64_t stride,
-    bool location,ExecContextPtr& xc,
+    Location data_to, ExecContextPtr& xc,
     std::function<void(bool)> on_item_store)
 {
     assert(!running && !done);
@@ -103,13 +103,15 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(!AddrsQ.size());
 
     using MopType = VectorMemUnit::MopType;
+    DPRINTF(MemUnitWriteTiming, "count: %d, DST_SIZE: %d, mem_addr: %#x mop: %d, stride: %d\n", 
+            count, DST_SIZE, mem_addr, mop, stride); 
 
     vectorwrapper = &vector_wrapper;
 
     uint64_t SIZE = DST_SIZE;
 
-    bool vindexed = (mop == MopType::indexed_unordered
-        || mop == MopType::indexed_ordered);
+    bool vindexed = (static_cast<MopType>(mop) == MopType::indexed_unordered
+        || static_cast<MopType>(mop) == MopType::indexed_ordered);
 
     // This function tries to get up to 'get_up_to' elements from the front of
     // the input queue. if there are less elements, it returns all of them
@@ -166,15 +168,15 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         };
     };
 
-    writeFunction = [try_write,location,fin,xc,vaddr,vstride,vindexed,
+    writeFunction = [try_write,data_to,fin,xc,vaddr,vstride,vindexed,
         on_item_store,SIZE,count,this](void) ->bool
     {
         //scratch and cache could use different line sizes
         uint64_t line_size;
-        switch ((int)location) {
-            case 0: line_size = cacheLineSize; break;
-            case 1: line_size = VRF_LineSize; break;
-            default: panic("invalid location"); break;
+        switch (data_to) {
+            case Location::mem      : line_size = cacheLineSize; break;
+            case Location::vector_rf: line_size = VRF_LineSize; break;
+            default: panic("invalid data target"); break;
         }
 
         uint64_t line_addr;
@@ -236,13 +238,13 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         DPRINTF(MemUnitWriteTiming,"getting data to write %d items at %#x\n",
             consec_items, addr);
 
-        return try_write(consec_items, [fin,location,xc,addr,SIZE,vindexed,
-            count,i,this](uint8_t * data, uint32_t items_ready) -> uint16_t
+        return try_write(consec_items, [fin, data_to, xc, addr, SIZE, vindexed,
+            count, i, this](uint8_t * data, uint32_t items_ready) -> uint16_t
         {
             DPRINTF(MemUnitWriteTiming, "got %d items to write at %#x\n",
                 items_ready, addr);
             bool success;
-            if (location == 0) { // location = 0 = MEMORY
+            if (data_to == Location::mem) { // location = 0 = MEMORY
                 Cache_line_w_req++;
                 success = vectorwrapper->writeVectorMem(addr, data,
                     SIZE*items_ready, xc->tcBase(),

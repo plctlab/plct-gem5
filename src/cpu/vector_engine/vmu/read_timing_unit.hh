@@ -40,6 +40,7 @@
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitReadTiming.hh"
 #include "sim/ticked_object.hh"
+#include "cpu/vector_engine/defines.hh"
 
 class VectorEngine;
 
@@ -56,7 +57,7 @@ public:
     void queueData(uint8_t *data);
     void initialize(VectorEngine& vector_wrapper,uint64_t count,
         uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop,uint64_t stride,
-        bool location, ExecContextPtr& xc,
+        Location data_from, ExecContextPtr& xc,
         std::function<void(uint8_t*,uint8_t,bool)> on_item_load);
 
 private:

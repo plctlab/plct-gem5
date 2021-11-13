@@ -105,15 +105,15 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     uint8_t lumop = insn.lumop();
     uint8_t sumop = insn.sumop();
 
-    bool unit = (mop == MopType::unit_stride);
-    bool indexed = (mop == MopType::indexed_unordered ||
-                    mop == MopType::indexed_ordered );
-    bool strided = (mop == MopType::strided);
+    bool unit = (mop == static_cast<uint8_t>(MopType::unit_stride));
+    bool indexed = (mop == static_cast<uint8_t>(MopType::indexed_unordered) ||
+                    mop == static_cast<uint8_t>(MopType::indexed_ordered) );
+    bool strided = (mop == static_cast<uint8_t>(MopType::strided));
     // bool ordered = (mop == MopType::indexed_ordered);
     uint64_t stride =  (strided) ? src2 : 1;
 
     std::stringstream mem_mop;
-    switch (mop)
+    switch (static_cast<MopType>(mop))
     {
     case MopType::unit_stride:
         mem_mop << "unit_stride ";
@@ -206,27 +206,33 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     }
 
     uint64_t mem_addr0;
-    bool  location0;
-    uint64_t mem_addr;
-    bool  location;
 
+    uint64_t mem_addr;
+
+    // vsew specified by load/store instruction, not vset*l*
     uint64_t mvl_bits =
-        vectorwrapper->vector_config->get_max_vector_length_bits(vtype);
+        vectorwrapper->vector_config->get_mvl_lmul1_bits();
     uint64_t mvl_elem =
-        vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
+        vectorwrapper->vector_config->get_mvl_lmul1_bits() / vsew;
 
     if (insn.isLoad())
     {
         
         mem_addr0 = (uint64_t)dyn_insn->get_renamed_dst() * mvl_bits / 8;
-        location0 = 1; // 1 Vecor Register
 
         DPRINTF(VectorMemUnit,"Vector Load %s to Register v%d, vl:%lu\n",
         mem_mop.str(),dyn_insn->get_renamed_dst() ,vl_count);
 
-        //NOTE: need to initialize the writer BEFORE the reader!
-        memWriter->initialize(vector_wrapper,mvl_elem,DST_SIZE,mem_addr0,
-            0,1,location0, xc,[done_callback,this](bool done){
+        // NOTE: need to initialize the writer BEFORE the reader, 
+        // loaded data should be writen in regfile
+        memWriter->initialize(
+            vector_wrapper,
+            mvl_elem,
+            DST_SIZE,
+            mem_addr0,
+            /*mop=*/0,
+            /*stride=*/1,
+            Location::vector_rf, xc,[done_callback,this](bool done){
             if (done) {
                 this->occupied = false;
                 done_callback(NoFault);
@@ -234,7 +240,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         });
 
         mem_addr = src1;
-        location = 0;
+
         DPRINTF(VectorMemUnit,"Vector Load %s from Base Memory Addrs: 0x%lx\n",
              mem_mop.str(),mem_addr );
 
@@ -243,8 +249,15 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
             uint64_t mem_addr1 = (uint64_t)dyn_insn->get_renamed_src2() * mvl_bits/8;
             DPRINTF(VectorMemUnit,"Vector Load Index from Vs2 Reg Addrs: "
                 "0x%lx\n",mem_addr1 );
-            memReader_addr->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr1,
-            0,1,location0,xc,[DST_SIZE,this]
+            memReader_addr->initialize(
+                vector_wrapper,
+                vl_count, 
+                DST_SIZE,
+                mem_addr1,
+                /*mop=*/0,
+                /*stride=*/1,
+                /*location*/Location::vector_rf,
+                xc,[DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
             {
                 uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -271,7 +284,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         }
 
         memReader->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr,
-        mop,stride,location, xc,[mvl_elem,vl_count,DST_SIZE,this]
+        mop,stride,Location::mem, xc,[mvl_elem,vl_count,DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
         {
             uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -330,7 +343,6 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     } else if (insn.isStore()) {
 
         mem_addr0 = src1;
-        location0 = 0; // 0 = Memoria
 
         DPRINTF(VectorMemUnit,"Vector Store %s to Memory Addrs: 0x%lx "
             "with vl: %lu\n",
@@ -338,7 +350,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
         //NOTE: need to initialize the writer BEFORE the reader!
         memWriter->initialize(vector_wrapper,vl_count,DST_SIZE,mem_addr0,
-            mop,stride,location0, xc,[done_callback,this](bool done) {
+            mop,stride,Location::mem, xc,[done_callback,this](bool done) {
             if (done) {
                 this->occupied = false;
                 done_callback(NoFault);
@@ -348,11 +360,11 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         if (indexed)
         {
             uint64_t mem_addr1 = (uint64_t)dyn_insn->get_renamed_src2() * mvl_bits/8;
-            location0 = 1; // 1 Vecor Register
+
             DPRINTF(VectorMemUnit,"Vector Store: Index from vector register v%d\n",
                 dyn_insn->get_renamed_src2());
             memReader_addr->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr1,
-            0,1,location0,xc,[DST_SIZE,this]
+            0,1,Location::vector_rf,xc,[DST_SIZE,this]
             (uint8_t*data, uint8_t size, bool done)
             {
                 uint8_t *ndata = new uint8_t[DST_SIZE];
@@ -379,12 +391,11 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         }
 
         mem_addr = (uint64_t)dyn_insn->get_renamed_src3() * mvl_bits / 8;
-        location = 1;
         DPRINTF(VectorMemUnit,"Vector Store: data from vector register v%d\n",
                 dyn_insn->get_renamed_src3());
 
         memReader->initialize(vector_wrapper,vl_count, DST_SIZE,mem_addr,
-            0,1,location, xc,[DST_SIZE,this](uint8_t*data, uint8_t size, bool done)
+            0,1,Location::vector_rf, xc,[DST_SIZE,this](uint8_t*data, uint8_t size, bool done)
         {
             uint8_t *ndata = new uint8_t[DST_SIZE];
             memcpy(ndata, data, DST_SIZE);
