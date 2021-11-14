@@ -157,12 +157,14 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
         DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
+        DPRINTF(VectorRegister, "first 64bits elem: 0x%lX\n", *((uint64_t*)(data+start_addr)));
     } else {
         numWritess_64bit_elements = numWritess_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
         numWritess_perLane_64bit_elements = numWritess_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
         DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
+        DPRINTF(VectorRegister, "first 64bits elem: 0x%lX\n", *((uint64_t*)(data+start_addr)));
     }
 
     pkt->makeTimingResponse();
