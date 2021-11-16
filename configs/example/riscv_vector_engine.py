@@ -74,7 +74,7 @@ ps.add_option('--renamed_regs',     type="int", default=40,
 ps.add_option('--VRF_line_size',    type="int", default=8,
                                     help="Vector Register Slice line size in Bytes (per lane)")
 # VECTOR QUEUES OPTIONS
-ps.add_option('--OoO_queues',       type="int", default=True,
+ps.add_option('--OoO_queues',       type="int", default=False,
                                     help="Out-of-Order/In-Order Queues")
 ps.add_option('--mem_queue_size',   type="int", default=32,
                                     help="Memory Queues")
