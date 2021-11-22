@@ -155,7 +155,7 @@ double
 Datapath::compute_double_fp_op(double Aitem, double Bitem,
      uint8_t Mitem, double Dstitem,  RiscvISA::VectorStaticInst* insn)
 {
-    float Ditem=0;
+    double Ditem=0;
     std::string operation = insn->getName();
     numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
