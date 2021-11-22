@@ -205,7 +205,7 @@ void
 VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
     uint64_t pc = insn.getPC();
-    bool indexed = (insn.mop() ==3);
+    bool indexed = (insn.mop() == 3 || insn.mop() == 1);
 
     uint32_t PDst = vector_dyn_insn->get_renamed_dst();
     uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
@@ -334,7 +334,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     vi_op = (insn.func3()==3);
 
     uint8_t mop = insn.mop();
-    bool indexed = (mop ==3);
+    bool indexed = (mop == 3 || mop == 1);
 
     if (insn.isVectorInstMem()) {
         // TODO: maked memory operations are not implemented

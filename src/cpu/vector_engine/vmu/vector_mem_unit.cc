@@ -106,8 +106,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     uint8_t sumop = insn.sumop();
 
     bool unit = (mop == static_cast<uint8_t>(MopType::unit_stride));
-    bool indexed = (mop == static_cast<uint8_t>(MopType::indexed_unordered) ||
-                    mop == static_cast<uint8_t>(MopType::indexed_ordered) );
+    bool indexed_unordered  = mop == static_cast<uint8_t>(MopType::indexed_unordered);
+    bool indexed_ordered    = mop == static_cast<uint8_t>(MopType::indexed_ordered);
+    bool indexed = indexed_unordered || indexed_ordered;
     bool strided = (mop == static_cast<uint8_t>(MopType::strided));
     // bool ordered = (mop == MopType::indexed_ordered);
     uint64_t stride =  (strided) ? src2 : 1;
@@ -185,13 +186,13 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     DPRINTF(VectorMemUnit, "DST_SIZE=%d \n", DST_SIZE);
 
     uint64_t vl_count = vl;
-    if (insn.isLoad() &&
+    if (insn.isLoad() && unit &&
         static_cast<LumopType>(lumop) == LumopType::whole_reg) {
         vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
             / 8 / DST_SIZE;
         DPRINTF(VectorMemUnit, "vl: %d, mvl: %d\n", vl, vl_count);
     }
-    else if (insn.isStore() &&
+    else if (insn.isStore() && unit &&
         static_cast<SumopType>(sumop) == SumopType::whole_reg) {
         vl_count = vectorwrapper->vector_config->get_mvl_lmul1_bits()
             / 8 / DST_SIZE;
@@ -205,8 +206,9 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         return;
     }
 
+    // addr of vector reg
     uint64_t mem_addr0;
-
+    // addr of mem
     uint64_t mem_addr;
 
     // vsew specified by load/store instruction, not vset*l*

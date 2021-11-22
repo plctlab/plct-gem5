@@ -273,7 +273,7 @@ InstQueue::evaluate()
             src3 = Mem_Instruction->dyn_insn->get_renamed_src3();
             src2 = Mem_Instruction->dyn_insn->get_renamed_src2();
             mop = Mem_Instruction->insn.mop();
-            indexed_op = (mop == 3) || (mop == 7);
+            indexed_op = (mop == 3) || (mop == 1);
 
             // If the instruction is indexed we stop looking for the next
             // instructions, check dependencies for indexed is too expensive
@@ -361,7 +361,7 @@ void
 InstQueue::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
     uint64_t pc = insn.getPC();
-    bool indexed = (insn.mop() ==3);
+    bool indexed = (insn.mop() == 3 || insn.mop() == 1);
     bool masked_op = (insn.vm()==0);
 
     uint32_t PDst = vector_dyn_insn->get_renamed_dst();
