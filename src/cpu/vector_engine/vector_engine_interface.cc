@@ -70,11 +70,11 @@ VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContex
 }
 
 uint64_t
-VectorEngineInterface::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl)
+VectorEngineInterface::reqAppVectorLength(uint64_t rvl, uint64_t vtype)
 {
     DPRINTF(VectorEngineInterface,"Resquesting a vector length\n");
      uint64_t gvl = vector_engine->vector_config->
-        reqAppVectorLength(rvl,vtype,r_mvl);
+        reqAppVectorLength(rvl,vtype);
     return gvl;
 }
 

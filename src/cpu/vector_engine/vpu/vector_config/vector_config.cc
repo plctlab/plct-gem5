@@ -54,12 +54,24 @@ VectorConfig::~VectorConfig()
 }
 
 uint64_t
-VectorConfig::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl) {
-    uint32_t gvl  = 0;
+VectorConfig::reqAppVectorLength(uint64_t avl, uint64_t vtype) {
+    uint32_t vl  = 0;
     uint32_t sew  =  get_vtype_sew(vtype);
     uint32_t lmul = get_vtype_lmul(vtype);
-    gvl= lmul * max_vector_length/sew;
-    return (r_mvl) ? gvl:(rvl>gvl) ? gvl:rvl;
+    const uint64_t VLMAX = lmul * this->max_vector_length / sew;
+    if (avl <= VLMAX) {
+        vl = avl;
+    } 
+    else if (avl < 2*VLMAX) {
+        // As specified in rvv-spec-rc1 6.3. Constraints on Setting vl
+        // vl should meet `ceil(AVL/2) <= vl <= VLMAX`
+        vl = VLMAX;
+    }
+    else {
+        vl = VLMAX;
+    }
+    
+    return vl;
 }
 
 uint64_t

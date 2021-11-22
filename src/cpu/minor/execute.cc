@@ -1223,8 +1223,8 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
             if(!discard_inst)
             {
-                RiscvISA::VectorStaticInst *vector_insn =
-                    dynamic_cast<RiscvISA::VectorStaticInst*>
+                RiscvISA::RiscvVectorInsn *vector_insn =
+                    dynamic_cast<RiscvISA::RiscvVectorInsn*>
                     (inst->staticInst.get());
 
                 if (!cpu.ve_interface->requestGrant(vector_insn))
@@ -1243,24 +1243,62 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
                     if (vector_insn->isVecConfig())
                     {
-                        bool vsetvl = (vector_insn->getName() =="vsetvl");
-                        uint64_t rvl = xc->readIntRegOperand(vector_insn,0);
-                        uint64_t vtype = (vsetvl) ?
-                            xc->readIntRegOperand(vector_insn,1) :
-                            (uint64_t)vector_insn->vtype();
-                        uint64_t gvl = cpu.ve_interface->reqAppVectorLength(
-                            rvl,vtype,(vector_insn->vs1()==0));
+                        const auto instName = vector_insn->getName();
+                        bool isVsetvl     = instName == "vsetvl";
+                        bool isVsetvli    = instName == "vsetvli";
+                        bool isVsetivli   = instName == "vsetivli";
+                        panic_if(!(isVsetvl || isVsetvli || isVsetivli), 
+                            "not supported vector config instruction: %s", 
+                            instName.data());
+                        uint64_t avl;
+                        uint64_t vtype;
+                        
+                        /** AVL used in vsetvli and vsetvl instructions
+                         *  | rd  | rs1 |   AVL value          | Effect on vl         |
+                         *     -    !x0   Value in x[rs1]        Normal stripmining
+                         *    !x0    x0         ~0               Set vl to VLMAX
+                         *     x0    x0   Value in vl register   Keep existing vl 
+                         *                                      (of course, vtype may change)
+                         * 
+                         *  ~0: the maximum unsigned integer value is used as the AVL, 
+                         * and the resulting VLMAX is written to vl and also to the x 
+                         * register specified by rd.
+                         * 
+                         */
+                        if (isVsetvl || isVsetvli) {
+                            if (vector_insn->rs1() != 0) {
+                                avl = xc->readIntRegOperand(vector_insn,0);
+                            }
+                            else if (vector_insn->rd() != 0) {
+                                avl = ~0;
+                            }
+                            // rs1 = x0, rd = x0
+                            else {
+                                avl = xc->readMiscReg(RiscvISA::MISCREG_VL);
+                            }
+                            vtype = isVsetvl ?
+                                xc->readIntRegOperand(vector_insn,1) :
+                                (uint64_t)vector_insn->vtype();
+                        }
+                        else if (isVsetivli) {
+                            avl = vector_insn->rs1();
+                            vtype = (uint64_t)vector_insn->vtype();
+                        }
+                        
+                        uint64_t vl = cpu.ve_interface->reqAppVectorLength(
+                            avl,vtype);
 
-                        DPRINTF(CpuVectorIssue,"vsetvl: %d, rvl: %d vtype: %d gvl: %d \n",vsetvl,rvl,vtype,gvl );
+                        DPRINTF(CpuVectorIssue,"%s: %d, avl: %d vtype: %d vl: %d \n",
+                            instName.data(), avl, vtype, vl);
 
-                        xc->setMiscReg(RiscvISA::MISCREG_VL,gvl);
+                        xc->setMiscReg(RiscvISA::MISCREG_VL,vl);
                         xc->setMiscReg(RiscvISA::MISCREG_VTYPE,vtype);
                         if (vector_insn->vd() != 0) {
                             DPRINTF(CpuVectorIssue,"Setting register: %d ,"
-                                " with value : %d\n",vector_insn->vd(), gvl);
-                            xc->setIntRegOperand(vector_insn,0,gvl);
+                                " with value : %d\n",vector_insn->vd(), vl);
+                            xc->setIntRegOperand(vector_insn,0,vl);
                         }
-                        src1 = gvl;
+                        src1 = vl;
                         src2 = vtype;
                     }
                     else

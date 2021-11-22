@@ -76,7 +76,7 @@ public:
     * instructions. This instructions ask to the vector engine for some
     * vector length, and the vector engine answer with the available one.
     */
-    uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
+    uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype);
 
     /**
     * bussy function is used by the scalar core to know the state of the vector

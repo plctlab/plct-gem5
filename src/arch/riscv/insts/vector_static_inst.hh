@@ -159,7 +159,7 @@ private:
 
 class RiscvVectorInsn : public VectorStaticInst
 {
-  protected:
+public:
   RiscvVectorInsn(const char *mnem, MachInst _machInst, OpClass __opClass):
       VectorStaticInst(mnem, _machInst, __opClass),
       b(_machInst),mnemo(mnem){}
@@ -176,7 +176,7 @@ class RiscvVectorInsn : public VectorStaticInst
 
   uint32_t opcode()          const { return x(0, 7); }
 
-  uint32_t vtype()           const  override   { return x(20, 11); }
+  uint32_t vtype()           const  override   { return (x(31, 1) == 0) ? x(20, 11) : x(20, 10); }
 
   uint32_t func3()           const override { return x(12, 3); }
   uint32_t func5()           const override { return x(27, 5); }
@@ -188,7 +188,7 @@ class RiscvVectorInsn : public VectorStaticInst
 
   RegIndex rs1()             const { return (RegIndex)x(15 ,5); }
   RegIndex rs2()             const { return (RegIndex)x(10, 5); }
-
+  RegIndex rd()              const { return (RegIndex)x(7, 5); }
   RegIndex vs1()             const override { return (RegIndex)x(15, 5); }
   RegIndex vs2()             const override { return (RegIndex)x(20, 5); }
   RegIndex vs3()             const override { return (RegIndex)x(7, 5); }
