@@ -411,7 +411,12 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         dependencie_callback();
         printConfigInst(insn,src1,src2);
         VectorConfigIns++;
-        DPRINTF(VectorEngine,"Settig vl %d , sew %d , lmul %d\n",last_vl,vector_config->get_vtype_sew(last_vtype),vector_config->get_vtype_lmul(last_vtype));
+        DPRINTF(VectorEngine,"Setting vl %d, sew %d, lmul %d, pc 0x%lx\n",
+            last_vl,
+            vector_config->get_vtype_sew(last_vtype),
+            vector_config->get_vtype_lmul(last_vtype),
+            insn.getPC()
+            );
         return;
     }
 
