@@ -89,6 +89,9 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(count > 0);
     assert(!dataQ.size());
 
+    DPRINTF(MemUnitReadTiming, "count: %d, DST_SIZE: %d, data_from: %s, mem_addr: %#x mop: %d, stride: %d\n", 
+            count, DST_SIZE, (data_from == Location::mem ? "mem" : "reg"), mem_addr, mop, stride); 
+
     vectorwrapper = &vector_wrapper;
 
     uint64_t SIZE = DST_SIZE;

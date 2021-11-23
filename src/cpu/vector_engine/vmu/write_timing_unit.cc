@@ -101,10 +101,8 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(count > 0);
     assert(!dataQ.size());
     assert(!AddrsQ.size());
-
-    using MopType = VectorMemUnit::MopType;
-    DPRINTF(MemUnitWriteTiming, "count: %d, DST_SIZE: %d, mem_addr: %#x mop: %d, stride: %d\n", 
-            count, DST_SIZE, mem_addr, mop, stride); 
+    DPRINTF(MemUnitWriteTiming, "count: %d, DST_SIZE: %d, data_to: %s, mem_addr: %#x mop: %d, stride: %d\n", 
+            count, DST_SIZE, (data_to == Location::mem ? "mem" : "reg"), mem_addr, mop, stride); 
 
     vectorwrapper = &vector_wrapper;
 
