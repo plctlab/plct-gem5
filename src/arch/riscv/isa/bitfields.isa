@@ -142,3 +142,7 @@ def bitfield VM         <25>;
 def bitfield LUMOP      <24:20>;
 def bitfield SUMOP      <24:20>;
 def bitfield WIDTH      <14:12>;
+
+def bitfield SIMM_3     <17:15>;
+def bitfield BIT31      <31>;
+def bitfield BIT30      <30>;

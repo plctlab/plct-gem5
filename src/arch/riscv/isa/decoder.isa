@@ -1794,233 +1794,193 @@ decode QUADRANT default Unknown::unknown() {
                 }}, FloatCvtOp);
             }
         }
-        0x15: decode VFUNC_6 {
-            0x00: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vadd_vv();
-                0x1: VectorData2SrcOp::vfadd_vv();
-                0x2: VectorReductionOp::vredsum_vs();
-                0x3: VectorData2SrcOp::vadd_vi();
-                0x4: VectorData2SrcOp::vadd_vx();
-                0x5: VectorData2SrcOp::vfadd_vf();
-                0x7: VectorConfigOp::vsetvli();
+        0x15: decode FUNCT3 {
+            0x0: decode VFUNC_6 { // OPIVV
+                0x00: VectorData2SrcOp::vadd_vv();
+                0x02: VectorData2SrcOp::vsub_vv();
+                0x04: VectorData2SrcOp::vminu_vv();
+                0x05: VectorData2SrcOp::vmin_vv();
+                0x06: VectorData2SrcOp::vmaxu_vv();
+                0x07: VectorData2SrcOp::vmax_vv();
+                0x09: VectorData2SrcOp::vand_vv();
+                0x0A: VectorData2SrcOp::vor_vv();
+                0x0B: VectorData2SrcOp::vxor_vv();
+                0x17: decode VM {
+                    0x0: VectorData2SrcOp::vmerge_vvm();
+                    0x1: VectorData2SrcOp::vmv_v_v();
+                }
+                0x18: VectorIntCompareOp::vmseq_vv();
+                0x19: VectorIntCompareOp::vmsne_vv();
+                0x1A: VectorIntCompareOp::vmsltu_vv();
+                0x1B: VectorIntCompareOp::vmslt_vv();
+                0x1C: VectorIntCompareOp::vmsleu_vv();
+                0x1D: VectorIntCompareOp::vmsle_vv();
+                0x25: VectorData2SrcOp::vsll_vv();
+                0x28: VectorData2SrcOp::vsrl_vv();
             }
-            0x01: decode FUNCT3 {
-                0x1: VectorReductionOp::vfredusum_vs();
-                0x2: VectorReductionOp::vredand_vs();
+            0x1: decode VFUNC_6 { // OPFVV
+                0x00: VectorData2SrcOp::vfadd_vv();
+                0x01: VectorReductionOp::vfredusum_vs();
+                0x02: VectorData2SrcOp::vfsub_vv();
+                0x03: VectorReductionOp::vfredosum_vs();
+                0x04: VectorData2SrcOp::vfmin_vv();
+                0x05: VectorReductionOp::vfredmin_vs();
+                0x06: VectorData2SrcOp::vfmax_vv();
+                0x07: VectorReductionOp::vfredmax_vs();
+                0x08: VectorData2SrcOp::vfsgnj_vv();
+                0x09: VectorData2SrcOp::vfsgnjn_vv();
+                0x0A: VectorData2SrcOp::vfsgnjx_vv();
+                0x10: decode VS1 { // VWFUNARY0
+                    0x00: VectorToScalarOp::vfmv_fs();
                 }
-            0x02: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vsub_vv();
-                0x1: VectorData2SrcOp::vfsub_vv();
-                0x2: VectorReductionOp::vredor_vs();
-                0x3: VectorData2SrcOp::vsub_vi();
-                0x4: VectorData2SrcOp::vsub_vx();
-                0x5: VectorData2SrcOp::vfsub_vf();
+                0x12: decode VS1 { // VFUNARY0
+                    0x00: VectorConvertFPToIntOp::vfcvt_xu_f_v();   // Convert float to unsigned integer.
+                    0x01: VectorConvertFPToIntOp::vfcvt_x_f_v();    // Convert float to signed integer.
+                    0x02: VectorConvertIntToFPOp::vfcvt_f_xu_v();   // Convert unsigned integer to float.
+                    0x03: VectorConvertIntToFPOp::vfcvt_f_x_v();    // Convert signed integer to float.
+                    // Widening Operations are not fully supported. WIP
+                    0x08: VectorWConvertFPToIntOp::vfwcvt_xu_f_v(); // Convert float to double-width unsigned integer.
+                    0x09: VectorWConvertFPToIntOp::vfwcvt_x_f_v();  // Convert float to double-width signed integer.
+                    0x0A: VectorWConvertIntToFPOp::vfwcvt_f_xu_v(); // Convert unsigned integer to double-width float.
+                    0x0B: VectorWConvertIntToFPOp::vfwcvt_f_x_v();  // Convert signed integer to double-width float.
+                    0x0C: VectorWConvertFPToFPOp::vfwcvt_f_f_v();   // Convert single-width float to double-width float.
+                    // Narrowing Operations are not fully supported. WIP
+                    0x10: VectorNConvertFPToIntOp::vfncvt_xu_f_w(); // Convert double-width float to unsigned integer.
+                    0x11: VectorNConvertFPToIntOp::vfncvt_x_f_w();  // Convert double-width float to signed integer.
+                    0x12: VectorNConvertIntToFPOp::vfncvt_f_xu_w(); // Convert double-width unsigned integer to float.
+                    0x13: VectorNConvertIntToFPOp::vfncvt_f_x_w();  // Convert double-width signed integer to float
+                    0x14: VectorNConvertFPToFPOp::vfncvt_f_f_w();   // Convert double-width float to single-width float.
                 }
-             0x03: decode FUNCT3 {
-                0x1: VectorReductionOp::vfredosum_vs();
-                0x2: VectorReductionOp::vredxor_vs();
+                0x13: decode VS1 { // VFUNARY1
+                    0x00: VectorData1SrcOp::vfsqrt_v();
                 }
-            0x04: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vminu_vv();
-                0x1: VectorData2SrcOp::vfmin_vv();
-                0x2: VectorReductionOp::vredminu_vs();
-                0x4: VectorData2SrcOp::vminu_vx();
-                0x5: VectorData2SrcOp::vfmin_vf();
-                }
-            0x05: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmin_vv();
-                0x1: VectorReductionOp::vfredmin_vs();
-                0x2: VectorReductionOp::vredmin_vs();
-                0x4: VectorData2SrcOp::vmin_vx();
-                }
-            0x06: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmaxu_vv();
-                0x1: VectorData2SrcOp::vfmax_vv();
-                0x2: VectorReductionOp::vredmaxu_vs();
-                0x4: VectorData2SrcOp::vmaxu_vx();
-                0x5: VectorData2SrcOp::vfmax_vf();
-                }
-            0x07: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vmax_vv();
-                0x1: VectorReductionOp::vfredmax_vs();
-                0x2: VectorReductionOp::vredmax_vs();
-                0x4: VectorData2SrcOp::vmax_vx();
-                }
-            0x08: decode FUNCT3 {
-                0x1: VectorData2SrcOp::vfsgnj_vv();
-                0x5: VectorData2SrcOp::vfsgnj_vf();
-                }
-            0x09: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vand_vv();
-                0x1: VectorData2SrcOp::vfsgnjn_vv();
-                0x3: VectorData2SrcOp::vand_vi();
-                0x4: VectorData2SrcOp::vand_vx();
-                0x5: VectorData2SrcOp::vfsgnjn_vf();
-                }
-            0x0A: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vor_vv();
-                0x1: VectorData2SrcOp::vfsgnjx_vv();
-                0x3: VectorData2SrcOp::vor_vi();
-                0x4: VectorData2SrcOp::vor_vx();
-                0x5: VectorData2SrcOp::vfsgnjx_vf();
-                }
-            0x0B: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vxor_vv();
-                0x3: VectorData2SrcOp::vxor_vi();
-                0x4: VectorData2SrcOp::vxor_vx();
-                }
-            0x0E: decode FUNCT3 {
-                0x3: VectorSlideUpOp::vslideup_vi();
-                0x4: VectorSlideUpOp::vslideup_vx();
-                0x5: VectorSlideUpOp::vfslide1up_vf();
-                0x6: VectorSlideUpOp::vslide1up_vx();
-                }
-            0x0F: decode FUNCT3 {
-                0x3: VectorSlideDownOp::vslidedown_vi();
-                0x4: VectorSlideDownOp::vslidedown_vx();
-                0x5: VectorSlideDownOp::vfslide1down_vf();
-                0x6: VectorSlideDownOp::vslide1down_vx();
-                }
-            0x10: decode FUNCT3 {
-                0x1: decode VS1 {// VWFUNARY0
-                	0x0: VectorToScalarOp::vfmv_fs();
-                    }
-                0x2: decode VS1 {// VWXUNARY0
+                0x18: VectorFPCompareOp::vmfeq_vv();
+                0x19: VectorFPCompareOp::vmfle_vv();
+                0x1B: VectorFPCompareOp::vmflt_vv();
+                0x1C: VectorFPCompareOp::vmfne_vv();
+                0x20: VectorData2SrcOp::vfdiv_vv();
+                0x24: VectorData2SrcOp::vfmul_vv();
+                0x28: VectorData3SrcOp::vfmadd_vv();
+                0x2C: VectorData3SrcOp::vfmacc_vv();
+            }
+            0x2: decode VFUNC_6 { // OPMVV
+                0x00: VectorReductionOp::vredsum_vs();
+                0x01: VectorReductionOp::vredand_vs();
+                0x02: VectorReductionOp::vredor_vs();
+                0x03: VectorReductionOp::vredxor_vs();
+                0x04: VectorReductionOp::vredminu_vs();
+                0x05: VectorReductionOp::vredmin_vs();
+                0x06: VectorReductionOp::vredmaxu_vs();
+                0x07: VectorReductionOp::vredmax_vs();
+                0x10: decode VS1 { // VWXUNARY0
                     0x10: VectorToScalarOp::vpopc_m();
                     0x11: VectorToScalarOp::vfirst_m();
-                    }
                 }
-            0x12: decode FUNCT3 {
-            	0x1: decode VS1{// VFUNARY0
-                    0x0:VectorConvertFPToIntOp::vfcvt_xu_f_v();   // Convert float to unsigned integer.
-                    0x1:VectorConvertFPToIntOp::vfcvt_x_f_v();    // Convert float to signed integer.
-                    0x2:VectorConvertIntToFPOp::vfcvt_f_xu_v();   // Convert unsigned integer to float.
-                    0x3:VectorConvertIntToFPOp::vfcvt_f_x_v();    // Convert signed integer to float.
-                    // Widening Operations are not fully supported. WIP
-                    0x8:VectorWConvertFPToIntOp::vfwcvt_xu_f_v(); // Convert float to double-width unsigned integer.
-                    0x9:VectorWConvertFPToIntOp::vfwcvt_x_f_v();  // Convert float to double-width signed integer.
-                    0xA:VectorWConvertIntToFPOp::vfwcvt_f_xu_v(); // Convert unsigned integer to double-width float.
-                    0xB:VectorWConvertIntToFPOp::vfwcvt_f_x_v();  // Convert signed integer to double-width float.
-                    0xC:VectorWConvertFPToFPOp::vfwcvt_f_f_v();  // Convert single-width float to double-width float.
-                    // Narrowing Operations are not fully supported. WIP
-                    0x10:VectorNConvertFPToIntOp::vfncvt_xu_f_w(); // Convert double-width float to unsigned integer.
-                    0x11:VectorNConvertFPToIntOp::vfncvt_x_f_w();  // Convert double-width float to signed integer.
-                    0x12:VectorNConvertIntToFPOp::vfncvt_f_xu_w(); // Convert double-width unsigned integer to float.
-                    0x13:VectorNConvertIntToFPOp::vfncvt_f_x_w();  // Convert double-width signed integer to float
-                    0x14:VectorNConvertFPToFPOp::vfncvt_f_f_w();  // Convert double-width float to single-width float.
-                    }
+                0x18: VectorMaskLogicalOp::vmandnot_mm();
+                0x19: VectorMaskLogicalOp::vmand_mm();
+                0x1A: VectorMaskLogicalOp::vmor_mm();
+                0x1B: VectorMaskLogicalOp::vmxor_mm();
+                0x1C: VectorMaskLogicalOp::vmornot_mm();
+                0x1D: VectorMaskLogicalOp::vmnand_mm();
+                0x1E: VectorMaskLogicalOp::vmnor_mm();
+                0x1F: VectorMaskLogicalOp::vmxnor_mm();
+                0x21: VectorData2SrcOp::vdiv_vv();
+                0x23: VectorData2SrcOp::vrem_vv();
+                0x25: VectorData2SrcOp::vmul_vv();
+            }
+            0x3: decode VFUNC_6 { // OPIVI
+                0x00: VectorData2SrcOp::vadd_vi();
+                0x02: VectorData2SrcOp::vsub_vi();
+                0x09: VectorData2SrcOp::vand_vi();
+                0x0A: VectorData2SrcOp::vor_vi();
+                0x0B: VectorData2SrcOp::vxor_vi();
+                0x0E: VectorSlideUpOp::vslideup_vi();
+                0x0F: VectorSlideDownOp::vslidedown_vi();
+                0x17: decode VM {
+                    0x0: VectorData2SrcOp::vmerge_vim();
+                    0x1: VectorData2SrcOp::vmv_v_i();
                 }
-            0x13: decode FUNCT3 {
-            	0x1: decode VS1{// VFUNARY1
-            		0x0: VectorData1SrcOp::vfsqrt_v();
-            		}
-            	}
-            0x17: decode VM {
-                0x0: decode FUNCT3 {
-                    0x0: VectorData2SrcOp::vmerge_vvm();
-                    0x3: VectorData2SrcOp::vmerge_vim();
-                    0x4: VectorData2SrcOp::vmerge_vxm();
-                    0x5: VectorData2SrcOp::vfmerge_vfm();
+                0x18: VectorIntCompareOp::vmseq_vi();
+                0x19: VectorIntCompareOp::vmsne_vi();
+                0x1C: VectorIntCompareOp::vmsleu_vi();
+                0x1D: VectorIntCompareOp::vmsle_vi();
+                0x1E: VectorIntCompareOp::vmsgtu_vi();
+                0x1F: VectorIntCompareOp::vmsgt_vi();
+                0x25: VectorData2SrcOp::vsll_vi();
+                0x27: decode SIMM_3 {
+                    0x0: VectorData1SrcOp::vmv1r_v();
+                    0x1: VectorData1SrcOp::vmv2r_v();
+                    0x3: VectorData1SrcOp::vmv4r_v();
+                    0x7: VectorData1SrcOp::vmv8r_v();
                 }
-                0x1: decode FUNCT3 {
-                    0x0: VectorData2SrcOp::vmv_v_v();
-                    0x3: VectorData2SrcOp::vmv_v_i();
-                    0x4: VectorData2SrcOp::vmv_v_x();
-                    0x5: VectorData2SrcOp::vfmv_v_f();
+                0x28: VectorData2SrcOp::vsrl_vi();
+            }
+            0x4: decode VFUNC_6 { // OPIVX
+                0x00: VectorData2SrcOp::vadd_vx();
+                0x02: VectorData2SrcOp::vsub_vx();
+                0x04: VectorData2SrcOp::vminu_vx();
+                0x05: VectorData2SrcOp::vmin_vx();
+                0x06: VectorData2SrcOp::vmaxu_vx();
+                0x07: VectorData2SrcOp::vmax_vx();
+                0x09: VectorData2SrcOp::vand_vx();
+                0x0A: VectorData2SrcOp::vor_vx();
+                0x0B: VectorData2SrcOp::vxor_vx();
+                0x0E: VectorSlideUpOp::vslideup_vx();
+                0x0F: VectorSlideDownOp::vslidedown_vx();
+                0x17: decode VM {
+                    0x0: VectorData2SrcOp::vmerge_vxm();
+                    0x1: VectorData2SrcOp::vmv_v_x();
+                }
+                0x18: VectorIntCompareOp::vmseq_vx();
+                0x19: VectorIntCompareOp::vmsne_vx();
+                0x1A: VectorIntCompareOp::vmsltu_vx();
+                0x1B: VectorIntCompareOp::vmslt_vx();
+                0x1C: VectorIntCompareOp::vmsleu_vx();
+                0x1D: VectorIntCompareOp::vmsle_vx();
+                0x1E: VectorIntCompareOp::vmsgtu_vx();
+                0x1F: VectorIntCompareOp::vmsgt_vx();
+                0x25: VectorData2SrcOp::vsll_vx();
+                0x28: VectorData2SrcOp::vsrl_vx();
+            }
+            0x5: decode VFUNC_6 { // OPFVF
+                0x00: VectorData2SrcOp::vfadd_vf();
+                0x02: VectorData2SrcOp::vfsub_vf();
+                0x04: VectorData2SrcOp::vfmin_vf();
+                0x06: VectorData2SrcOp::vfmax_vf();
+                0x08: VectorData2SrcOp::vfsgnj_vf();
+                0x09: VectorData2SrcOp::vfsgnjn_vf();
+                0x0A: VectorData2SrcOp::vfsgnjx_vf();
+                0x0E: VectorSlideUpOp::vfslide1up_vf();
+                0x0F: VectorSlideDownOp::vfslide1down_vf();
+                0x17: decode VM {
+                    0x0: VectorData2SrcOp::vfmerge_vfm();
+                    0x1: VectorData2SrcOp::vfmv_v_f();
+                }
+                0x18: VectorFPCompareOp::vmfeq_vf();
+                0x19: VectorFPCompareOp::vmfle_vf();
+                0x1B: VectorFPCompareOp::vmflt_vf();
+                0x1C: VectorFPCompareOp::vmfne_vf();
+                0x1D: VectorFPCompareOp::vmfgt_vf();
+                0x1F: VectorFPCompareOp::vmfge_vf();
+                0x20: VectorData2SrcOp::vfdiv_vf();
+                0x24: VectorData2SrcOp::vfmul_vf();
+                0x28: VectorData3SrcOp::vfmadd_vf();
+                0x2C: VectorData3SrcOp::vfmacc_vf();
+            }
+            0x6: decode VFUNC_6 { // OPMVX
+                0x0E: VectorSlideUpOp::vslide1up_vx();
+                0x0F: VectorSlideDownOp::vslide1down_vx();
+                0x21: VectorData2SrcOp::vdiv_vx();
+                0x23: VectorData2SrcOp::vrem_vx();
+                0x25: VectorData2SrcOp::vmul_vx();
+            }
+            0x7: decode BIT31 { // Configuration-Setting
+                0x0: VectorConfigOp::vsetvli();
+                0x1: decode BIT30 {
+                    0x0: VectorConfigOp::vsetvl();
+                    0x1: VectorConfigOp::vsetivli();
                 }
             }
-            0x18: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmseq_vv();
-                0x1: VectorFPCompareOp::vmfeq_vv();
-                0x2: VectorMaskLogicalOp::vmandnot_mm();
-                0x3: VectorIntCompareOp::vmseq_vi();
-                0x4: VectorIntCompareOp::vmseq_vx();
-                0x5: VectorFPCompareOp::vmfeq_vf();
-                }
-            0x19: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmsne_vv();
-                0x1: VectorFPCompareOp::vmfle_vv();
-                0x2: VectorMaskLogicalOp::vmand_mm();
-                0x3: VectorIntCompareOp::vmsne_vi();
-                0x4: VectorIntCompareOp::vmsne_vx();
-                0x5: VectorFPCompareOp::vmfle_vf();
-                }
-            0x1A: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmsltu_vv();
-                0x2: VectorMaskLogicalOp::vmor_mm();
-                0x4: VectorIntCompareOp::vmsltu_vx();
-                }
-            0x1B: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmslt_vv();
-                0x1: VectorFPCompareOp::vmflt_vv();
-                0x2: VectorMaskLogicalOp::vmxor_mm();
-                0x4: VectorIntCompareOp::vmslt_vx();
-                0x5: VectorFPCompareOp::vmflt_vf();
-                }
-            0x1C: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmsleu_vv();
-                0x1: VectorFPCompareOp::vmfne_vv();
-                0x2: VectorMaskLogicalOp::vmornot_mm();
-                0x3: VectorIntCompareOp::vmsleu_vi();
-                0x4: VectorIntCompareOp::vmsleu_vx();
-                0x5: VectorFPCompareOp::vmfne_vf();
-                }
-            0x1D: decode FUNCT3 {
-                0x0: VectorIntCompareOp::vmsle_vv();
-                0x2: VectorMaskLogicalOp::vmnand_mm();
-                0x3: VectorIntCompareOp::vmsle_vi();
-                0x4: VectorIntCompareOp::vmsle_vx();
-                0x5: VectorFPCompareOp::vmfgt_vf();
-                }
-            0x1E: decode FUNCT3 {
-                0x2: VectorMaskLogicalOp::vmnor_mm();
-                0x3: VectorIntCompareOp::vmsgtu_vi();
-                0x4: VectorIntCompareOp::vmsgtu_vx();
-                }
-            0x1F: decode FUNCT3 {
-                0x2: VectorMaskLogicalOp::vmxnor_mm();
-                0x3: VectorIntCompareOp::vmsgt_vi();
-                0x4: VectorIntCompareOp::vmsgt_vx();
-                0x5: VectorFPCompareOp::vmfge_vf();
-                }
-            0x20: decode FUNCT3 {
-                0x1: VectorData2SrcOp::vfdiv_vv();
-                0x5: VectorData2SrcOp::vfdiv_vf();
-                0x7: VectorConfigOp::vsetvl();
-                }
-            0x21: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vdiv_vv();
-                0x6: VectorData2SrcOp::vdiv_vx();
-                }
-            0x23: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vrem_vv();
-                0x6: VectorData2SrcOp::vrem_vx();
-                }
-            0x24: decode FUNCT3 {
-                0x1: VectorData2SrcOp::vfmul_vv();
-                0x5: VectorData2SrcOp::vfmul_vf();
-                }
-            0x25: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vsll_vv();
-                0x2: VectorData2SrcOp::vmul_vv();
-                0x3: VectorData2SrcOp::vsll_vi();
-                0x4: VectorData2SrcOp::vsll_vx();
-                0x6: VectorData2SrcOp::vmul_vx();
-                }
-            0x27: decode FUNCT3 {
-                0x3: VectorData1SrcOp::vmv1r_v();
-                }
-            0x28: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vsrl_vv();
-                0x1: VectorData3SrcOp::vfmadd_vv();
-                0x3: VectorData2SrcOp::vsrl_vi();
-                0x4: VectorData2SrcOp::vsrl_vx();
-                0x5: VectorData3SrcOp::vfmadd_vf();
-                }
-            0x2C: decode FUNCT3 {
-                0x1: VectorData3SrcOp::vfmacc_vv();
-                0x5: VectorData3SrcOp::vfmacc_vf();
-                }
         }
         0x18: decode FUNCT3 {
             format BOp {
