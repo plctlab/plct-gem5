@@ -88,13 +88,13 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
      *************************************************************************/
 
     if ((operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")) {
-        Ditem = (Bitem>=0.0) ? fabs(Aitem):-Aitem;
+        Ditem = (Bitem>=0.0) ? fabs(Aitem):-fabs(Aitem);
         DPRINTF(Datapath,"WB Instruction = %f , %f  = %f\n",
             Aitem,Bitem, Ditem);
     }
 
     if ((operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")) {
-        Ditem = (Bitem>=0.0) ?-Aitem: fabs(Aitem);
+        Ditem = (Bitem>=0.0) ?-fabs(Aitem): fabs(Aitem);
         DPRINTF(Datapath,"WB Instruction = %f , %f  = %f\n",
             Aitem,Bitem, Ditem);
     }
@@ -209,13 +209,13 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
      *************************************************************************/
 
     if ((operation == "vfsgnj_vv") || (operation == "vfsgnj_vf")) {
-        Ditem = (Bitem>=0.0) ? fabs(Aitem):-Aitem;
+        Ditem = (Bitem>=0.0) ? fabs(Aitem):-fabs(Aitem);
         DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
 
     if ((operation == "vfsgnjn_vv") || (operation == "vfsgnjn_vf")) {
-        Ditem = (Bitem>=0.0) ?-Aitem: fabs(Aitem);
+        Ditem = (Bitem>=0.0) ?-fabs(Aitem): fabs(Aitem);
         DPRINTF(Datapath,"WB Instruction = %lf , %lf  = %lf\n",
             Aitem,Bitem, Ditem);
     }
