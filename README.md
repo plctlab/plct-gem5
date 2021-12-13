@@ -24,9 +24,10 @@ To run binaries you can use following command:
 ${GEM5_DIR}build/RISCV/gem5.opt ${GEM5_DIR}configs/example/riscv_vector_engine.py --cmd="$program $program_args"
 ```
 
-## Contact
-Yin Zhang zhangyin2018@iscas.ac.cn
-PLCT Lab
+## Contributors and Contacts
+Yin Zhang   zhangyin2018@iscas.ac.cn
+Xuan Hu     huxuan21@mails.ucas.ac.cn
+Liutong Han liutong2020@iscas.ac.cn
 
 Original author:
 Cristóbal Ramírez Lazo: cristobal.ramirez@bsc.es
