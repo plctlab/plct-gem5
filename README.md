@@ -3,7 +3,7 @@
 
 ## Overview
 
-this repository is forked from https://github.com/RALC88/gem5/tree/develop. The original implementation is based on rvv-0.7.1 and it has been updated to be based on rvv-1.0 in this repository.
+This repository is forked from https://github.com/RALC88/gem5/tree/develop. The original implementation is based on rvv-0.7.1 and it has been updated to be based on rvv-1.0 in this repository.
 
 The implementation is based on the working draft of the proposed [RISC-V V vector extension v1.0 Spec](https://github.com/riscv/riscv-v-spec)
 
