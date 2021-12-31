@@ -14,7 +14,7 @@ Cristóbal Ramirez, César Hernandez, Oscar Palomar, Osman Unsal, Marco Ramírez
 
 In current implementation, vector engine will be built by default when you build gem5 for RISC-V.
 ```
-scons build/RISC-V/gem5.opt
+scons build/RISCV/gem5.opt
 ```
 
 ## Run program with gem5
