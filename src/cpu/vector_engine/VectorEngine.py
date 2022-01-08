@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,22 +32,22 @@ from m5.proxy import *
 from m5.SimObject import SimObject
 
 
-
 class VectorEngine(SimObject):
-    type = 'VectorEngine'
+    type = "VectorEngine"
     cxx_header = "cpu/vector_engine/vector_engine.hh"
 
     vector_config = Param.VectorConfig("Vector CSR Copy")
 
-    vector_reg = Param.VectorRegister("Vector Register");
+    vector_reg = Param.VectorRegister("Vector Register")
     vector_reg_port = VectorMasterPort("Vector Register Port")
-    vector_rf_ports = Param.Unsigned(1,"number of VRF ports")
+    vector_rf_ports = Param.Unsigned(1, "number of VRF ports")
 
     vector_mem_port = MasterPort("Vector Accelerator Memory Port")
 
     vector_lane = VectorParam.VectorLane("Vector Lane")
-    num_clusters = Param.Unsigned(1,"Number of independent execution clusters")
-    num_lanes = Param.Unsigned(8,"Number of lanes")
+    num_clusters = Param.Unsigned(1,
+                                  "Number of independent execution clusters")
+    num_lanes = Param.Unsigned(8, "Number of lanes")
     vector_rob = Param.ReorderBuffer("Vector Reorder Buffer")
     vector_memory_unit = Param.VectorMemUnit("Vector Memory Unit ")
     vector_inst_queue = Param.InstQueue("Vector Instruction Queue")

@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -48,7 +48,7 @@ from common.Caches import *
 # Parse options
 ps = OptionParser()
 
-# GENERAL OPTIONS
+# General Options
 ps.add_option('--cmd',              type="string",
                                     help="Command to run on the CPU")
 ps.add_option('--output',           type="string",
@@ -68,12 +68,12 @@ ps.add_option('--mem_size',         type="string", default='2048MB',
 ps.add_option('--cpu_clk',          type="string", default='2GHz',
                                     help="Speed of all CPUs")
 
-# VECTOR REGISTER OPTIONS
+# Vector Register Options
 ps.add_option('--renamed_regs',     type="int", default=40,
                                     help="Number of Vector Physical Registers")
 ps.add_option('--VRF_line_size',    type="int", default=8,
                                     help="Vector Register Slice line size in Bytes (per lane)")
-# VECTOR QUEUES OPTIONS
+# Vector Queues Options
 ps.add_option('--OoO_queues',       type="int", default=False,
                                     help="Out-of-Order/In-Order Queues")
 ps.add_option('--mem_queue_size',   type="int", default=32,
@@ -84,13 +84,13 @@ ps.add_option('--arith_queue_size', type="int", default=32,
 ps.add_option('--rob_size',         type="int", default=64,
                                     help="Reorder Buffer size")
 
-# VECTOR EXECUNIT OPTIONS
+# Vector Exec Unit Options
 ps.add_option('--vector_clk',       type="string", default='1GHz',
                                     help="Speed of Vector Accelerator")
 ps.add_option('--v_lanes',          type="int", default=8,
                                     help="Number of Lanes")
 ps.add_option('--max_vl',           type="int", default=16384,
-                                    help="Maximum Vector Lenght in bits")
+                                    help="Maximum Vector Length in bits")
 ps.add_option('--num_clusters',     type="int", default=1,
                                     help="Number execution clusters")
 
@@ -107,7 +107,7 @@ ps.add_option('--connect_to_dram',  type="int", default=False,
 
 ###############################################################################
 # Memory hierarchy configuration
-# Here you can select where to connect the vector memmory port, it can be;
+# Here you can select where to connect the vector memory port, it can be;
 # to main memory
 # to l2 cache
 # to l1 data cache (share with the core)
@@ -119,14 +119,14 @@ connect_to_l2     = options.connect_to_l2
 connect_to_l1d    = options.connect_to_l1_d
 connect_to_l1V    = options.connect_to_l1_v
 
-multiport       = 1
-vector_rf_ports = (((options.num_clusters*5)+3) if multiport else 1)
+multi_port = True
+vector_rf_ports = (((options.num_clusters*5)+3) if multi_port else 1)
 
 ###############################################################################
 # Setup System
 ###############################################################################
 
-# create the system we are going to simulate
+# Create the system we are going to simulate
 system = System(
     cache_line_size = options.cache_line_size,
     clk_domain = SrcClockDomain(
@@ -138,14 +138,11 @@ system = System(
 )
 
 ###############################################################################
-# CPU CONFIG
+# CPU Config
 ###############################################################################
-#system.cpu = MinorCPU(mem_unit_channels = mem_unit_channels)
 system.cpu = MinorCPU()
 
-###############################################################################
-# Create CPU and add simple Icache and Dcache
-###############################################################################
+# Create CPU and add simple ICache and DCache
 
 system.cpu.icache = Cache(
     size = options.l1i_size,
@@ -156,6 +153,7 @@ system.cpu.icache = Cache(
     mshrs = 4,
     tgts_per_mshr = 20
 )
+
 system.cpu.dcache = Cache(
     size = options.l1d_size,
     assoc = 4,
@@ -166,7 +164,8 @@ system.cpu.dcache = Cache(
     tgts_per_mshr = 20
 )
 
-def createVectorCache(cpu):
+# Setup vector cache
+if (not connect_to_l1d) and (not connect_to_l2) and (not connect_to_dram):
     system.VectorCache = Cache(
         size = options.l1d_size,
         assoc = 4,
@@ -177,7 +176,7 @@ def createVectorCache(cpu):
         tgts_per_mshr = 20
     )
 
-def createbuffer(cpu):
+if connect_to_l2 or connect_to_dram:
     system.VectorCache = Cache(
         size = "2kB",
         assoc = 1,
@@ -188,15 +187,10 @@ def createbuffer(cpu):
         tgts_per_mshr = 20
     )
 
-if( (not connect_to_l1d) and (not connect_to_l2) and (not connect_to_dram)):
-    createVectorCache(system.cpu)
-
-if( (connect_to_l2) or (connect_to_dram)):
-    createbuffer(system.cpu)
-
 ###############################################################################
-# VECTOR EXTESION CONFIG
+# Vector extension config
 ###############################################################################
+
 system.cpu.ve_interface = VectorEngineInterface(
     vector_engine = VectorEngine(
         vector_rf_ports = vector_rf_ports,
@@ -229,19 +223,22 @@ system.cpu.ve_interface = VectorEngineInterface(
         ),
         vector_memory_unit = VectorMemUnit(
             memReader = MemUnitReadTiming(
-                channel = (((options.num_clusters-1)*5)+5 if multiport else 0),
+                channel = (((options.num_clusters-1)*5)+5
+                           if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
                                * (options.v_lanes/options.num_clusters)
             ),
             memWriter = MemUnitWriteTiming(
-                channel = (((options.num_clusters-1)*5)+6 if multiport else 0),
+                channel = (((options.num_clusters-1)*5)+6
+                           if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
                                * (options.v_lanes/options.num_clusters)
             ),
             memReader_addr = MemUnitReadTiming(
-                channel = (((options.num_clusters-1)*5)+7 if multiport else 0),
+                channel = (((options.num_clusters-1)*5)+7
+                           if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
                                * (options.v_lanes/options.num_clusters)
@@ -252,31 +249,31 @@ system.cpu.ve_interface = VectorEngineInterface(
         vector_lane = [VectorLane(
             lane_id = lane_id,
             srcAReader = MemUnitReadTiming(
-                channel = ((lane_id*5)+0 if multiport else 0),
+                channel = ((lane_id*5)+0 if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
                                 * (options.v_lanes/options.num_clusters)
             ),
             srcBReader = MemUnitReadTiming(
-                channel = ((lane_id*5)+1 if multiport else 0),
+                channel = ((lane_id*5)+1 if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
                         * (options.v_lanes/options.num_clusters)
             ),
             srcMReader = MemUnitReadTiming(
-                channel = ((lane_id*5)+2 if multiport else 0),
+                channel = ((lane_id*5)+2 if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
                                 * (options.v_lanes/options.num_clusters)
             ),
             dstReader = MemUnitReadTiming(
-                channel = ((lane_id*5)+3 if multiport else 0),
+                channel = ((lane_id*5)+3 if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
                                 * (options.v_lanes/options.num_clusters)
             ),
             dstWriter = MemUnitWriteTiming(
-                channel = ((lane_id*5)+4 if multiport else 0),
+                channel = ((lane_id*5)+4 if multi_port else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
                                 * (options.v_lanes/options.num_clusters)
@@ -288,15 +285,15 @@ system.cpu.ve_interface = VectorEngineInterface(
                     voltage_domain = VoltageDomain()
                 )
             )
-        )for lane_id in range(0,options.num_clusters)]
+        ) for lane_id in range(0, options.num_clusters)]
     )
 )
-
 
 ###############################################################################
 # Create l1Xbar
 ###############################################################################
-def createl1bus(cpu):
+
+if connect_to_l1d:
     system.l1bus = CoherentXBar(
         forward_latency = 0,
         frontend_latency = 0,
@@ -305,21 +302,18 @@ def createl1bus(cpu):
         width = options.cache_line_size
     )
 
-if(connect_to_l1d):
-    createl1bus(system.cpu)
 ###############################################################################
 # Create l2Xbar and SystemXBar
 ###############################################################################
 
 system.l2bus = L2XBar()
-
-# Create a memory bus
 system.membus = SystemXBar()
 
 ###############################################################################
 # Connect CPU Ports and Vector Port
 ###############################################################################
-def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
+
+def connect_cpu_ports1(cpu, vector_engine, l1bus, l2bus):
     cpu.icache.mem_side = l2bus.slave
     cpu.dcache.mem_side = l2bus.slave
     cpu.icache_port = cpu.icache.cpu_side
@@ -328,44 +322,39 @@ def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
     vector_engine.vector_mem_port = l1bus.slave
     l1bus.master = cpu.dcache.cpu_side
 
-    #connect vector_reg ports for each mem_unit
-    for channel in range(0, vector_rf_ports):
+    # Connect vector_reg ports for each mem_unit
+    for _ in range(0, vector_rf_ports):
         vector_engine.vector_reg_port = vector_engine.vector_reg.port
 
-def connectCPUPorts2(cpu,vector_engine,l2bus,membus):
+def connect_cpu_ports2(cpu,vector_engine,l2bus,membus):
     cpu.icache.mem_side = l2bus.slave
     cpu.dcache.mem_side = l2bus.slave
     cpu.icache_port = cpu.icache.cpu_side
     cpu.dcache_port = cpu.dcache.cpu_side
 
-    if(connect_to_l1V):
-        vector_engine.vector_mem_port = system.VectorCache.cpu_side
+    vector_engine.vector_mem_port = system.VectorCache.cpu_side
+    if connect_to_l1V:
         system.VectorCache.mem_side = l2bus.slave
-    else:
-        if(connect_to_l2):
-            vector_engine.vector_mem_port = system.VectorCache.cpu_side
-            system.VectorCache.mem_side = l2bus.slave
-        else:
-            if(connect_to_dram):
-                vector_engine.vector_mem_port = system.VectorCache.cpu_side
-                system.VectorCache.mem_side = membus.slave
+    elif connect_to_l2:
+        system.VectorCache.mem_side = l2bus.slave
+    elif connect_to_dram:
+        system.VectorCache.mem_side = membus.slave
 
-    for channel in range(0, vector_rf_ports):
+    for _ in range(0, vector_rf_ports):
         vector_engine.vector_reg_port = vector_engine.vector_reg.port
 
-if(connect_to_l1d):
-    connectCPUPorts1(system.cpu, system.cpu.ve_interface.vector_engine,
-        system.l1bus,system.l2bus, system.membus)
+if connect_to_l1d:
+    connect_cpu_ports1(system.cpu, system.cpu.ve_interface.vector_engine,
+                       system.l1bus, system.l2bus)
 else:
-    connectCPUPorts2(system.cpu, system.cpu.ve_interface.vector_engine,
-        system.l2bus, system.membus)
+    connect_cpu_ports2(system.cpu, system.cpu.ve_interface.vector_engine,
+                       system.l2bus, system.membus)
 
 ###############################################################################
 # Everything from the l2Xbar down
 ###############################################################################
 
 # Create an L2 cache and connect it to the l2bus and systemBus
-
 system.l2cache = Cache(
     size = options.l2_size,
     assoc = 8,
@@ -379,16 +368,14 @@ system.l2cache = Cache(
 system.l2cache.mem_side = system.membus.slave
 system.l2cache.cpu_side = system.l2bus.master
 
-#create interrupt controller
+# Create interrupt controller
 system.cpu.createInterruptController()
 
 # Connect the system up to the membus
 system.system_port = system.membus.slave
 
-# Create a DDR3 memory controller (wtf is ddr5 and hbm slower than ddr3?)
+# Create a DDR3 memory controller
 system.mem_ctrl = DDR3_1600_8x8(device_size = options.mem_size)
-#system.mem_ctrl = GDDR5_4000_x64(device_size = options.mem_size)
-#system.mem_ctrl = HBM_1000_4H_x64(device_size = options.mem_size)
 system.mem_ctrl.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.master
 
@@ -399,7 +386,6 @@ system.mem_ctrl.port = system.membus.master
 process = Process()
 
 filtered = []
-#output = []
 
 if not options or not options.cmd:
     print("No --cmd='<workload> [args...]' passed in")
@@ -413,7 +399,6 @@ else:
 
     process.executable = filtered[0]
     process.cmd = filtered
-#    process.output = output[0]
 
 system.cpu.workload = process
 system.cpu.createThreads()
@@ -423,9 +408,10 @@ system.cpu.createThreads()
 # Run Simulation
 ###############################################################################
 
-# set up the root SimObject and start the simulation
+# Setup the root SimObject and start the simulation
 root = Root(full_system = False, system = system)
-# instantiate all of the objects we've created above
+
+# Instantiate all of the objects we've created above
 m5.instantiate()
 
 print("Beginning simulation!")
