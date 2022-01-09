@@ -162,7 +162,7 @@ Execute::Execute(const std::string &name_,
             fu_index++;
         }
 
-        if (!found_fu) {
+        if (!found_fu && op_class < VectorArith1SrcOp) {
             warn("No functional unit for OpClass %s\n",
                 Enums::OpClassStrings[op_class]);
         }
