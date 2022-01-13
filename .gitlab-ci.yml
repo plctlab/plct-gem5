@@ -1,0 +1,12 @@
+image: ubuntu:18.04
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  tags:
+    - gem5
+  script:
+    - /usr/bin/env python3 $(which scons) build/RISCV/gem5.opt -j32
+

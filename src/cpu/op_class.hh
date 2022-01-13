@@ -105,6 +105,7 @@ static const OpClass FloatMemReadOp = enums::FloatMemRead;
 static const OpClass FloatMemWriteOp = enums::FloatMemWrite;
 static const OpClass IprAccessOp = enums::IprAccess;
 static const OpClass InstPrefetchOp = enums::InstPrefetch;
+static const OpClass VectorDummyOp = enums::VectorDummy;
 static const OpClass Num_OpClasses = enums::Num_OpClass;
 
 } // namespace gem5

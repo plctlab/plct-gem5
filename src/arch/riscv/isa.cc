@@ -41,6 +41,7 @@
 #include "arch/riscv/regs/float.hh"
 #include "arch/riscv/regs/int.hh"
 #include "arch/riscv/regs/misc.hh"
+#include "arch/riscv/regs/vector.hh"
 #include "base/bitfield.hh"
 #include "base/compiler.hh"
 #include "base/logging.hh"
@@ -52,6 +53,7 @@
 #include "debug/LLSC.hh"
 #include "debug/MiscRegs.hh"
 #include "debug/RiscvMisc.hh"
+#include "debug/VecRegs.hh"
 #include "mem/packet.hh"
 #include "mem/request.hh"
 #include "params/RiscvISA.hh"
@@ -189,19 +191,32 @@ namespace RiscvISA
     [MISCREG_FFLAGS]        = "FFLAGS",
     [MISCREG_FRM]           = "FRM",
 
+    [MISCREG_VSTART]        = "VSTART",
+    [MISCREG_VXSAT]         = "VXSAT",
+    [MISCREG_VXRM]          = "VXRM",
+    [MISCREG_VCSR]          = "VCSR",
+    [MISCREG_VL]            = "VL",
+    [MISCREG_VTYPE]         = "VTYPE",
+    [MISCREG_VLENB]         = "VLENB",
+
     [MISCREG_NMIVEC]        = "NMIVEC",
     [MISCREG_NMIE]          = "NMIE",
     [MISCREG_NMIP]          = "NMIP",
 }};
 
+VecElemRegClassOps<RiscvISA::VecElem> vecRegElemClassOps(NumVecElemPerVecReg);
+TypedRegClassOps<RiscvISA::VecRegContainer> vecRegClassOps;
+
 ISA::ISA(const Params &p) : BaseISA(p)
 {
-    _regClasses.emplace_back(int_reg::NumRegs, debug::IntRegs);
+    _regClasses.emplace_back(int_reg::NumRegs, debug::IntRegs, 0);
     _regClasses.emplace_back(float_reg::NumRegs, debug::FloatRegs);
-    _regClasses.emplace_back(1, debug::IntRegs); // Not applicable to RISCV
-    _regClasses.emplace_back(2, debug::IntRegs); // Not applicable to RISCV
-    _regClasses.emplace_back(1, debug::IntRegs); // Not applicable to RISCV
-    _regClasses.emplace_back(0, debug::IntRegs); // Not applicable to RISCV
+    _regClasses.emplace_back(NumVecRegs, vecRegClassOps, debug::VecRegs, -1,
+            sizeof(VecRegContainer));
+    _regClasses.emplace_back(NumVecRegs * NumVecElemPerVecReg,
+            vecRegElemClassOps, debug::VecRegs);
+    _regClasses.emplace_back(1, debug::IntRegs); // not applicable to RISCV
+    _regClasses.emplace_back(0, debug::IntRegs); // not applicable to RISCV
     _regClasses.emplace_back(NUM_MISCREGS, debug::MiscRegs);
 
     miscRegFile.resize(NUM_MISCREGS);
@@ -228,6 +243,8 @@ ISA::copyRegsFrom(ThreadContext *src)
         tc->setReg(reg, src->getReg(reg));
     }
 
+    // TODO: Copy vector regs.
+
     // Lastly copy PC/NPC
     tc->pcState(src->pcState());
 }
@@ -242,7 +259,7 @@ void ISA::clear()
     miscRegFile[MISCREG_ARCHID] = 0;
     miscRegFile[MISCREG_IMPID] = 0;
     miscRegFile[MISCREG_STATUS] = (2ULL << UXL_OFFSET) | (2ULL << SXL_OFFSET) |
-                                  (1ULL << FS_OFFSET);
+                                  (1ULL << FS_OFFSET) | (1ULL << VS_OFFSET);
     miscRegFile[MISCREG_MCOUNTEREN] = 0x7;
     miscRegFile[MISCREG_SCOUNTEREN] = 0x7;
     // don't set it to zero; software may try to determine the supported
@@ -345,6 +362,11 @@ ISA::readMiscReg(int misc_reg)
             else
                 return mbits(val, 63, 1);
         }
+      case MISCREG_VLENB:
+        {
+            return vlenb;
+        }
+        break;
       default:
         // Try reading HPM counters
         // As a placeholder, all HPM counters are just cycle counters
