@@ -49,14 +49,20 @@ class ISA;
 class Decoder : public InstDecoder
 {
   private:
-    decode_cache::InstMap<ExtMachInst> instMap;
     bool aligned;
     bool mid;
-
+    bool vConfigDone;
   protected:
     //The extended machine instruction being generated
     ExtMachInst emi;
-    uint32_t machInst;
+    uint32_t data;
+    uint32_t vl;
+    uint8_t vtype; // exclude vill
+    bool vill;
+
+    /// A cache of decoded instruction objects.
+    static GenericISA::BasicDecodeCache<Decoder, ExtMachInst> defaultCache;
+    friend class GenericISA::BasicDecodeCache<Decoder, ExtMachInst>;
 
     StaticInstPtr decodeInst(ExtMachInst mach_inst);
 
@@ -66,7 +72,7 @@ class Decoder : public InstDecoder
     StaticInstPtr decode(ExtMachInst mach_inst, Addr addr);
 
   public:
-    Decoder(const RiscvDecoderParams &p) : InstDecoder(p, &machInst)
+    Decoder(const RiscvDecoderParams &p) : InstDecoder(p, &data)
     {
         reset();
     }
@@ -80,6 +86,12 @@ class Decoder : public InstDecoder
     void moreBytes(const PCStateBase &pc, Addr fetchPC) override;
 
     StaticInstPtr decode(PCStateBase &nextPC) override;
+
+    void setVl(uint32_t new_vl);
+
+    void setVtype(uint64_t new_vtype);
+
+    void setVConfigDone();
 };
 
 } // namespace RiscvISA
