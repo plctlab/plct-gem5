@@ -105,14 +105,20 @@ Datapath::get_instruction_latency()
     }
 
     /**************************************************************************
-     * 
+     * Vector Floating-Point Multiply-Add / Multiply-Accumulate
      *************************************************************************/
 
-    if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
+    if (   (operation == "vfmacc_vv")  || (operation == "vfmacc_vf")
+        || (operation == "vfnmacc_vv") || (operation == "vfnmacc_vf")
+        || (operation == "vfmsac_vv")  || (operation == "vfmsac_vf")
+        || (operation == "vfnmsac_vv") || (operation == "vfnmsac_vf") ) {
         Oplatency           = 6;
     }
 
-    if (operation == "vfmadd_vv")   {
+    if (   (operation == "vfmadd_vv")  || (operation == "vfmadd_vf")
+        || (operation == "vfnmadd_vv") || (operation == "vfnmadd_vf")
+        || (operation == "vfmsub_vv")  || (operation == "vfmsub_vf")
+        || (operation == "vfnmsub_vv") || (operation == "vfnmsub_vf") ) {
         Oplatency           = 6;
     }
     /*

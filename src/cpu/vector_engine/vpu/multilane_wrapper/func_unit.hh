@@ -130,12 +130,56 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
             Aitem,Bitem,Dstitem, Ditem);
     }
 
+    if ((operation == "vfnmacc_vv") || (operation == "vfnmacc_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            - (Aitem * Bitem) - Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = -(%f * %f) - %f  = %f\n",
+            Aitem,Bitem,Dstitem, Ditem);
+    }
+
+    if ((operation == "vfmsac_vv") || (operation == "vfmsac_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            (Aitem * Bitem) - Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %f * %f - %f  = %f\n",
+            Aitem,Bitem,Dstitem, Ditem);
+    }
+
+    if ((operation == "vfnmsac_vv") || (operation == "vfnmsac_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            -(Aitem * Bitem) - Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = -(%f * %f) - %f  = %f\n",
+            Aitem,Bitem,Dstitem, Ditem);
+    }
+
+
     if ((operation == "vfmadd_vv") || (operation == "vfmadd_vf")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
             (Aitem * Dstitem) + Bitem  : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f * %f + %f  = %f\n",
             Aitem,Dstitem,Bitem, Ditem);
     }
+
+    if ((operation == "vfnmadd_vv") || (operation == "vfnmadd_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            -(Aitem * Dstitem) - Bitem  : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = -(%f * %f) - %f  = %f\n",
+            Aitem,Dstitem,Bitem, Ditem);
+    }
+
+    if ((operation == "vfmsub_vv") || (operation == "vfmsub_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            (Aitem * Dstitem) - Bitem  : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %f * %f - %f  = %f\n",
+            Aitem,Dstitem,Bitem, Ditem);
+    }
+
+    if ((operation == "vfnmsub_vv") || (operation == "vfnmsub_vf")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
+            - (Aitem * Dstitem) + Bitem  : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = - %f * %f + %f  = %f\n",
+            Aitem,Dstitem,Bitem, Ditem);
+    }
+
 
     if (operation == "vfmv_v_f") {
         Ditem = Aitem;
