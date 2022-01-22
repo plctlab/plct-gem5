@@ -1838,6 +1838,9 @@ decode QUADRANT default Unknown::unknown() {
                     0x01: VectorConvertFPToIntOp::vfcvt_x_f_v();    // Convert float to signed integer.
                     0x02: VectorConvertIntToFPOp::vfcvt_f_xu_v();   // Convert unsigned integer to float.
                     0x03: VectorConvertIntToFPOp::vfcvt_f_x_v();    // Convert signed integer to float.
+
+                    0x06: VectorConvertIntToFPOp::vfcvt_rtz_xu_f_v();   // Convert unsigned integer to float (round towards zero).
+                    0x07: VectorConvertIntToFPOp::vfcvt_rtz_x_f_v();    // Convert signed integer to float (round towards zero).
                     // Widening Operations are not fully supported. WIP
                     0x08: VectorWConvertFPToIntOp::vfwcvt_xu_f_v(); // Convert float to double-width unsigned integer.
                     0x09: VectorWConvertFPToIntOp::vfwcvt_x_f_v();  // Convert float to double-width signed integer.

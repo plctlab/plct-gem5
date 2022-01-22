@@ -1828,7 +1828,7 @@ Datapath::compute_cvt_x_f_64_op( double Bitem, uint8_t Mitem,
 {
     long int Ditem=0;
     std::string operation = insn->getName();
-    numFP64_operations = numFP64_operations.value() + 1; // number of 32-bit FP operations
+    numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
     if ((operation == "vfcvt_x_f_v")) {
         Ditem = (long int)Bitem;
@@ -1838,6 +1838,18 @@ Datapath::compute_cvt_x_f_64_op( double Bitem, uint8_t Mitem,
 
     if ((operation == "vfcvt_xu_f_v")) {
         Ditem = (unsigned long int)Bitem;
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_rtz_x_f_v")) {
+        Ditem = (long int) trunc(Bitem);
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_rtz_xu_f_v")) {
+        Ditem = (unsigned long int) trunc(Bitem);
         DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
             Bitem, Ditem);
     }
@@ -1862,6 +1874,18 @@ Datapath::compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem,
     if ((operation == "vfcvt_xu_f_v")) {
         Ditem = (unsigned int)Bitem;
         DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2f) = %d\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_rtz_x_f_v")) {
+        Ditem = (int) truncf(Bitem);
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
+            Bitem, Ditem);
+    }
+
+    if ((operation == "vfcvt_rtz_xu_f_v")) {
+        Ditem = (unsigned int) truncf(Bitem);
+        DPRINTF(Datapath,"WB Instruction =  cast unsigned (%0.2lf) = %d\n",
             Bitem, Ditem);
     }
 

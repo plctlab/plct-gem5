@@ -131,6 +131,7 @@ Datapath::get_instruction_latency()
      *************************************************************************/
 
     if (   (operation == "vfcvt_x_f_v") || (operation == "vfcvt_xu_f_v")
+        || (operation == "vfcvt_rtz_x_f_v") || (operation == "vfcvt_rtz_xu_f_v")
         || (operation == "vfcvt_f_x_v") || (operation == "vfcvt_f_xu_v")) { 
         Oplatency           = 4;
     }
