@@ -50,6 +50,12 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
             Aitem, Ditem);
     }
 
+    if (operation == "vfrsub_vf"){
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem - Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %f - %f  = %f  \n",Aitem,
+            Bitem, Ditem);
+    }
+
     if ((operation == "vfmul_vv") | (operation == "vfmul_vf")){
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %f * %f  = %f  \n",Aitem,

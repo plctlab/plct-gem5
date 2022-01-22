@@ -1897,6 +1897,7 @@ decode QUADRANT default Unknown::unknown() {
             0x3: decode VFUNC_6 { // OPIVI
                 0x00: VectorData2SrcOp::vadd_vi();
                 0x02: VectorData2SrcOp::vsub_vi();
+                0x03: VectorData2SrcOp::vrsub_vi();
                 0x09: VectorData2SrcOp::vand_vi();
                 0x0A: VectorData2SrcOp::vor_vi();
                 0x0B: VectorData2SrcOp::vxor_vi();
@@ -1924,6 +1925,7 @@ decode QUADRANT default Unknown::unknown() {
             0x4: decode VFUNC_6 { // OPIVX
                 0x00: VectorData2SrcOp::vadd_vx();
                 0x02: VectorData2SrcOp::vsub_vx();
+                0x03: VectorData2SrcOp::vrsub_vx();
                 0x04: VectorData2SrcOp::vminu_vx();
                 0x05: VectorData2SrcOp::vmin_vx();
                 0x06: VectorData2SrcOp::vmaxu_vx();
@@ -1951,6 +1953,7 @@ decode QUADRANT default Unknown::unknown() {
             0x5: decode VFUNC_6 { // OPFVF
                 0x00: VectorData2SrcOp::vfadd_vf();
                 0x02: VectorData2SrcOp::vfsub_vf();
+                0x03: VectorData2SrcOp::vfrsub_vf();
                 0x04: VectorData2SrcOp::vfmin_vf();
                 0x06: VectorData2SrcOp::vfmax_vf();
                 0x08: VectorData2SrcOp::vfsgnj_vf();
