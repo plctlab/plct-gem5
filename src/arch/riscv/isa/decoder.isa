@@ -433,6 +433,7 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle16_v();
                 }
+                0x1:VectorMemLoadOp::vluxei16_v();
                 0x2:VectorMemLoadOp::vlse16_v();
                 0x3:VectorMemLoadOp::vloxei16_v();
             }
@@ -440,6 +441,7 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle32_v();
                 }
+                0x1:VectorMemLoadOp::vluxei32_v();
                 0x2:VectorMemLoadOp::vlse32_v();
                 0x3:VectorMemLoadOp::vloxei32_v();
             }
@@ -447,6 +449,7 @@ decode QUADRANT default Unknown::unknown() {
                 0x0: decode LUMOP {
                     0x0: VectorMemLoadOp::vle64_v();
                 }
+                0x1:VectorMemLoadOp::vluxei64_v();
                 0x2:VectorMemLoadOp::vlse64_v();
                 0x3:VectorMemLoadOp::vloxei64_v();
             }
@@ -1838,6 +1841,9 @@ decode QUADRANT default Unknown::unknown() {
                     0x01: VectorConvertFPToIntOp::vfcvt_x_f_v();    // Convert float to signed integer.
                     0x02: VectorConvertIntToFPOp::vfcvt_f_xu_v();   // Convert unsigned integer to float.
                     0x03: VectorConvertIntToFPOp::vfcvt_f_x_v();    // Convert signed integer to float.
+
+                    0x06: VectorConvertIntToFPOp::vfcvt_rtz_xu_f_v();   // Convert unsigned integer to float (round towards zero).
+                    0x07: VectorConvertIntToFPOp::vfcvt_rtz_x_f_v();    // Convert signed integer to float (round towards zero).
                     // Widening Operations are not fully supported. WIP
                     0x08: VectorWConvertFPToIntOp::vfwcvt_xu_f_v(); // Convert float to double-width unsigned integer.
                     0x09: VectorWConvertFPToIntOp::vfwcvt_x_f_v();  // Convert float to double-width signed integer.
@@ -1894,6 +1900,7 @@ decode QUADRANT default Unknown::unknown() {
             0x3: decode VFUNC_6 { // OPIVI
                 0x00: VectorData2SrcOp::vadd_vi();
                 0x02: VectorData2SrcOp::vsub_vi();
+                0x03: VectorData2SrcOp::vrsub_vi();
                 0x09: VectorData2SrcOp::vand_vi();
                 0x0A: VectorData2SrcOp::vor_vi();
                 0x0B: VectorData2SrcOp::vxor_vi();
@@ -1921,6 +1928,7 @@ decode QUADRANT default Unknown::unknown() {
             0x4: decode VFUNC_6 { // OPIVX
                 0x00: VectorData2SrcOp::vadd_vx();
                 0x02: VectorData2SrcOp::vsub_vx();
+                0x03: VectorData2SrcOp::vrsub_vx();
                 0x04: VectorData2SrcOp::vminu_vx();
                 0x05: VectorData2SrcOp::vmin_vx();
                 0x06: VectorData2SrcOp::vmaxu_vx();
@@ -1948,6 +1956,7 @@ decode QUADRANT default Unknown::unknown() {
             0x5: decode VFUNC_6 { // OPFVF
                 0x00: VectorData2SrcOp::vfadd_vf();
                 0x02: VectorData2SrcOp::vfsub_vf();
+                0x03: VectorData2SrcOp::vfrsub_vf();
                 0x04: VectorData2SrcOp::vfmin_vf();
                 0x06: VectorData2SrcOp::vfmax_vf();
                 0x08: VectorData2SrcOp::vfsgnj_vf();
