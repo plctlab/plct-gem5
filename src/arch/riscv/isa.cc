@@ -209,9 +209,9 @@ TypedRegClassOps<RiscvISA::VecRegContainer> vecRegClassOps;
 
 ISA::ISA(const Params &p) : BaseISA(p)
 {
-    _regClasses.emplace_back(int_reg::NumRegs, debug::IntRegs, 0);
+    _regClasses.emplace_back(int_reg::NumRegs, debug::IntRegs);
     _regClasses.emplace_back(float_reg::NumRegs, debug::FloatRegs);
-    _regClasses.emplace_back(NumVecRegs, vecRegClassOps, debug::VecRegs, -1,
+    _regClasses.emplace_back(NumVecRegs, vecRegClassOps, debug::VecRegs,
             sizeof(VecRegContainer));
     _regClasses.emplace_back(NumVecRegs * NumVecElemPerVecReg,
             vecRegElemClassOps, debug::VecRegs);
