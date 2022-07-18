@@ -132,8 +132,6 @@ parser.add_argument("--dtb-filename", action="store", type=str,
         "enabled kernels")
 parser.add_argument("--virtio-rng", action="store_true",
     help="Enable VirtIORng device")
-parser.add_argument("--test", action="store_true",
-    help="Test mode")
 
 # ---------------------------- Parse Options --------------------------- #
 args = parser.parse_args()
@@ -150,15 +148,9 @@ system = System()
 mdesc = SysConfig(disks=args.disk_image, rootdev=args.root_device,
                         mem=args.mem_size, os_type=args.os_type)
 system.mem_mode = mem_mode
-if args.test:
-    # TODO: 80001000 -> 80002000 is the HTIF mem region, it's not fixed and
-    # should be calculated using ELF symbols.
-    system.mem_ranges = [AddrRange(start=0x80000000, end=0x80001000),
-                         AddrRange(start=0x80002000, size=mdesc.mem())]
-else:
-    system.mem_ranges = [AddrRange(start=0x80000000, size=mdesc.mem())]
+system.mem_ranges = [AddrRange(start=0x80000000, size=mdesc.mem())]
 
-if args.bare_metal or args.test:
+if args.bare_metal:
     system.workload = RiscvBareMetal()
     system.workload.bootloader = args.kernel
 else:
@@ -170,13 +162,8 @@ system.membus = MemBus()
 
 system.system_port = system.membus.cpu_side_ports
 
-if args.test:
-    system.platform = Spike()
-    # TODO: Should be calculated using ELF symbols.
-    system.platform.htif.pio_addr = 0x80001000
-else:
-    # HiFive Platform
-    system.platform = HiFive()
+# HiFive Platform
+system.platform = HiFive()
 
 # RTCCLK (Set to 100MHz for faster simulation)
 system.platform.rtc = RiscvRTC(frequency=Frequency("100MHz"))
@@ -232,7 +219,7 @@ system.cpu_clk_domain = SrcClockDomain(clock = args.cpu_clock,
                                             voltage_domain =
                                             system.cpu_voltage_domain)
 
-# system.workload.object_file = args.kernel
+system.workload.object_file = args.kernel
 
 # NOTE: Not yet tested
 if args.script is not None:
