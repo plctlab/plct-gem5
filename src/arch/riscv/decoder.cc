@@ -91,9 +91,9 @@ Decoder::moreBytes(const PCStateBase &pc, Addr fetchPC)
         }
     }
     if (instDone) {
-        emi.vl      = this->vl;
-        emi.vtype8   = this->vtype8;
-        emi.vill    = this->vill;
+        emi.vl      = this->machVl;
+        emi.vtype8   = this->machVtype & 0xff;
+        emi.vill    = this->machVtype.vill;
         if (vconf(emi)) {
             this->vConfigDone = false; // set true when vconfig inst execute
         }
@@ -136,13 +136,15 @@ Decoder::decode(PCStateBase &_next_pc)
 void
 Decoder::setVlAndVtype(uint32_t vl, uint64_t vtype)
 {
-    this->vl = vl;
-    this->vill = bits(vtype, XLEN - 1);
-    if (GEM5_UNLIKELY(this->vill)) {
-        this->vtype8 = 0;
+    this->machVl = vl;
+
+    this->machVtype.vill = bits(vtype, XLEN - 1);
+    if (GEM5_UNLIKELY(this->machVtype.vill)) {
+        this->machVtype.vtype8 = 0;
     } else {
-        this->vtype8 = bits(vtype, 7, 0);
+        this->machVtype.vtype8 = bits(vtype, 7, 0);
     }
+
     this->vConfigDone = true;
 }
 
