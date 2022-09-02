@@ -90,7 +90,8 @@ class Decoder : public InstDecoder
     void moreBytes(const PCStateBase &pc, Addr fetchPC) override;
 
     StaticInstPtr decode(PCStateBase &nextPC) override;
-    void setVlAndVtype(uint32_t vl, uint64_t vtype);
+
+    void setVlAndVtype(uint32_t vl, VTYPE vtype);
 };
 
 } // namespace RiscvISA
