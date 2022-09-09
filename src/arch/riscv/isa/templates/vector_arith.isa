@@ -8,7 +8,7 @@ output header {{
     [[maybe_unused]] decltype(Vd) old_Vd = nullptr;                  \
     xc->getRegOperand(this, idx, &old_vd);                           \
     old_Vd = old_vd.as<std::remove_reference_t<decltype(Vd[0])> >(); \
-    memcpy(Vd, old_Vd, vlenb);
+    memcpy(Vd, old_Vd, VLENB);
 
 #define VRM_REQUIRED                                                         \
         uint_fast8_t frm = xc->readMiscReg(MISCREG_FRM);                     \
@@ -65,8 +65,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -150,7 +149,7 @@ private:
 public:
     %(class_name)s(ExtMachInst _machInst);
     std::string generateDisassembly(Addr pc,
-        const loader::SymbolTable *symtab) const
+        const loader::SymbolTable *symtab) const override
     {
         std::stringstream ss;
         ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
@@ -176,7 +175,7 @@ public:
                    uint8_t _microIdx);
     Fault execute(ExecContext* xc, Trace::InstRecord* traceData)const override;
     std::string generateDisassembly(Addr pc,
-        const loader::SymbolTable *symtab) const
+        const loader::SymbolTable *symtab) const override
     {
         std::stringstream ss;
         ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
@@ -291,8 +290,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -411,8 +409,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -596,8 +593,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -668,7 +664,7 @@ Fault
     %(vm_decl_rd)s;
     %(copy_old_vd)s;
 
-    constexpr uint16_t bit_offset = vlenb / sizeof(ElemType);
+    constexpr uint16_t bit_offset = VLENB / sizeof(ElemType);
     const uint16_t offset = bit_offset * microIdx;
 
     %(code)s;
@@ -705,8 +701,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -776,7 +771,7 @@ Fault
     %(vm_decl_rd)s;
     %(copy_old_vd)s;
 
-    constexpr uint16_t bit_offset = vlenb / sizeof(ElemType);
+    constexpr uint16_t bit_offset = VLENB / sizeof(ElemType);
     const uint16_t offset = bit_offset * microIdx;
 
     %(code)s;
@@ -948,8 +943,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst, micro_vl, i);
         microop->setDelayedCommit();
         this->microops.push_back(microop);
@@ -1100,8 +1094,7 @@ template<typename ElemType>
     int32_t micro_vl = std::min(tmp_vl, micro_vlmax);
     StaticInstPtr microop;
 
-    // Allow one empty micro op to hold IsLastMicroop flag
-    for (int i = 0; i < num_microops && micro_vl >= 0; ++i) {
+    for (int i = 0; i < num_microops && micro_vl > 0; ++i) {
         microop = new %(class_name)sMicro<ElemType>(_machInst,
             micro_vl, i, &vxsat);
         microop->setDelayedCommit();

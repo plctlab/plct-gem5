@@ -43,6 +43,28 @@ namespace gem5
 namespace RiscvISA
 {
 
+enum VectorRoundingMode {
+    RoundToNearestUp = 0,
+    RoundToNearestEven,
+    RoundDown,
+    RoundToOdd,
+    InvalidRound,
+};
+
+void roundUnsignedInteger(__uint128_t &result, uint32_t xrm, int gb);
+void roundSignedInteger(__int128_t &result, uint32_t xrm, int gb);
+
+float
+getVflmul(uint32_t vlmul_encoding);
+
+inline uint32_t getSew(uint32_t vsew) {
+    assert(vsew <= 3);
+    return (8 << vsew);
+}
+
+uint32_t
+getVlmax(VTYPE vtype, uint32_t vlen);
+
 /**
  * Base class for Vector Config operations
  */
@@ -51,12 +73,15 @@ class VConfOp : public RiscvStaticInst
   protected:
     uint64_t bit30;
     uint64_t bit31;
-    uint64_t zimm;
+    uint64_t zimm10;
+    uint64_t zimm11;
     uint64_t uimm;
     VConfOp(const char *mnem, ExtMachInst _extMachInst, OpClass __opClass)
         : RiscvStaticInst(mnem, _extMachInst, __opClass),
           bit30(_extMachInst.bit30), bit31(_extMachInst.bit31),
-          zimm(_extMachInst.zimm_vsetivli), uimm(_extMachInst.uimm_vsetivli)
+          zimm10(_extMachInst.zimm_vsetivli),
+          zimm11(_extMachInst.zimm_vsetvli),
+          uimm(_extMachInst.uimm_vsetivli)
     {}
 
     std::string generateDisassembly(
@@ -369,13 +394,13 @@ class VMaskMergeMicroInst : public VectorArithMicroInst
             const override {
         vreg_t tmp_d0 = *(vreg_t *)xc->getWritableRegOperand(this, 0);
         auto Vd = tmp_d0.as<uint8_t>();
-        constexpr uint8_t elems_per_vreg = vlenb / sizeof(ElemType);
+        constexpr uint8_t elems_per_vreg = VLENB / sizeof(ElemType);
         size_t bit_cnt = elems_per_vreg;
         vreg_t tmp_s;
         xc->getRegOperand(this, 0, &tmp_s);
         auto s = tmp_s.as<uint8_t>();
         // cp the first result and tail
-        memcpy(Vd, s, vlenb);
+        memcpy(Vd, s, VLENB);
         for (uint8_t i = 1; i < this->_numSrcRegs; i++) {
             xc->getRegOperand(this, i, &tmp_s);
             s = tmp_s.as<uint8_t>();
@@ -404,7 +429,7 @@ class VMaskMergeMicroInst : public VectorArithMicroInst
         for (uint8_t i = 0; i < this->_numSrcRegs; i++) {
             ss << ", " << registerName(srcRegIdx(i));
         }
-        ss << ", offset:" << vlenb / sizeof(ElemType);
+        ss << ", offset:" << VLENB / sizeof(ElemType);
         return ss.str();
     }
 };

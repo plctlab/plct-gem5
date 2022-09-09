@@ -41,6 +41,70 @@ namespace gem5
 namespace RiscvISA
 {
 
+void roundUnsignedInteger(__uint128_t &result, uint32_t xrm, int gb) {
+  const uint64_t lsb = 1UL << (gb);
+  const uint64_t lsb_half = lsb >> 1;
+  switch (xrm) {
+    case VectorRoundingMode::RoundToNearestUp:
+      result += lsb_half;
+      break;
+    case VectorRoundingMode::RoundToNearestEven:
+      if ((result & lsb_half) && ((result & (lsb_half - 1)) || (result & lsb))) {
+        result += lsb;
+      }
+      break;
+    case VectorRoundingMode::RoundDown:
+      break;
+    case VectorRoundingMode::RoundToOdd:
+      if (result & (lsb - 1)) {
+        result |= lsb;
+      }
+      break;
+    default:
+      printf("error: unknown vector rounding mode\n");
+      exit(1);
+  }
+}
+
+void roundSignedInteger(__int128_t &result, uint32_t xrm, int gb) {
+  const uint64_t lsb = 1UL << (gb);
+  const uint64_t lsb_half = lsb >> 1;
+  switch (xrm) {
+    case VectorRoundingMode::RoundToNearestUp:
+      result += lsb_half;
+      break;
+    case VectorRoundingMode::RoundToNearestEven:
+      if ((result & lsb_half) && ((result & (lsb_half - 1)) || (result & lsb))) {
+        result += lsb;
+      }
+      break;
+    case VectorRoundingMode::RoundDown:
+      break;
+    case VectorRoundingMode::RoundToOdd:
+      if (result & (lsb - 1)) {
+        result |= lsb;
+      }
+      break;
+    default:
+      printf("error: unknown vector rounding mode\n");
+      exit(1);
+  }
+}
+
+float
+getVflmul(uint32_t vlmul_encoding) {
+  int vlmul = int8_t(vlmul_encoding << 5) >> 5;
+  float vflmul = vlmul >= 0 ? 1 << vlmul : 1.0 / (1 << -vlmul);
+  return vflmul;
+}
+
+uint32_t
+getVlmax(VTYPE vtype, uint32_t vlen) {
+  uint32_t sew = getSew(vtype.vsew);
+  uint32_t vlmax = (vlen/sew) * getVflmul(vtype.vlmul);
+  return vlmax;
+}
+
 std::string
 VConfOp::generateDisassembly(Addr pc, const loader::SymbolTable *symtab) const
 {
@@ -60,6 +124,10 @@ std::string
 VConfOp::generateZimmDisassembly() const
 {
     std::stringstream s;
+
+    // VSETIVLI uses ZIMM10 and VSETVLI uses ZIMM11
+    uint64_t zimm = (bit31 && bit30) ? zimm10 : zimm11;
+
     bool frac_lmul = bits(zimm, 2);
     int sew = 1 << (bits(zimm, 5, 3) + 3);
     int lmul = bits(zimm, 1, 0);
@@ -101,21 +169,31 @@ VectorNonSplitInst::generateDisassembly(Addr pc,
 }
 
 std::string VectorArithMicroInst::generateDisassembly(Addr pc,
-        const loader::SymbolTable *symtab) const
+        const Loader::SymbolTable *symtab) const
 {
     std::stringstream ss;
-    ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
-        << registerName(srcRegIdx(1)) << ", " << registerName(srcRegIdx(0));
+    ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", ";
+    if (machInst.funct3 == 0x3) {
+        // OPIVI
+      ss  << registerName(srcRegIdx(0)) << ", " << machInst.vecimm;
+    } else {
+      ss  << registerName(srcRegIdx(1)) << ", " << registerName(srcRegIdx(0));
+    }
     if (machInst.vm == 0) ss << ", v0.t";
     return ss.str();
 }
 
 std::string VectorArithMacroInst::generateDisassembly(Addr pc,
-        const loader::SymbolTable *symtab) const
+        const Loader::SymbolTable *symtab) const
 {
     std::stringstream ss;
-    ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
-        << registerName(srcRegIdx(1)) << ", " << registerName(srcRegIdx(0));
+    ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", ";
+    if (machInst.funct3 == 0x3) {
+        // OPIVI
+      ss  << registerName(srcRegIdx(0)) << ", " << machInst.vecimm;
+    } else {
+      ss  << registerName(srcRegIdx(1)) << ", " << registerName(srcRegIdx(0));
+    }
     if (machInst.vm == 0) ss << ", v0.t";
     return ss.str();
 }
@@ -125,7 +203,7 @@ std::string VleMicroInst::generateDisassembly(Addr pc,
 {
     std::stringstream ss;
     ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
-       << vlenb * microIdx << '(' << registerName(srcRegIdx(0)) << ')' << ", "
+       << VLENB * microIdx << '(' << registerName(srcRegIdx(0)) << ')' << ", "
        << registerName(srcRegIdx(1));
     if (!machInst.vm) ss << ", v0.t";
     return ss.str();
@@ -136,7 +214,7 @@ std::string VlWholeMicroInst::generateDisassembly(Addr pc,
 {
     std::stringstream ss;
     ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
-       << vlenb * microIdx << '(' << registerName(srcRegIdx(0)) << ')';
+       << VLENB * microIdx << '(' << registerName(srcRegIdx(0)) << ')';
     return ss.str();
 }
 
@@ -145,7 +223,7 @@ std::string VseMicroInst::generateDisassembly(Addr pc,
 {
     std::stringstream ss;
     ss << mnemonic << ' ' << registerName(srcRegIdx(1)) << ", "
-       << vlenb * microIdx  << '(' << registerName(srcRegIdx(0)) << ')';
+       << VLENB * microIdx  << '(' << registerName(srcRegIdx(0)) << ')';
     if (!machInst.vm) ss << ", v0.t";
     return ss.str();
 }
@@ -155,7 +233,7 @@ std::string VsWholeMicroInst::generateDisassembly(Addr pc,
 {
     std::stringstream ss;
     ss << mnemonic << ' ' << registerName(srcRegIdx(1)) << ", "
-       << vlenb * microIdx << '(' << registerName(srcRegIdx(0)) << ')';
+       << VLENB * microIdx << '(' << registerName(srcRegIdx(0)) << ')';
     return ss.str();
 }
 
