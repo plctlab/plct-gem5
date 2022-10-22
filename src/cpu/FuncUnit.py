@@ -55,7 +55,16 @@ class OpClass(Enum):
             'SimdShaSigma3',
             'SimdPredAlu',
             'MemRead', 'MemWrite', 'FloatMemRead', 'FloatMemWrite',
-            'IprAccess', 'InstPrefetch', 'VectorDummy'
+            'IprAccess', 'InstPrefetch',
+            'VectorUnitStrideLoad', 'VectorUnitStrideStore',
+            'VectorUnitStrideMaskLoad', 'VectorUnitStrideMaskStore',
+            'VectorStridedLoad', 'VectorStridedStore',
+            'VectorIndexedLoad', 'VectorIndexedStore',
+            'VectorUnitStrideFaultOnlyFirstLoad',
+            'VectorWholeRegisterLoad', 'VectorWholeRegisterStore',
+            'VectorIntegerArith', 'VectorFloatArith', 'VectorFloatConvert',
+            'VectorIntegerReduce', 'VectorFloatReduce',
+            'VectorMisc', 'VectorIntegerExtension', 'VectorConfig'
             ]
 
 class OpDesc(SimObject):
