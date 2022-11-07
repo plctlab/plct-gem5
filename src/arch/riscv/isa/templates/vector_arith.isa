@@ -133,6 +133,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_sss)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -202,9 +203,10 @@ Fault
     using vu [[maybe_unused]] = std::make_unsigned_t<ElemType>;
     using vi [[maybe_unused]] = std::make_signed_t<ElemType>;
 
-    if (machInst.vill)
+    if (machInst.vill){
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
-
+    }
+    %(vi_vv_ext_check)s;
     auto SEW = vtype_SEW(vtype);
     auto offset = (VLEN / SEW) * (microIdx % %(ext_div)d);
     switch (SEW / %(ext_div)d) {
@@ -369,6 +371,8 @@ Fault
     [[maybe_unused]] const size_t offset =
         (this->microIdx % 2 == 0) ? 0 : micro_vlmax;
 
+    %(vi_check_dss)s;
+    %(vi_check_dds)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -401,6 +405,7 @@ Fault
     [[maybe_unused]] const size_t offset =
         (this->microIdx % 2 == 0) ? 0 : micro_vlmax;
 
+    %(vi_check_sds)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -515,6 +520,7 @@ Fault
 
     VRM_REQUIRED;
 
+    %(vi_check_sss)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -608,6 +614,8 @@ Fault
     [[maybe_unused]] const size_t offset =
         (this->microIdx % 2 == 0) ? 0 : micro_vlmax;
 
+    %(vi_check_dss)s;
+    %(vi_check_dds)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -642,6 +650,7 @@ Fault
     [[maybe_unused]] const size_t offset =
         (this->microIdx % 2 == 0) ? 0 : micro_vlmax;
 
+    %(vi_check_sds)s
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -757,6 +766,17 @@ Fault
     using vi [[maybe_unused]] = std::make_signed_t<ElemType>;
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
+    const float vflmul = Vflmul(vtype_vlmul(machInst.vtype8));
+    if(!(is_aligned(machInst.vd, vflmul))){
+        std::string error =
+            csprintf("Unaligned Vs2 or Vs1 group");
+        return std::make_shared<IllegalInstFault>(error, machInst);
+    }
+    if(is_overlapped(machInst.vd, vflmul, machInst.vs2, 1)){
+        std::string error =
+            csprintf("Unsupported overlap in Vd and Vs2 group");
+        return std::make_shared<IllegalInstFault>(error, machInst);
+    }
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -794,6 +814,11 @@ Fault
     using vu = uint8_t;
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
+    if(machInst.vd == machInst.vs2){
+        std::string error =
+            csprintf("Vd is the same as Vs2");
+        return std::make_shared<IllegalInstFault>(error, machInst);
+    }
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -953,6 +978,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_mss)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1064,6 +1090,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_mss)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1154,6 +1181,7 @@ Fault
 {
     // TODO: Check register alignment.
     // TODO: If vd is equal to vs2 the instruction is an architectural NOP.
+    %(vmv_check)s;
     %(op_decl)s;
     %(op_rd)s;
     for (size_t i = 0; i < (VLEN / 64); i++) {
@@ -1385,6 +1413,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_reduction)s
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1420,6 +1449,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_reduction)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1457,6 +1487,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_reduction)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1601,7 +1632,7 @@ Fault
 
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
-
+    %(vi_check_vrather)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1761,6 +1792,7 @@ Fault
     if (machInst.vill)
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
 
+    %(vi_check_reduction)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1922,6 +1954,7 @@ Fault
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
     [[maybe_unused]]const uint32_t vlmax = vtype_VLMAX(vtype);
 
+    %(vi_check_slide)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1948,6 +1981,7 @@ Fault
         return std::make_shared<IllegalInstFault>("VILL is set", machInst);
     [[maybe_unused]]const uint32_t vlmax = vtype_VLMAX(vtype);
 
+    %(vi_check_slide)s;
     %(op_decl)s;
     %(op_rd)s;
     %(vm_decl_rd)s;
@@ -1959,3 +1993,4 @@ Fault
 };
 
 }};
+

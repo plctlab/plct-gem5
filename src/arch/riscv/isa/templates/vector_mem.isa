@@ -100,6 +100,7 @@ Fault
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;
+    %(vi_check_ld)s;
 
     RiscvISA::vreg_t tmp_v0;
     uint8_t *v0;
@@ -262,6 +263,7 @@ Fault
         v0 = tmp_v0.as<uint8_t>();
     }
 
+    %(vi_check_st)s;
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;
@@ -454,6 +456,7 @@ Fault
 %(class_name)s::execute(ExecContext *xc, Trace::InstRecord *traceData) const
 {
     Addr EA;
+    %(vi_check_st_whole)s;
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;
@@ -563,6 +566,7 @@ Fault
 %(class_name)s::execute(ExecContext *xc, Trace::InstRecord *traceData) const
 {
     Addr EA;
+    %(vi_check_ld_whole)s;
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;
@@ -704,6 +708,7 @@ Fault
     Fault fault = NoFault;
     Addr EA;
 
+    %(vi_check_ld_stride)s;
     %(op_decl)s;
     %(op_rd)s;
     constexpr uint8_t elem_size = sizeof(Vd[0]);
@@ -890,7 +895,7 @@ Fault
 {
     Fault fault = NoFault;
     Addr EA;
-
+    %(vi_check_st_stride)s;
     %(op_decl)s;
     %(op_rd)s;
     constexpr uint8_t elem_size = sizeof(Vs3[0]);
@@ -1059,6 +1064,7 @@ Fault
     Fault fault = NoFault;
     Addr EA;
 
+    %(vi_check_ld_index)s;
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;
@@ -1255,6 +1261,7 @@ Fault
     Fault fault = NoFault;
     Addr EA;
 
+    %(vi_check_st_index)s;
     %(op_decl)s;
     %(op_rd)s;
     %(ea_code)s;

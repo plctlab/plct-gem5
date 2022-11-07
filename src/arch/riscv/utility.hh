@@ -186,6 +186,14 @@ vtype_vlmul(const uint64_t vtype)
     return (int64_t)sext<3>(bits(vtype, 2, 0));
 }
 
+inline float
+Vflmul(const int64_t val){
+    if (val>=-3&&val<=3){
+        return pow(2,val);
+    }
+    GEM5_UNREACHABLE;
+}
+
 inline uint64_t
 vtype_regs_per_group(const uint64_t vtype)
 {
@@ -224,6 +232,44 @@ elem_mask(const T* vs, const int index)
     int idx = index / (sizeof(T)*8);
     int pos = index % (sizeof(T)*8);
     return (vs[idx] >> pos) & 1;
+}
+
+inline bool
+is_aligned(const unsigned val, const unsigned pos)
+{
+  return pos ? (val & (pos - 1)) == 0 : true;
+}
+
+inline bool
+is_overlapped(const int astart, int asize,
+              const int bstart, int bsize)
+{
+  asize = asize == 0 ? 1 : asize;
+  bsize = bsize == 0 ? 1 : bsize;
+
+  const int aend = astart + asize;
+  const int bend = bstart + bsize;
+
+  return std::max(aend, bend) - std::min(astart, bstart) < asize + bsize;
+}
+
+inline bool
+is_overlapped_widen(const int astart, int asize,
+                    const int bstart, int bsize)
+{
+  asize = asize == 0 ? 1 : asize;
+  bsize = bsize == 0 ? 1 : bsize;
+
+  const int aend = astart + asize;
+  const int bend = bstart + bsize;
+
+  if (astart < bstart &&
+      is_overlapped(astart, asize, bstart, bsize) &&
+      !is_overlapped(astart, asize, bstart + bsize, bsize)) {
+      return false;
+  } else  {
+    return std::max(aend, bend) - std::min(astart, bstart) < asize + bsize;
+  }
 }
 
 inline uint64_t
