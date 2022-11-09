@@ -211,7 +211,7 @@ RegClass ccRegClass(CCRegClass, CCRegClassName, 0, debug::IntRegs);
 
 } // anonymous namespace
 
-ISA::ISA(const Params &p) : BaseISA(p)
+ISA::ISA(const Params &p) : BaseISA(p), vlen(p.vlen), elen(p.elen)
 {
     _regClasses.push_back(&intRegClass);
     _regClasses.push_back(&floatRegClass);
@@ -223,6 +223,15 @@ ISA::ISA(const Params &p) : BaseISA(p)
 
     miscRegFile.resize(NUM_MISCREGS);
     clear();
+
+    fatal_if(vlen > MaxVlenInBits, "RISC-V VLEN greater than %d not supported."
+        " Found VLEN of %d.",
+        MaxVlenInBits, vlen);
+    fatal_if(elen > vlen, "ELEN (%d) must be less than or equal to VLEN (%d).",
+        elen, vlen);
+    fatal_if(!isPowerOf2(vlen), "VLEN (%d) must be a power of 2.", vlen);
+    fatal_if(!isPowerOf2(elen), "ELEN (%d) must be a power of 2.", elen);
+    fatal_if(elen > 64, "ELEN > 64 is not supported.");
 }
 
 bool ISA::inUserMode() const
