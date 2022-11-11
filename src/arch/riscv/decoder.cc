@@ -91,9 +91,6 @@ Decoder::moreBytes(const PCStateBase &pc, Addr fetchPC)
         }
     }
     if (instDone) {
-        emi.vl      = this->machVl;
-        emi.vtype8   = this->machVtype & 0xff;
-        emi.vill    = this->machVtype.vill;
         if (vconf(emi)) {
             this->vConfigDone = false; // set true when vconfig inst execute
         }
@@ -120,7 +117,7 @@ Decoder::decode(PCStateBase &_next_pc)
         return nullptr;
     instDone = false;
 
-    auto &next_pc = _next_pc.as<PCState>();
+    auto &next_pc = _next_pc.as<RiscvISA::PCState>();
 
     if (compressed(emi)) {
         next_pc.npc(next_pc.instAddr() + sizeof(machInst) / 2);
@@ -129,6 +126,11 @@ Decoder::decode(PCStateBase &_next_pc)
         next_pc.npc(next_pc.instAddr() + sizeof(machInst));
         next_pc.compressed(false);
     }
+
+    emi.vl = next_pc.vl();
+    VTYPE vtype = next_pc.vtype();
+    emi.vtype8 = vtype.vtype8;
+    emi.vill = vtype.vill;
 
     return decode(emi, next_pc.instAddr());
 }
