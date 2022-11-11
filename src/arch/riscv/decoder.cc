@@ -44,7 +44,6 @@ void Decoder::reset()
 {
     aligned = true;
     mid = false;
-    vConfigDone = true;
     machInst = 0;
     emi = 0;
 }
@@ -52,14 +51,6 @@ void Decoder::reset()
 void
 Decoder::moreBytes(const PCStateBase &pc, Addr fetchPC)
 {
-    if (GEM5_UNLIKELY(!this->vConfigDone)) {
-        DPRINTF(Decode, "Waiting for vset*vl* to be executed\n");
-        instDone = false;
-        outOfBytes = false;
-        stall = true;
-        return;
-    }
-    stall = false;
 
     // The MSB of the upper and lower halves of a machine instruction.
     constexpr size_t max_bit = sizeof(machInst) * 8 - 1;
@@ -88,11 +79,6 @@ Decoder::moreBytes(const PCStateBase &pc, Addr fetchPC)
             mid = !compressed(emi);
             outOfBytes = true;
             instDone = compressed(emi);
-        }
-    }
-    if (instDone) {
-        if (vconf(emi)) {
-            this->vConfigDone = false; // set true when vconfig inst execute
         }
     }
 }
@@ -133,15 +119,6 @@ Decoder::decode(PCStateBase &_next_pc)
     emi.vill = vtype.vill;
 
     return decode(emi, next_pc.instAddr());
-}
-
-void
-Decoder::setVlAndVtype(uint32_t vl, VTYPE vtype)
-{
-    this->machVtype = vtype;
-    this->machVl = vl;
-
-    this->vConfigDone = true;
 }
 
 } // namespace RiscvISA

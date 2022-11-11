@@ -52,7 +52,6 @@ class Decoder : public InstDecoder
   private:
     bool aligned;
     bool mid;
-    bool vConfigDone;
   protected:
     //The extended machine instruction being generated
     ExtMachInst emi;
@@ -90,8 +89,6 @@ class Decoder : public InstDecoder
     void moreBytes(const PCStateBase &pc, Addr fetchPC) override;
 
     StaticInstPtr decode(PCStateBase &nextPC) override;
-
-    void setVlAndVtype(uint32_t vl, VTYPE vtype);
 };
 
 } // namespace RiscvISA
