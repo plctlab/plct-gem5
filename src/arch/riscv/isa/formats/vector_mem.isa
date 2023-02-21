@@ -39,6 +39,37 @@ def VMemBase(name, Name, ea_code, memacc_code, mem_flags,
     # Make sure flags are in lists (convert to lists if not).
     mem_flags = makeList(mem_flags)
     inst_flags = makeList(inst_flags)
+    inst_name, inst_suffix = name.split("_", maxsplit=1)
+
+    vi_ld_index_flag = ""
+    vi_st_index_flag = ""
+    vi_ld_flag = ""
+    vi_st_flag = ""
+    vi_ld_whole_flag = ""
+    vi_st_whole_flag = ""
+    vi_ld_stride_flag = ""
+    vi_st_stride_flag = ""
+    is_mask = "false"
+
+    if inst_name.find("xei") != -1 and inst_name.find("vl") != -1:
+        vi_ld_index_flag = re.findall(r'\d+', inst_name)[0]
+    if inst_name.find("xei") != -1 and inst_name.find("vs") != -1:
+        vi_st_index_flag = re.findall(r'\d+', inst_name)[0]
+    if inst_name.find("vle") != -1:
+        vi_ld_flag = re.findall(r'\d+', inst_name)[0]
+    if inst_name.find("vse") != -1:
+        vi_st_flag = re.findall(r'\d+', inst_name)[0]
+    if inst_name.find("vlm") != -1 or inst_name.find("vsm") != -1:
+        vi_ld_flag = 8
+        vi_st_flag = 8
+        is_mask = "true"
+    if inst_name.find("re") != -1 and len(re.findall(r'\d+', inst_name))==2:
+        vi_ld_whole_flag = re.findall(r'\d+', inst_name)[1]
+    if inst_name.find("vlse") != -1:
+        vi_ld_stride_flag = re.findall(r'\d+', inst_name)[0]
+    if inst_name.find("vsse") != -1:
+        vi_st_stride_flag = re.findall(r'\d+', inst_name)[0]
+
     iop = InstObjParams(name, Name, base_class,
         {'ea_code': ea_code,
          'memacc_code': memacc_code,
@@ -63,7 +94,16 @@ def VMemBase(name, Name, ea_code, memacc_code, mem_flags,
         exec_template_base + 'MicroInst',
         {'ea_code': ea_code,
          'memacc_code': memacc_code,
-         'postacc_code': postacc_code},
+         'postacc_code': postacc_code,
+         'vi_check_ld_index': VI_CHECK_LD_INDEX(vi_ld_index_flag),
+         'vi_check_st_index': VI_CHECK_ST_INDEX(vi_st_index_flag),
+         'vi_check_ld': VI_CHECK_LOAD(vi_ld_flag, is_mask),
+         'vi_check_st': VI_CHECK_STORE(vi_st_flag, is_mask),
+         'vi_check_ld_whole': VI_CHECK_LD_WHOLE(vi_ld_whole_flag),
+         'vi_check_st_whole': VI_CHECK_ST_WHOLE(),
+         'vi_check_ld_stride': VI_CHECK_LOAD(vi_ld_stride_flag, is_mask),
+         'vi_check_st_stride': VI_CHECK_STORE(vi_st_stride_flag, is_mask),
+         },
         inst_flags)
 
     if mem_flags:

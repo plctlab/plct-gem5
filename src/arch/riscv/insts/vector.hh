@@ -79,8 +79,8 @@ class VConfOp : public RiscvStaticInst
     std::string generateZimmDisassembly() const;
 };
 
-inline uint8_t checked_vtype(bool vill, uint8_t vtype) {
-    panic_if(vill, "vill has been set");
+inline uint8_t checked_vtype(uint8_t opcode7, bool vill, uint8_t vtype) {
+    if (opcode7!=7&&opcode7!=39) panic_if(vill, "vill has been set");
     const uint8_t vsew = bits(vtype, 5, 3);
     panic_if(vsew >= 0b100, "vsew: %#x not supported", vsew);
     const uint8_t vlmul = bits(vtype, 2, 0);
@@ -97,7 +97,7 @@ class VectorNonSplitInst : public RiscvStaticInst
                    OpClass __opClass)
         : RiscvStaticInst(mnem, _machInst, __opClass),
         vl(_machInst.vl),
-        vtype(checked_vtype(_machInst.vill, _machInst.vtype8))
+        vtype(checked_vtype(_machInst.opcode7,_machInst.vill,_machInst.vtype8))
     {
         this->flags[IsVector] = true;
     }
@@ -115,7 +115,7 @@ class VectorMacroInst : public RiscvMacroInst
                    OpClass __opClass)
         : RiscvMacroInst(mnem, _machInst, __opClass),
         vl(_machInst.vl),
-        vtype(checked_vtype(_machInst.vill, _machInst.vtype8))
+        vtype(checked_vtype(_machInst.opcode7,_machInst.vill,_machInst.vtype8))
     {
         this->flags[IsVector] = true;
     }

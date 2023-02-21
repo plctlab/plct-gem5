@@ -2461,7 +2461,6 @@ decode QUADRANT default Unknown::unknown() {
                         }}, OPFVV, VectorFloatArithOp);
                     }
                 }
-
                 format VectorFloatMaskFormat {
                     0x18: vmfeq_vv({{
                         Vd_ub[(i + offset)/8] = ASSIGN_VD_BIT(i + offset,
