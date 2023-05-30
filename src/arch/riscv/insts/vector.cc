@@ -205,6 +205,17 @@ std::string VleMicroInst::generateDisassembly(Addr pc,
     return ss.str();
 }
 
+std::string VleffMicroInst::generateDisassembly(Addr pc,
+        const loader::SymbolTable *symtab) const
+{
+    std::stringstream ss;
+    ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", "
+       << VLENB * microIdx << '(' << registerName(srcRegIdx(0)) << ')' << ", "
+       << registerName(srcRegIdx(1));
+    if (!machInst.vm) ss << ", v0.t";
+    return ss.str();
+}
+
 std::string VlWholeMicroInst::generateDisassembly(Addr pc,
         const loader::SymbolTable *symtab) const
 {
@@ -384,6 +395,66 @@ VMvWholeMicroInst::generateDisassembly(Addr pc,
     std::stringstream ss;
     ss << mnemonic << ' ' << registerName(destRegIdx(0)) << ", " <<
         registerName(srcRegIdx(1));
+    return ss.str();
+}
+
+VleffEndMicroInst::VleffEndMicroInst(ExtMachInst extMachInst, uint8_t _numSrcs)
+    : VectorMicroInst("VleffEnd", extMachInst,
+    VectorIntegerArithOp, 0, 0)
+{
+    setRegIdxArrays(
+        reinterpret_cast<RegIdArrayPtr>(
+            &std::remove_pointer_t<decltype(this)>::srcRegIdxArr),
+        reinterpret_cast<RegIdArrayPtr>(
+            &std::remove_pointer_t<decltype(this)>::destRegIdxArr));
+    _numSrcRegs = 0;
+    _numDestRegs = 0;
+    for (uint8_t i = 0; i < _numSrcs; i++) {
+        setSrcRegIdx(_numSrcRegs++, vecRegClass[VecMemInternalReg0 + i]);
+    }
+    this->numSrcs = _numSrcs;
+    printf("VleffEndMicroInst numSrc: %hhu, numDestRegs: %hhu\n", this->numSrcs, _numDestRegs);
+
+    flags[IsNonSpeculative] = true;
+    flags[IsSerializeAfter] = true;
+}
+
+Fault
+VleffEndMicroInst::execute(ExecContext* xc, Trace::InstRecord* traceData) const
+{
+    printf("VleffEndMicroInst::execute begin\n");
+    vreg_t cnt[8];
+    for (uint8_t i = 0; i < this->numSrcs; i++) {
+        xc->getRegOperand(this, i, cnt + i);
+    }
+
+    printf("VleffEndMicroInst::execute getRegOperand done\n");
+
+    // [[maybe_unused]]uint64_t vl = *(uint64_t*)xc->getWritableRegOperand(this, 0);
+    printf("VleffEndMicroInst::execute getWritableRegOperand done\n");
+    
+    uint64_t new_vl = 0;
+    for (uint8_t i = 0; i < this->numSrcs; i++) {
+        new_vl += cnt[i].as<uint64_t>()[0];
+    }
+    printf("VleffEndMicroInst::execute new_vl sum done\n");
+
+    // xc->setRegOperand(this, 0, new_vl);
+    xc->setMiscReg(MISCREG_VL, new_vl);
+
+    printf("VleffEndMicroInst::execute setRegOperand done\n");
+
+    if (traceData)
+        traceData->setData(new_vl);
+    printf("VleffEndMicroInst::execute end\n");
+    return NoFault;
+}
+
+std::string
+VleffEndMicroInst::generateDisassembly(Addr pc, const loader::SymbolTable *symtab) const
+{
+    std::stringstream ss;
+    ss << mnemonic << ' ' << registerName(destRegIdx(0));
     return ss.str();
 }
 
