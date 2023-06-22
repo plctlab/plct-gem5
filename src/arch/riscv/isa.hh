@@ -75,6 +75,10 @@ enum class VPUStatus
 
 class ISA : public BaseISA
 {
+  private:
+    int vlen;
+    int elen;
+
   protected:
     std::vector<RegVal> miscRegFile;
 
@@ -96,6 +100,9 @@ class ISA : public BaseISA
     RegVal readMiscReg(int misc_reg);
     void setMiscRegNoEffect(int misc_reg, RegVal val);
     void setMiscReg(int misc_reg, RegVal val);
+
+    int getVlen() const { return vlen; }
+    int getElen() const { return elen; }
 
     RegId flattenRegId(const RegId &regId) const { return regId; }
     int flattenIntIndex(int reg) const { return reg; }

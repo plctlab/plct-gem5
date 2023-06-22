@@ -48,7 +48,6 @@ class InstDecoder : public SimObject
 
     bool instDone = false;
     bool outOfBytes = true;
-    bool stall = false;
 
   public:
     template <typename MoreBytesType>
@@ -155,15 +154,6 @@ class InstDecoder : public SimObject
      * decoder isn't ready (see instReady()).
      */
     virtual StaticInstPtr decode(PCStateBase &pc) = 0;
-
-    /**
-     * Has decoder been stalled?
-     *
-     * This method can be used to check if decoder has been stalled for
-     * some reason. If so, no more instructions can be fetch from decoder.
-     *
-     */
-    bool isStalled() { return this->stall; }
 };
 
 } // namespace gem5

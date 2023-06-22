@@ -39,8 +39,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from m5.objects.BaseISA import BaseISA
+from m5.params import Param
 
 class RiscvISA(BaseISA):
     type = 'RiscvISA'
     cxx_class = 'gem5::RiscvISA::ISA'
     cxx_header = "arch/riscv/isa.hh"
+
+    vlen = Param.Int(
+        1024,
+        "VLEN: The number of bits in a single vector register, VLEN>=ELEN, "
+        "which must be a power of 2, and must be no greater than 65536."
+    )
+    elen = Param.Int(
+        64,
+        "ELEN: The maximum size in bits of a vector element that any operation"
+        " can produce or consume, ELEN>=8, which must be a power of 2."
+    )

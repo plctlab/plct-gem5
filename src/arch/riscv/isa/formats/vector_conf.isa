@@ -86,7 +86,14 @@ def template VConfExecute {{
 
         xc->setMiscReg(MISCREG_VL, new_vl);
 
-        tc->getDecoderPtr()->as<Decoder>().setVlAndVtype(new_vl, new_vtype);
+        //tc->getDecoderPtr()->as<Decoder>().setVlAndVtype(new_vl, new_vtype);
+        RiscvISA::PCState newPCState;
+        set(newPCState, xc->pcState());
+        newPCState.vtype(new_vtype);
+        newPCState.vl(new_vl);
+        xc->pcState(newPCState);
+
+        xc->tcBase()->pcState(newPCState);
 
         Rd = new_vl;
 

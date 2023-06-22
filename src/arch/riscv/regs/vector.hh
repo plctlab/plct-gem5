@@ -46,6 +46,7 @@ namespace gem5
 namespace RiscvISA
 {
 
+const unsigned MaxVlenInBits = 65536;
 constexpr unsigned NumVecElemPerVecReg = 4;
 using VecElem = uint64_t;
 constexpr size_t VLENB = NumVecElemPerVecReg * sizeof(VecElem);
